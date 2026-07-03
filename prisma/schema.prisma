@@ -1,0 +1,58 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  CLIENT
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  role         Role     @default(CLIENT)
+  isActive     Boolean  @default(false) // premium access granted by the nutritionist
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model SubstitutionGroup {
+  id          String       @id @default(cuid())
+  name        String       // e.g. "Fonti proteiche", "Cereali e derivati"
+  description String?
+  items       FoodItem[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model FoodItem {
+  id       String            @id @default(cuid())
+  name     String            // e.g. "Petto di pollo"
+  quantity String            // e.g. "150g"
+  notes    String?
+  group    SubstitutionGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  groupId  String
+}
+
+model Recipe {
+  id           String   @id @default(cuid())
+  title        String
+  description  String?
+  ingredients  String   // newline-separated list
+  instructions String   // newline-separated steps
+  calories     Int?
+  tags         String?  // comma-separated tags e.g. "colazione,vegetariano"
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
