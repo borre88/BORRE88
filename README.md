@@ -8,9 +8,7 @@ dedicato al nutrizionista.
 
 - [Next.js 16](https://nextjs.org/) (App Router) + TypeScript
 - [Tailwind CSS 4](https://tailwindcss.com/)
-- [Prisma 6](https://www.prisma.io/) + SQLite (facile da usare in locale;
-  passare a Postgres/MySQL in produzione cambiando solo `DATABASE_URL` e il
-  `provider` in `prisma/schema.prisma`)
+- [Prisma 6](https://www.prisma.io/) + PostgreSQL
 - [NextAuth v5](https://authjs.dev/) (Credentials provider, sessioni JWT)
 
 ## Funzionalità
@@ -38,6 +36,8 @@ dedicato al nutrizionista.
 
 - Node.js 20+
 - npm
+- Un database PostgreSQL (in locale, oppure un servizio gratuito come
+  [Neon](https://neon.tech) o [Supabase](https://supabase.com))
 
 ## Setup locale
 
@@ -54,6 +54,8 @@ dedicato al nutrizionista.
    ```
 
    In particolare imposta:
+   - `DATABASE_URL`: connection string del tuo database Postgres (locale o
+     di un servizio come Neon/Supabase).
    - `AUTH_SECRET`: genera un valore casuale con `openssl rand -base64 32`.
    - `ADMIN_EMAIL`, `ADMIN_NAME`, `ADMIN_PASSWORD`: credenziali del primo
      account amministratore (il nutrizionista). **Cambia la password dopo il
@@ -97,15 +99,60 @@ dedicato al nutrizionista.
 - `npx prisma db seed` — ri-esegue il seed (idempotente per l'admin e il
   cliente demo)
 
-## Note per la produzione
+## Deploy in produzione (Vercel + Postgres)
 
-- SQLite va bene per iniziare, ma per un deploy con più utenti concorrenti è
-  consigliato passare a Postgres: cambia `provider` in
-  `prisma/schema.prisma` e `DATABASE_URL`, poi rilancia
-  `npx prisma migrate deploy`.
+L'app è pronta per essere pubblicata online su [Vercel](https://vercel.com),
+la piattaforma ufficiale per Next.js. Il comando `npm run build` esegue già
+`prisma migrate deploy` prima della build, quindi ogni deploy applica
+automaticamente le migrazioni del database.
+
+1. **Crea un database Postgres** su un servizio con piano gratuito, ad
+   esempio [Neon](https://neon.tech) o [Supabase](https://supabase.com).
+   Copia la connection string (per Neon/Supabase, se disponibile, usa la
+   variante "pooled"/"connection pooling", pensata per ambienti serverless
+   come Vercel).
+
+2. **Importa il repository su Vercel**: vai su
+   [vercel.com/new](https://vercel.com/new), collega il tuo account GitHub e
+   seleziona questo repository (`borre88/BORRE88`). Vercel riconosce
+   automaticamente che è un progetto Next.js.
+
+3. **Imposta le variabili d'ambiente** nel pannello Vercel (Project Settings
+   → Environment Variables), le stesse del file `.env`:
+   - `DATABASE_URL` — la connection string ottenuta al punto 1
+   - `AUTH_SECRET` — genera un valore sicuro con `openssl rand -base64 32`
+     (diverso da quello usato in sviluppo)
+   - `ADMIN_EMAIL`, `ADMIN_NAME`, `ADMIN_PASSWORD` — credenziali del primo
+     account amministratore
+
+4. **Avvia il deploy.** Vercel esegue `npm install` (che genera il client
+   Prisma tramite lo script `postinstall`) e poi `npm run build` (che
+   applica le migrazioni e compila l'app). Al termine l'app è online
+   sull'URL fornito da Vercel (es. `nutriplan.vercel.app`).
+
+5. **Popola l'account amministratore**: dopo il primo deploy, esegui una
+   volta il seed puntando alla produzione (dal tuo computer, con
+   `DATABASE_URL` impostata sulla stringa di produzione):
+
+   ```bash
+   DATABASE_URL="<connection string di produzione>" npx prisma db seed
+   ```
+
+   Questo crea l'account admin (e i dati di esempio, se il database è
+   vuoto). È idempotente: si può rilanciare senza duplicare l'admin.
+
+6. **Dominio personalizzato (opzionale)**: da Project Settings → Domains su
+   Vercel puoi collegare un dominio tuo (es. `app.tuostudio.it`) invece
+   dell'URL `*.vercel.app`.
+
+### Note per la produzione
+
 - Imposta `AUTH_SECRET` con un valore sicuro e diverso da quello di sviluppo.
 - Il flag di attivazione (`isActive`) sostituisce per ora un vero sistema di
   pagamento: l'attivazione dell'accesso premium è manuale, gestita
   dall'admin dopo aver ricevuto il pagamento del cliente con altri mezzi
   (bonifico, ecc.). Un'integrazione di pagamento online (es. Stripe) può
   essere aggiunta in un secondo momento.
+- Ogni deploy su Vercel esegue automaticamente `prisma migrate deploy`: le
+  modifiche allo schema del database si aggiornano da sole ad ogni push
+  sul branch collegato, senza passaggi manuali.
