@@ -5,9 +5,13 @@ import { prisma } from "@/lib/prisma";
 export default async function DashboardPage() {
   const session = await auth();
 
-  const [recipeCount, groupCount] = await Promise.all([
+  const [recipeCount, groupCount, latestAssessment] = await Promise.all([
     prisma.recipe.count(),
     prisma.substitutionGroup.count(),
+    prisma.longevityAssessment.findFirst({
+      where: { userId: session?.user?.id },
+      orderBy: { createdAt: "desc" },
+    }),
   ]);
 
   return (
@@ -23,6 +27,17 @@ export default async function DashboardPage() {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
+        <Link
+          href="/dashboard/longevity"
+          className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm transition-colors hover:border-emerald-300 sm:col-span-2"
+        >
+          <h2 className="font-semibold text-stone-900">Longevity Score</h2>
+          <p className="mt-1 text-sm text-stone-600">
+            {latestAssessment
+              ? `Il tuo punteggio attuale è ${latestAssessment.totalScore} / 100`
+              : "Compila il questionario per scoprire il tuo punteggio"}
+          </p>
+        </Link>
         <Link
           href="/dashboard/recipes"
           className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm transition-colors hover:border-emerald-300"

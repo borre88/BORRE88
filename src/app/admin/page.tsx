@@ -2,16 +2,27 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 
 export default async function AdminHomePage() {
-  const [clientCount, activeClientCount, recipeCount, groupCount] = await Promise.all([
-    prisma.user.count({ where: { role: "CLIENT" } }),
-    prisma.user.count({ where: { role: "CLIENT", isActive: true } }),
-    prisma.recipe.count(),
-    prisma.substitutionGroup.count(),
-  ]);
+  const [clientCount, activeClientCount, recipeCount, groupCount, longevityRespondents] =
+    await Promise.all([
+      prisma.user.count({ where: { role: "CLIENT" } }),
+      prisma.user.count({ where: { role: "CLIENT", isActive: true } }),
+      prisma.recipe.count(),
+      prisma.substitutionGroup.count(),
+      prisma.longevityAssessment.findMany({
+        where: { user: { role: "CLIENT" } },
+        distinct: ["userId"],
+        select: { userId: true },
+      }),
+    ]);
 
   const stats = [
     { label: "Clienti totali", value: clientCount, href: "/admin/clients" },
     { label: "Clienti attivi", value: activeClientCount, href: "/admin/clients" },
+    {
+      label: "Questionari Longevity compilati",
+      value: longevityRespondents.length,
+      href: "/admin/longevity",
+    },
     { label: "Ricette", value: recipeCount, href: "/admin/recipes" },
     { label: "Gruppi di sostituzione", value: groupCount, href: "/admin/substitutions" },
   ];

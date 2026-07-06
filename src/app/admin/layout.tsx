@@ -21,6 +21,9 @@ export default async function AdminLayout({
               <Link href="/admin/clients" className="hover:text-emerald-800">
                 Clienti
               </Link>
+              <Link href="/admin/longevity" className="hover:text-emerald-800">
+                Longevity Score
+              </Link>
               <Link href="/admin/recipes" className="hover:text-emerald-800">
                 Ricette
               </Link>
@@ -39,6 +42,9 @@ export default async function AdminLayout({
         <nav className="flex gap-4 border-t border-stone-100 px-6 py-2 text-sm font-medium text-stone-600 sm:hidden">
           <Link href="/admin/clients" className="hover:text-emerald-800">
             Clienti
+          </Link>
+          <Link href="/admin/longevity" className="hover:text-emerald-800">
+            Longevity
           </Link>
           <Link href="/admin/recipes" className="hover:text-emerald-800">
             Ricette
