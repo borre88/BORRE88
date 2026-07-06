@@ -17,14 +17,33 @@ enum Role {
 }
 
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  passwordHash String
-  name         String
-  role         Role     @default(CLIENT)
-  isActive     Boolean  @default(false) // premium access granted by the nutritionist
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id                   String                 @id @default(cuid())
+  email                String                 @unique
+  passwordHash         String
+  name                 String
+  role                 Role                   @default(CLIENT)
+  isActive             Boolean                @default(false) // premium access granted by the nutritionist
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
+  longevityAssessments LongevityAssessment[]
+}
+
+// Snapshot of a client's Longevity Score questionnaire: 5 areas scored 1-20
+// each (allenamento, nutrizione, sonno, stress, prevenzione), totale su 100.
+model LongevityAssessment {
+  id              String   @id @default(cuid())
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId          String
+  answersJson     String   // risposte grezze al questionario (JSON)
+  trainingScore   Int
+  nutritionScore  Int
+  sleepScore      Int
+  stressScore     Int
+  preventionScore Int
+  totalScore      Int
+  createdAt       DateTime @default(now())
+
+  @@index([userId])
 }
 
 model SubstitutionGroup {

@@ -26,6 +26,9 @@ export default async function DashboardLayout({
               <Link href="/dashboard" className="hover:text-emerald-800">
                 Panoramica
               </Link>
+              <Link href="/dashboard/longevity" className="hover:text-emerald-800">
+                Longevity Score
+              </Link>
               <Link href="/dashboard/recipes" className="hover:text-emerald-800">
                 Ricette
               </Link>
@@ -44,6 +47,9 @@ export default async function DashboardLayout({
         <nav className="flex gap-4 border-t border-stone-100 px-6 py-2 text-sm font-medium text-stone-600 sm:hidden">
           <Link href="/dashboard" className="hover:text-emerald-800">
             Panoramica
+          </Link>
+          <Link href="/dashboard/longevity" className="hover:text-emerald-800">
+            Longevity
           </Link>
           <Link href="/dashboard/recipes" className="hover:text-emerald-800">
             Ricette

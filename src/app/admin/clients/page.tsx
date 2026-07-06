@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { ConfirmSubmitButton } from "@/components/confirm-submit-button";
 import { NewClientForm } from "./client-form";
@@ -7,6 +8,12 @@ export default async function AdminClientsPage() {
   const clients = await prisma.user.findMany({
     where: { role: "CLIENT" },
     orderBy: { createdAt: "desc" },
+    include: {
+      longevityAssessments: {
+        orderBy: { createdAt: "desc" },
+        take: 1,
+      },
+    },
   });
 
   return (
@@ -36,13 +43,14 @@ export default async function AdminClientsPage() {
               <th className="px-4 py-3 font-medium">Nome</th>
               <th className="px-4 py-3 font-medium">Email</th>
               <th className="px-4 py-3 font-medium">Stato</th>
+              <th className="px-4 py-3 font-medium">Longevity Score</th>
               <th className="px-4 py-3 font-medium">Azioni</th>
             </tr>
           </thead>
           <tbody>
             {clients.length === 0 && (
               <tr>
-                <td colSpan={4} className="px-4 py-6 text-center text-stone-500">
+                <td colSpan={5} className="px-4 py-6 text-center text-stone-500">
                   Nessun cliente ancora registrato.
                 </td>
               </tr>
@@ -68,6 +76,18 @@ export default async function AdminClientsPage() {
                     >
                       {client.isActive ? "Attivo" : "Non attivo"}
                     </span>
+                  </td>
+                  <td className="px-4 py-3">
+                    {client.longevityAssessments[0] ? (
+                      <Link
+                        href={`/admin/longevity/${client.id}`}
+                        className="font-medium text-emerald-700 hover:underline"
+                      >
+                        {client.longevityAssessments[0].totalScore} / 100
+                      </Link>
+                    ) : (
+                      <span className="text-stone-400">—</span>
+                    )}
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">

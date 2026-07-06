@@ -20,10 +20,19 @@ dedicato al nutrizionista.
   nutrizionista attiva/disattiva manualmente dal pannello admin (nessun
   pagamento online integrato in questa versione).
 - **Pannello admin** (`/admin`): gestione clienti (creazione account,
-  attivazione/disattivazione, eliminazione), gestione ricette (CRUD) e
-  gestione gruppi di alimenti sostitutivi (CRUD).
+  attivazione/disattivazione, eliminazione), gestione ricette (CRUD),
+  gestione gruppi di alimenti sostitutivi (CRUD) e panoramica del
+  **Longevity Score** di tutti i clienti.
 - **Area cliente** (`/dashboard`): consultazione ricette e alimenti
   sostitutivi, visibile solo se l'account è attivo.
+- **Longevity Score** (`/dashboard/longevity`): questionario premium che
+  valuta 5 aree (allenamento, nutrizione e integrazione, sonno, gestione
+  dello stress, prevenzione), ciascuna su una scala da 1 a 20, per un
+  punteggio complessivo su 100. In base alle risposte l'app genera un
+  feedback automatico con le aree su cui concentrarsi, visibile sia al
+  cliente sia al nutrizionista (`/admin/longevity`), che vede anche i dati
+  aggiuntivi (massimali, integratori assunti, ultimi esami) e lo storico dei
+  punteggi.
 
 ## Requisiti
 
