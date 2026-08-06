@@ -4,54 +4,77 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
+type Status = "checking" | "ready" | "invalid";
+
+const GENERIC_INVALID_LINK =
+  "Il link non è valido o è scaduto. Chiedi al tuo trainer di inviartene uno nuovo.";
+
 export default function ImpostaPasswordPage() {
   const router = useRouter();
   const [supabase] = useState(() => createClient());
-  const [ready, setReady] = useState(false);
+  const [status, setStatus] = useState<Status>("checking");
+  const [linkError, setLinkError] = useState(GENERIC_INVALID_LINK);
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
   useEffect(() => {
-    let settled = false;
+    let cancelled = false;
 
-    const { data: sub } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "PASSWORD_RECOVERY") {
-        settled = true;
-        setReady(true);
+    async function establishSession() {
+      const hashParams = new URLSearchParams(window.location.hash.slice(1));
+      const queryParams = new URLSearchParams(window.location.search);
+
+      const description = hashParams.get("error_description") || queryParams.get("error_description");
+      if (description) {
+        if (!cancelled) {
+          setLinkError(decodeURIComponent(description.replace(/\+/g, " ")));
+          setStatus("invalid");
+        }
+        return;
       }
-    });
 
-    supabase.auth.getSession().then(({ data }) => {
-      if (!settled && data.session) {
-        settled = true;
-        setReady(true);
+      const accessToken = hashParams.get("access_token");
+      const refreshToken = hashParams.get("refresh_token");
+      if (accessToken && refreshToken) {
+        const { error } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken,
+        });
+        if (!cancelled) setStatus(error ? "invalid" : "ready");
+        return;
       }
-    });
 
-    const timeout = setTimeout(() => {
-      if (!settled) {
-        setError("Il link non è valido o è scaduto. Chiedi al tuo trainer di inviartene uno nuovo.");
+      const code = queryParams.get("code");
+      if (code) {
+        const { error } = await supabase.auth.exchangeCodeForSession(code);
+        if (!cancelled) setStatus(error ? "invalid" : "ready");
+        return;
       }
-    }, 2500);
 
+      // No token in the URL (e.g. page reload after success): fall back to
+      // whatever session may already be stored.
+      const { data } = await supabase.auth.getSession();
+      if (!cancelled) setStatus(data.session ? "ready" : "invalid");
+    }
+
+    establishSession();
     return () => {
-      sub.subscription.unsubscribe();
-      clearTimeout(timeout);
+      cancelled = true;
     };
   }, [supabase]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setError(null);
+    setFormError(null);
 
     if (password.length < 8) {
-      setError("La password deve avere almeno 8 caratteri.");
+      setFormError("La password deve avere almeno 8 caratteri.");
       return;
     }
     if (password !== confirm) {
-      setError("Le due password non coincidono.");
+      setFormError("Le due password non coincidono.");
       return;
     }
 
@@ -60,7 +83,7 @@ export default function ImpostaPasswordPage() {
     setPending(false);
 
     if (updateError) {
-      setError("Non è stato possibile impostare la password. Riprova.");
+      setFormError("Non è stato possibile impostare la password. Riprova.");
       return;
     }
 
@@ -78,7 +101,7 @@ export default function ImpostaPasswordPage() {
           Scegli una password per accedere a Nutrition &amp; Performance.
         </p>
 
-        {ready ? (
+        {status === "ready" ? (
           <form onSubmit={handleSubmit} className="text-left">
             <label className="mb-1 block text-xs font-medium text-ink-soft" htmlFor="password">
               Nuova password
@@ -104,7 +127,7 @@ export default function ImpostaPasswordPage() {
               onChange={(e) => setConfirm(e.target.value)}
               className="mb-4 w-full rounded-lg border border-line bg-cream px-3 py-2.5 text-sm outline-none focus:border-teal"
             />
-            {error && <p className="mb-3 text-xs font-medium text-bad">{error}</p>}
+            {formError && <p className="mb-3 text-xs font-medium text-bad">{formError}</p>}
             <button
               type="submit"
               disabled={pending}
@@ -113,8 +136,8 @@ export default function ImpostaPasswordPage() {
               {pending ? "Salvataggio…" : "Imposta password ed entra"}
             </button>
           </form>
-        ) : error ? (
-          <p className="text-xs font-medium text-bad">{error}</p>
+        ) : status === "invalid" ? (
+          <p className="text-xs font-medium text-bad">{linkError}</p>
         ) : (
           <p className="text-xs text-ink-faint">Verifica del link in corso…</p>
         )}
