@@ -1,17 +1,14 @@
-import { signOut } from "@/auth";
+import { LogOut } from "lucide-react";
+import { logout } from "@/app/login/actions";
 
 export function LogoutButton() {
   return (
-    <form
-      action={async () => {
-        "use server";
-        await signOut({ redirectTo: "/" });
-      }}
-    >
+    <form action={logout}>
       <button
         type="submit"
-        className="rounded-full border border-stone-300 px-4 py-1.5 text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100"
+        className="flex items-center gap-1.5 rounded-lg border border-line px-2.5 py-1.5 text-xs font-medium text-ink-soft"
       >
+        <LogOut size={13} strokeWidth={2.2} />
         Esci
       </button>
     </form>

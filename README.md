@@ -1,34 +1,19 @@
-# NutriPlan
+# Nutrition & Performance
 
-Area riservata (servizio premium) per i clienti in percorso nutrizionale:
-ricette curate e alimenti sostitutivi, gestiti da un pannello amministrativo
-dedicato al nutrizionista.
+Web app per il servizio di personal training e nutrizione del Dott. Borrelli Simone.
+Due aree riservate:
+
+- **Area Personal Trainer**: gestione clienti, rilevazioni periodiche (sonno, FC a
+  riposo, VO2max, massimali, peso), grafici di andamento.
+- **Area Cliente**: ricettario, allenamenti a casa, calcolo cena fuori, i propri dati
+  di salute registrati dal trainer.
 
 ## Stack tecnico
 
-- [Next.js 16](https://nextjs.org/) (App Router) + TypeScript
-- [Tailwind CSS 4](https://tailwindcss.com/)
-- [Prisma 6](https://www.prisma.io/) + SQLite (facile da usare in locale;
-  passare a Postgres/MySQL in produzione cambiando solo `DATABASE_URL` e il
-  `provider` in `prisma/schema.prisma`)
-- [NextAuth v5](https://authjs.dev/) (Credentials provider, sessioni JWT)
-
-## Funzionalità
-
-- **Autenticazione con ruoli**: `ADMIN` (nutrizionista) e `CLIENT`.
-- **Accesso premium controllato**: ogni cliente ha un flag `isActive` che il
-  nutrizionista attiva/disattiva manualmente dal pannello admin (nessun
-  pagamento online integrato in questa versione).
-- **Pannello admin** (`/admin`): gestione clienti (creazione account,
-  attivazione/disattivazione, eliminazione), gestione ricette (CRUD) e
-  gestione gruppi di alimenti sostitutivi (CRUD).
-- **Area cliente** (`/dashboard`): consultazione ricette e alimenti
-  sostitutivi, visibile solo se l'account è attivo.
-
-## Requisiti
-
-- Node.js 20+
-- npm
+- [Next.js 16](https://nextjs.org/) (App Router) + TypeScript + Tailwind CSS 4
+- [Supabase](https://supabase.com/) (database Postgres, autenticazione, Row Level
+  Security)
+- Deploy su [Vercel](https://vercel.com/), collegato al repository GitHub
 
 ## Setup locale
 
@@ -38,32 +23,21 @@ dedicato al nutrizionista.
    npm install
    ```
 
-2. Copia il file di esempio delle variabili d'ambiente e personalizzalo:
+2. Crea `.env.local` con le chiavi del progetto Supabase (vedi `.env.example`):
 
    ```bash
-   cp .env.example .env
+   NEXT_PUBLIC_SUPABASE_URL=
+   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
+   SUPABASE_SERVICE_ROLE_KEY=
+   NEXT_PUBLIC_SITE_URL=
    ```
 
-   In particolare imposta:
-   - `AUTH_SECRET`: genera un valore casuale con `openssl rand -base64 32`.
-   - `ADMIN_EMAIL`, `ADMIN_NAME`, `ADMIN_PASSWORD`: credenziali del primo
-     account amministratore (il nutrizionista). **Cambia la password dopo il
-     primo accesso.**
+   Le prime due si trovano su Supabase in *Project Settings → API keys*. La
+   `SUPABASE_SERVICE_ROLE_KEY` è la chiave segreta "service_role" (stessa pagina):
+   serve solo lato server per creare gli account dei clienti, non va mai esposta al
+   browser.
 
-3. Crea il database e applica le migrazioni:
-
-   ```bash
-   npx prisma migrate dev
-   ```
-
-4. Popola il database con l'account admin e alcuni dati di esempio (ricette,
-   gruppi di sostituzione, un cliente demo):
-
-   ```bash
-   npx prisma db seed
-   ```
-
-5. Avvia il server di sviluppo:
+3. Avvia il server di sviluppo:
 
    ```bash
    npm run dev
@@ -71,32 +45,45 @@ dedicato al nutrizionista.
 
    L'app è disponibile su [http://localhost:3000](http://localhost:3000).
 
-## Credenziali di esempio dopo il seed
+## Come aggiungere nuove ricette, allenamenti e voci "cena fuori"
 
-- **Admin (nutrizionista)**: l'email/password impostate in `.env`
-  (`ADMIN_EMAIL` / `ADMIN_PASSWORD`).
-- **Cliente demo**: `cliente.demo@example.com` / `Cliente123!`
+Questi contenuti vivono in Supabase e si modificano dal **Table Editor** di Supabase
+(Studio), senza toccare il codice:
 
-## Script disponibili
+1. Vai su [supabase.com](https://supabase.com/dashboard), apri il progetto, sezione
+   **Table Editor**.
+2. Per una nuova ricetta: apri la tabella `recipes` → **Insert row** → compila
+   `name`, `meal` (`colazione` / `pranzo` / `cena` / `spuntino`), `goal`
+   (`definizione` / `mantenimento` / `massa`), `kcal`, `protein_g`, `carbs_g`,
+   `fat_g`, `time_minutes`, `emoji` (facoltativo), `ingredients` e `steps` (liste di
+   testo, un elemento per riga nell'editor).
+3. Per un nuovo allenamento: inserisci una riga in `workouts` (`equipment`:
+   `nessuno` / `manubri` / `elastici`; `goal`: `generale` / `forza` /
+   `dimagrimento`), poi aggiungi i suoi esercizi in `workout_exercises` con lo
+   stesso `workout_id`.
+4. Per una nuova voce "cena fuori": inserisci una riga in `dining_dishes`, scegliendo
+   `category_id` tra quelli esistenti in `dining_categories` (o creane uno nuovo lì
+   prima).
 
-- `npm run dev` — avvia il server di sviluppo
-- `npm run build` — build di produzione
-- `npm run start` — avvia il server con la build di produzione
-- `npm run lint` — esegue ESLint
-- `npx prisma studio` — GUI per esplorare/modificare il database
-- `npx prisma migrate dev` — applica migrazioni in sviluppo
-- `npx prisma db seed` — ri-esegue il seed (idempotente per l'admin e il
-  cliente demo)
+Le modifiche compaiono nell'app al primo caricamento successivo (nessun deploy
+necessario).
 
-## Note per la produzione
+## Sicurezza dei dati (Row Level Security)
 
-- SQLite va bene per iniziare, ma per un deploy con più utenti concorrenti è
-  consigliato passare a Postgres: cambia `provider` in
-  `prisma/schema.prisma` e `DATABASE_URL`, poi rilancia
-  `npx prisma migrate deploy`.
-- Imposta `AUTH_SECRET` con un valore sicuro e diverso da quello di sviluppo.
-- Il flag di attivazione (`isActive`) sostituisce per ora un vero sistema di
-  pagamento: l'attivazione dell'accesso premium è manuale, gestita
-  dall'admin dopo aver ricevuto il pagamento del cliente con altri mezzi
-  (bonifico, ecc.). Un'integrazione di pagamento online (es. Stripe) può
-  essere aggiunta in un secondo momento.
+Ogni cliente vede solo le proprie rilevazioni; il trainer vede solo i propri
+clienti. Le regole sono applicate a livello di database (RLS di Postgres), quindi
+valgono anche se qualcuno provasse a interrogare l'API direttamente. Vedi i commenti
+nelle migration Supabase del progetto per il dettaglio delle policy.
+
+## Note per la produzione (GDPR)
+
+L'app registra dati sanitari reali (sonno, frequenza cardiaca, VO2max, peso,
+massimali). Prima di usarla con clienti veri:
+
+- Far verificare/completare da un consulente privacy i testi segnaposto in
+  `src/app/consenso/page.tsx` (informativa privacy e consenso al trattamento dei
+  dati sulla salute, art. 9 GDPR).
+- Verificare la region del progetto Supabase (deve restare in UE).
+- Valutare l'attivazione di un provider email personalizzato (SMTP) in Supabase per
+  l'invio affidabile delle email di impostazione password ai clienti, oltre al
+  servizio email di default incluso nel piano gratuito.
