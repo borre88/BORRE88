@@ -1,21 +1,73 @@
-import { Moon, HeartPulse, Activity, Dumbbell, Scale, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import {
+  Moon,
+  HeartPulse,
+  Activity,
+  Dumbbell,
+  Scale,
+  TrendingUp,
+  TrendingDown,
+  Minus,
+  Timer,
+  Route,
+  Waves,
+  Sparkles,
+  Ruler,
+  PieChart,
+  CalendarCheck,
+  Pizza,
+  Apple,
+  Wine,
+  Beef,
+  Fish,
+  Egg,
+  Droplet,
+} from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import { ALL_METRICS, type LatestMetric, type MetricKey } from "@/lib/metrics";
+import { ALL_METRICS, formatSecondsAsClock, type LatestMetric, type MetricDef, type MetricKey } from "@/lib/metrics";
 
 const ICONS: Record<MetricKey, LucideIcon> = {
-  sleep_hours: Moon,
-  resting_hr: HeartPulse,
   vo2max: Activity,
+  resting_hr: HeartPulse,
+  five_km_time_seconds: Timer,
+  cooper_test_meters: Route,
+  hrv: Waves,
+  sleep_hours: Moon,
+  sleep_quality: Sparkles,
+  weight_kg: Scale,
+  height_cm: Ruler,
+  waist_cm: Ruler,
+  hip_cm: Ruler,
+  neck_cm: Ruler,
+  body_fat_percent: PieChart,
+  workouts_per_week: CalendarCheck,
   squat_1rm: Dumbbell,
   bench_1rm: Dumbbell,
   deadlift_1rm: Dumbbell,
-  weight_kg: Scale,
+  pullup_1rm: Dumbbell,
+  junk_food_weekly: Pizza,
+  fruit_veg_daily: Apple,
+  alcohol_weekly: Wine,
+  red_meat_weekly: Beef,
+  fish_weekly: Fish,
+  protein_meals_daily: Egg,
+  water_daily_liters: Droplet,
 };
 
-export function SnapshotStrip({ latest }: { latest: Record<MetricKey, LatestMetric | null> }) {
+function displayValue(m: MetricDef, value: number) {
+  if (m.key === "five_km_time_seconds") return formatSecondsAsClock(value);
+  return value;
+}
+
+export function SnapshotStrip({
+  latest,
+  metrics = ALL_METRICS,
+}: {
+  latest: Record<MetricKey, LatestMetric | null>;
+  metrics?: MetricDef[];
+}) {
   return (
     <div className="mb-5 grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-4">
-      {ALL_METRICS.map((m) => {
+      {metrics.map((m) => {
         const data = latest[m.key];
         const Icon = ICONS[m.key];
         let delta: number | null = null;
@@ -36,7 +88,7 @@ export function SnapshotStrip({ latest }: { latest: Record<MetricKey, LatestMetr
             {data ? (
               <>
                 <div className="flex items-baseline gap-1">
-                  <span className="font-mono text-xl font-medium">{data.value}</span>
+                  <span className="font-mono text-xl font-medium">{displayValue(m, data.value)}</span>
                   <span className="text-[10.5px] text-ink-faint">{m.unit}</span>
                 </div>
                 {delta !== null && Math.abs(delta) > 0.001 ? (

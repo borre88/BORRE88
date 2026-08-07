@@ -1,12 +1,20 @@
-import { ALL_METRICS, formatDateIt, type MeasurementLike } from "@/lib/metrics";
+import { ALL_METRICS, formatDateIt, formatSecondsAsClock, type MeasurementLike, type MetricDef } from "@/lib/metrics";
 
 type MeasurementRow = MeasurementLike & { id: string };
 
+function displayValue(m: MetricDef, value: number | null) {
+  if (value === null) return "—";
+  if (m.key === "five_km_time_seconds") return formatSecondsAsClock(value);
+  return value;
+}
+
 export function MeasurementsTable({
   entries,
+  metrics = ALL_METRICS,
   renderRowActions,
 }: {
   entries: MeasurementRow[];
+  metrics?: MetricDef[];
   renderRowActions?: (entry: MeasurementRow) => React.ReactNode;
 }) {
   if (entries.length === 0) return null;
@@ -22,7 +30,7 @@ export function MeasurementsTable({
               <th className="whitespace-nowrap px-2.5 py-1.5 text-left text-[10.5px] font-semibold tracking-wide text-ink-faint">
                 Data
               </th>
-              {ALL_METRICS.map((m) => (
+              {metrics.map((m) => (
                 <th
                   key={m.key}
                   className="whitespace-nowrap px-2.5 py-1.5 text-left text-[10.5px] font-semibold tracking-wide text-ink-faint"
@@ -39,9 +47,9 @@ export function MeasurementsTable({
                 <td className="whitespace-nowrap border-t border-line px-2.5 py-2 font-medium">
                   {formatDateIt(e.date)}
                 </td>
-                {ALL_METRICS.map((m) => (
+                {metrics.map((m) => (
                   <td key={m.key} className="whitespace-nowrap border-t border-line px-2.5 py-2 font-mono">
-                    {e[m.key] ?? "—"}
+                    {displayValue(m, e[m.key])}
                   </td>
                 ))}
                 {renderRowActions && (

@@ -19,22 +19,22 @@ export function NewClientForm({ onDone }: { onDone: () => void }) {
     });
   }
 
+  const inputClass =
+    "mb-1.5 w-full rounded-md border border-line bg-surface px-2.5 py-1.5 text-[13px] outline-none focus:border-teal";
+
   return (
     <form action={action} className="mb-2.5 rounded-lg bg-cream p-2.5">
-      <input
-        name="full_name"
-        placeholder="Nome cliente"
-        required
-        autoFocus
-        className="mb-1.5 w-full rounded-md border border-line bg-surface px-2.5 py-1.5 text-[13px] outline-none focus:border-teal"
-      />
-      <input
-        name="email"
-        type="email"
-        placeholder="Email cliente"
-        required
-        className="mb-1.5 w-full rounded-md border border-line bg-surface px-2.5 py-1.5 text-[13px] outline-none focus:border-teal"
-      />
+      <input name="full_name" placeholder="Nome e cognome" required autoFocus className={inputClass} />
+      <input name="email" type="email" placeholder="Email cliente" required className={inputClass} />
+      <input name="phone" type="tel" placeholder="Telefono" className={inputClass} />
+      <div className="mb-1.5 flex gap-1.5">
+        <input name="date_of_birth" type="date" aria-label="Data di nascita" className={`${inputClass} mb-0`} />
+        <select name="gender" aria-label="Sesso" defaultValue="" className={`${inputClass} mb-0`}>
+          <option value="">Sesso</option>
+          <option value="maschio">Maschio</option>
+          <option value="femmina">Femmina</option>
+        </select>
+      </div>
       {error && <p className="mb-1.5 text-[11px] font-medium text-bad">{error}</p>}
       <div className="flex gap-2">
         <button

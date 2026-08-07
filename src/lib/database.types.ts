@@ -17,25 +17,34 @@ export type Database = {
       clients: {
         Row: {
           created_at: string
+          date_of_birth: string | null
           email: string | null
           full_name: string
+          gender: string | null
           id: string
+          phone: string | null
           profile_id: string | null
           trainer_id: string
         }
         Insert: {
           created_at?: string
+          date_of_birth?: string | null
           email?: string | null
           full_name: string
+          gender?: string | null
           id?: string
+          phone?: string | null
           profile_id?: string | null
           trainer_id: string
         }
         Update: {
           created_at?: string
+          date_of_birth?: string | null
           email?: string | null
           full_name?: string
+          gender?: string | null
           id?: string
+          phone?: string | null
           profile_id?: string | null
           trainer_id?: string
         }
@@ -114,43 +123,103 @@ export type Database = {
       }
       measurements: {
         Row: {
+          activity_level: string | null
+          alcohol_weekly: number | null
           bench_1rm: number | null
+          body_fat_percent: number | null
           client_id: string
+          cooper_test_meters: number | null
           created_at: string
           date: string
           deadlift_1rm: number | null
+          fish_weekly: number | null
+          five_km_time_seconds: number | null
+          fruit_veg_daily: number | null
+          height_cm: number | null
+          hip_cm: number | null
+          hrv: number | null
           id: string
+          junk_food_weekly: number | null
+          neck_cm: number | null
+          protein_meals_daily: number | null
+          pullup_1rm: number | null
+          red_meat_weekly: number | null
           resting_hr: number | null
           sleep_hours: number | null
+          sleep_quality: number | null
           squat_1rm: number | null
+          trainer_notes: string | null
           vo2max: number | null
+          waist_cm: number | null
+          water_daily_liters: number | null
           weight_kg: number | null
+          workouts_per_week: number | null
         }
         Insert: {
+          activity_level?: string | null
+          alcohol_weekly?: number | null
           bench_1rm?: number | null
+          body_fat_percent?: number | null
           client_id: string
+          cooper_test_meters?: number | null
           created_at?: string
           date: string
           deadlift_1rm?: number | null
+          fish_weekly?: number | null
+          five_km_time_seconds?: number | null
+          fruit_veg_daily?: number | null
+          height_cm?: number | null
+          hip_cm?: number | null
+          hrv?: number | null
           id?: string
+          junk_food_weekly?: number | null
+          neck_cm?: number | null
+          protein_meals_daily?: number | null
+          pullup_1rm?: number | null
+          red_meat_weekly?: number | null
           resting_hr?: number | null
           sleep_hours?: number | null
+          sleep_quality?: number | null
           squat_1rm?: number | null
+          trainer_notes?: string | null
           vo2max?: number | null
+          waist_cm?: number | null
+          water_daily_liters?: number | null
           weight_kg?: number | null
+          workouts_per_week?: number | null
         }
         Update: {
+          activity_level?: string | null
+          alcohol_weekly?: number | null
           bench_1rm?: number | null
+          body_fat_percent?: number | null
           client_id?: string
+          cooper_test_meters?: number | null
           created_at?: string
           date?: string
           deadlift_1rm?: number | null
+          fish_weekly?: number | null
+          five_km_time_seconds?: number | null
+          fruit_veg_daily?: number | null
+          height_cm?: number | null
+          hip_cm?: number | null
+          hrv?: number | null
           id?: string
+          junk_food_weekly?: number | null
+          neck_cm?: number | null
+          protein_meals_daily?: number | null
+          pullup_1rm?: number | null
+          red_meat_weekly?: number | null
           resting_hr?: number | null
           sleep_hours?: number | null
+          sleep_quality?: number | null
           squat_1rm?: number | null
+          trainer_notes?: string | null
           vo2max?: number | null
+          waist_cm?: number | null
+          water_daily_liters?: number | null
           weight_kg?: number | null
+          workouts_per_week?: number | null
         }
         Relationships: [
           {

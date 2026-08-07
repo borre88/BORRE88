@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { ALL_METRICS } from "@/lib/metrics";
 
 export interface ActionState {
   error?: string;
@@ -22,6 +23,10 @@ export async function createClientAccount(
 
   const fullName = String(formData.get("full_name") ?? "").trim();
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
+  const dateOfBirth = String(formData.get("date_of_birth") ?? "").trim() || null;
+  const phone = String(formData.get("phone") ?? "").trim() || null;
+  const genderRaw = String(formData.get("gender") ?? "");
+  const gender = genderRaw === "maschio" || genderRaw === "femmina" ? genderRaw : null;
 
   if (!fullName || !email) {
     return { error: "Nome ed email sono obbligatori." };
@@ -55,6 +60,9 @@ export async function createClientAccount(
     profile_id: created.user.id,
     full_name: fullName,
     email,
+    date_of_birth: dateOfBirth,
+    phone,
+    gender,
   });
 
   if (profileErr || insertErr) {
@@ -111,17 +119,24 @@ export async function addMeasurement(
     return Number.isFinite(n) ? n : null;
   };
 
+  const numericFields = Object.fromEntries(ALL_METRICS.map((m) => [m.key, numeric(m.key)]));
+
+  const activityLevelRaw = String(formData.get("activity_level") ?? "");
+  const activityLevel = ["sedentario", "leggero", "moderato", "intenso", "molto_intenso"].includes(
+    activityLevelRaw
+  )
+    ? activityLevelRaw
+    : null;
+
+  const trainerNotes = String(formData.get("trainer_notes") ?? "").trim() || null;
+
   const { error } = await supabase.from("measurements").upsert(
     {
       client_id: clientId,
       date,
-      sleep_hours: numeric("sleep_hours"),
-      resting_hr: numeric("resting_hr"),
-      vo2max: numeric("vo2max"),
-      squat_1rm: numeric("squat_1rm"),
-      bench_1rm: numeric("bench_1rm"),
-      deadlift_1rm: numeric("deadlift_1rm"),
-      weight_kg: numeric("weight_kg"),
+      ...numericFields,
+      activity_level: activityLevel,
+      trainer_notes: trainerNotes,
     },
     { onConflict: "client_id,date" }
   );
