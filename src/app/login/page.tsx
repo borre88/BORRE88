@@ -1,18 +1,40 @@
 "use client";
 
 import { useActionState } from "react";
+import { motion } from "framer-motion";
 import { ShieldCheck } from "lucide-react";
+import { BrandMark } from "@/components/brand-mark";
 import { login, type LoginState } from "./actions";
 
 export default function LoginPage() {
   const [state, action, pending] = useActionState<LoginState | undefined, FormData>(login, undefined);
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-5">
-      <div className="w-full max-w-sm rounded-2xl border border-line bg-surface px-8 pb-6 pt-8 text-center">
-        <div className="mx-auto mb-3.5 flex h-12 w-12 items-center justify-center rounded-xl bg-teal font-display text-lg font-bold text-white">
-          N&P
-        </div>
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden p-5">
+      <div
+        aria-hidden
+        className="ambient-blob pointer-events-none absolute -left-24 -top-24 h-72 w-72 rounded-full bg-teal/20 blur-3xl"
+      />
+      <div
+        aria-hidden
+        className="ambient-blob pointer-events-none absolute -bottom-28 -right-16 h-80 w-80 rounded-full bg-gold/20 blur-3xl"
+        style={{ animationDelay: "-7s" }}
+      />
+
+      <motion.div
+        initial={{ opacity: 0, y: 14, scale: 0.98 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.45, ease: "easeOut" }}
+        className="relative w-full max-w-sm rounded-2xl border border-line bg-surface px-8 pb-6 pt-8 text-center shadow-sm"
+      >
+        <motion.div
+          initial={{ opacity: 0, scale: 0.7 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.4, delay: 0.1, ease: "easeOut" }}
+          className="mx-auto mb-3.5 flex justify-center"
+        >
+          <BrandMark size="lg" />
+        </motion.div>
         <h1 className="font-display text-2xl font-bold leading-tight">Nutrition &amp; Performance</h1>
         <p className="mb-6 text-sm text-ink-faint">Accedi alla tua area riservata</p>
 
@@ -26,7 +48,7 @@ export default function LoginPage() {
             type="email"
             required
             autoFocus
-            className="mb-4 w-full rounded-lg border border-line bg-cream px-3 py-2.5 text-sm text-ink outline-none focus:border-teal"
+            className="mb-4 w-full rounded-lg border border-line bg-cream px-3 py-2.5 text-sm text-ink outline-none transition-colors focus:border-teal"
           />
           <label className="mb-1 block text-xs font-medium text-ink-soft" htmlFor="password">
             Password
@@ -36,7 +58,7 @@ export default function LoginPage() {
             name="password"
             type="password"
             required
-            className="mb-4 w-full rounded-lg border border-line bg-cream px-3 py-2.5 text-sm text-ink outline-none focus:border-teal"
+            className="mb-4 w-full rounded-lg border border-line bg-cream px-3 py-2.5 text-sm text-ink outline-none transition-colors focus:border-teal"
           />
 
           {state?.error && <p className="mb-3 text-xs font-medium text-bad">{state.error}</p>}
@@ -44,7 +66,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={pending}
-            className="flex w-full items-center justify-center gap-2 rounded-lg bg-teal px-4 py-2.5 text-sm font-medium text-white disabled:opacity-60"
+            className="flex w-full items-center justify-center gap-2 rounded-lg bg-teal px-4 py-2.5 text-sm font-medium text-white shadow-sm disabled:opacity-60"
           >
             <ShieldCheck size={14} strokeWidth={2.2} />
             {pending ? "Accesso…" : "Entra"}
@@ -55,7 +77,7 @@ export default function LoginPage() {
           Se non hai ancora un account, contatta il tuo personal trainer: gli accessi vengono creati
           direttamente da lui.
         </p>
-      </div>
+      </motion.div>
     </div>
   );
 }

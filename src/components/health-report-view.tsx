@@ -1,6 +1,7 @@
 import { ThumbsUp, ThumbsDown, Sparkles } from "lucide-react";
 import { synthesizeReport, type AreaScore } from "@/lib/health-report";
 import { ReportRadarChart } from "@/components/report-radar-chart";
+import { AnimatedNumber } from "@/components/animated-number";
 
 function scoreColor(score: number) {
   if (score >= 15) return "text-good";
@@ -36,7 +37,11 @@ export function HealthReportView({
       {averageScore !== null && (
         <div className="mb-5 flex items-baseline gap-2">
           <span className="text-[11px] font-medium text-ink-soft">Punteggio medio</span>
-          <span className={`font-mono text-2xl font-bold ${scoreColor(averageScore)}`}>{averageScore}</span>
+          <AnimatedNumber
+            value={averageScore}
+            decimals={1}
+            className={`font-mono text-2xl font-bold ${scoreColor(averageScore)}`}
+          />
           <span className="text-xs text-ink-faint">/ 20</span>
         </div>
       )}
@@ -75,8 +80,8 @@ export function HealthReportView({
                 {area.label}
               </div>
               {area.result && (
-                <span className={`font-mono text-base font-bold ${scoreColor(area.result.score)}`}>
-                  {area.result.score}/20
+                <span className={`flex items-baseline gap-0.5 font-mono text-base font-bold ${scoreColor(area.result.score)}`}>
+                  <AnimatedNumber value={area.result.score} />/20
                 </span>
               )}
             </div>

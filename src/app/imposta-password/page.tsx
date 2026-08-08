@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
+import { BrandMark } from "@/components/brand-mark";
 
 type Status = "checking" | "ready" | "invalid";
 
@@ -92,9 +94,14 @@ export default function ImpostaPasswordPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center p-5">
-      <div className="w-full max-w-sm rounded-2xl border border-line bg-surface px-8 pb-6 pt-8 text-center">
-        <div className="mx-auto mb-3.5 flex h-12 w-12 items-center justify-center rounded-xl bg-teal font-display text-lg font-bold text-white">
-          N&P
+      <motion.div
+        initial={{ opacity: 0, y: 14, scale: 0.98 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.45, ease: "easeOut" }}
+        className="w-full max-w-sm rounded-2xl border border-line bg-surface px-8 pb-6 pt-8 text-center shadow-sm"
+      >
+        <div className="mx-auto mb-3.5 flex justify-center">
+          <BrandMark size="lg" />
         </div>
         <h1 className="font-display text-2xl font-bold leading-tight">Imposta la tua password</h1>
         <p className="mb-6 text-sm text-ink-faint">
@@ -141,7 +148,7 @@ export default function ImpostaPasswordPage() {
         ) : (
           <p className="text-xs text-ink-faint">Verifica del link in corso…</p>
         )}
-      </div>
+      </motion.div>
     </div>
   );
 }

@@ -38,3 +38,85 @@ body {
   color: var(--color-ink);
   font-family: var(--font-body), Arial, Helvetica, sans-serif;
 }
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Subtle lift/press on every button, app-wide, unless explicitly opted out. */
+button:not(:disabled):not(.no-lift) {
+  transition:
+    transform 150ms ease,
+    box-shadow 150ms ease,
+    background-color 150ms ease,
+    border-color 150ms ease,
+    opacity 150ms ease;
+}
+button:not(:disabled):not(.no-lift):hover {
+  transform: translateY(-1px);
+}
+button:not(:disabled):not(.no-lift):active {
+  transform: translateY(0) scale(0.97);
+}
+
+@keyframes brand-sheen {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
+}
+
+.brand-mark {
+  background: linear-gradient(
+    100deg,
+    var(--color-teal) 0%,
+    var(--color-teal) 35%,
+    #1a7d70 50%,
+    var(--color-teal) 65%,
+    var(--color-teal) 100%
+  );
+  background-size: 220% 100%;
+  animation: brand-sheen 5s ease-in-out infinite alternate;
+}
+
+@keyframes float-blob {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(3%, -4%) scale(1.06);
+  }
+}
+
+.ambient-blob {
+  animation: float-blob 14s ease-in-out infinite;
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in-up {
+  animation: fade-in-up 0.35s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brand-mark,
+  .ambient-blob,
+  .fade-in-up {
+    animation: none;
+  }
+  html {
+    scroll-behavior: auto;
+  }
+}

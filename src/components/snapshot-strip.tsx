@@ -62,7 +62,7 @@ export function SnapshotStrip({
 }) {
   return (
     <div className="mb-5 grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-4">
-      {metrics.map((m) => {
+      {metrics.map((m, i) => {
         const data = latest[m.key];
         const Icon = ICONS[m.key];
         let delta: number | null = null;
@@ -75,7 +75,11 @@ export function SnapshotStrip({
           }
         }
         return (
-          <div key={m.key} className="rounded-lg border border-line bg-surface px-3.5 py-3">
+          <div
+            key={m.key}
+            style={{ animationDelay: `${Math.min(i, 8) * 40}ms` }}
+            className="fade-in-up rounded-lg border border-line bg-surface px-3.5 py-3 transition-shadow hover:shadow-md"
+          >
             <div className="mb-2 flex items-center gap-1.5">
               <Icon size={14} strokeWidth={2} className="text-teal" />
               <span className="text-[11px] font-medium text-ink-soft">{m.label}</span>
