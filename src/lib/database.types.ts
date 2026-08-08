@@ -14,6 +14,70 @@ export type Database = {
   }
   public: {
     Tables: {
+      blood_test_values: {
+        Row: {
+          blood_test_id: string
+          id: string
+          marker_key: string
+          value: number
+        }
+        Insert: {
+          blood_test_id: string
+          id?: string
+          marker_key: string
+          value: number
+        }
+        Update: {
+          blood_test_id?: string
+          id?: string
+          marker_key?: string
+          value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blood_test_values_blood_test_id_fkey"
+            columns: ["blood_test_id"]
+            isOneToOne: false
+            referencedRelation: "blood_tests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      blood_tests: {
+        Row: {
+          client_id: string
+          created_at: string
+          id: string
+          lab_name: string | null
+          notes: string | null
+          test_date: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          id?: string
+          lab_name?: string | null
+          notes?: string | null
+          test_date: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          id?: string
+          lab_name?: string | null
+          notes?: string | null
+          test_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blood_tests_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clients: {
         Row: {
           created_at: string
