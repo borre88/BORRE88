@@ -17,7 +17,7 @@ export function ClientSidebar({ clients }: { clients: ClientSummary[] }) {
   const pathname = usePathname();
 
   return (
-    <aside className="w-full shrink-0 border-b border-line bg-surface p-4 sm:w-60 sm:border-b-0 sm:border-r sm:p-5">
+    <aside className="print:hidden w-full shrink-0 border-b border-line bg-surface p-4 sm:w-60 sm:border-b-0 sm:border-r sm:p-5">
       <div className="mb-2 flex items-center justify-between text-[10.5px] font-semibold tracking-wide text-ink-faint">
         <span className="flex items-center gap-1.5">
           <Users size={13} strokeWidth={2.2} /> CLIENTI

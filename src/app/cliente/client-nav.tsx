@@ -16,7 +16,7 @@ export function ClientNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="flex gap-1 overflow-x-auto border-b border-line bg-surface px-5 sm:px-7">
+    <nav className="print:hidden flex gap-1 overflow-x-auto border-b border-line bg-surface px-5 sm:px-7">
       {TABS.map(({ href, label, icon: Icon }) => {
         const active = pathname.startsWith(href);
         return (
