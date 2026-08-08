@@ -8,6 +8,7 @@ import { MeasurementsTable } from "@/components/measurements-table";
 import { AreaTabs } from "@/components/area-tabs";
 import { HealthScoreCard, type HealthArea } from "@/components/health-score-card";
 import { CardioStats, AnthropometryStats } from "@/components/computed-stats";
+import { WeeklyCheckinsTable } from "@/components/weekly-checkins-table";
 import { AddMeasurementModal } from "./add-measurement-modal";
 import { DeleteMeasurementButton } from "./delete-measurement-button";
 import { EditProfileModal } from "./edit-profile-modal";
@@ -33,6 +34,13 @@ export default async function ClientDetailPage({
     .select("*")
     .eq("client_id", clientId)
     .order("date", { ascending: true });
+
+  const { data: weeklyCheckins } = await supabase
+    .from("weekly_checkins")
+    .select("*")
+    .eq("client_id", clientId)
+    .order("week_start", { ascending: false })
+    .limit(8);
 
   const entries = measurements ?? [];
   const latest = computeLatestByMetric(entries);
@@ -110,6 +118,12 @@ export default async function ClientDetailPage({
             Note ({new Date(latestMeasurement.date + "T00:00:00").toLocaleDateString("it-IT")}) — solo tu le vedi
           </div>
           <p className="whitespace-pre-line text-[13px] text-ink-soft">{latestMeasurement.trainer_notes}</p>
+        </div>
+      )}
+
+      {weeklyCheckins && weeklyCheckins.length > 0 && (
+        <div className="mb-5">
+          <WeeklyCheckinsTable checkins={weeklyCheckins} />
         </div>
       )}
 

@@ -306,6 +306,53 @@ export type Database = {
         }
         Relationships: []
       }
+      weekly_checkins: {
+        Row: {
+          client_id: string
+          created_at: string
+          diet_slips: number | null
+          energy: number | null
+          id: string
+          notes: string | null
+          tiredness: number | null
+          week_start: string
+          weight_kg: number | null
+          workouts_count: number | null
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          diet_slips?: number | null
+          energy?: number | null
+          id?: string
+          notes?: string | null
+          tiredness?: number | null
+          week_start: string
+          weight_kg?: number | null
+          workouts_count?: number | null
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          diet_slips?: number | null
+          energy?: number | null
+          id?: string
+          notes?: string | null
+          tiredness?: number | null
+          week_start?: string
+          weight_kg?: number | null
+          workouts_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "weekly_checkins_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       workout_exercises: {
         Row: {
           id: string

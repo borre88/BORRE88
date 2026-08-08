@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChefHat, Dumbbell, UtensilsCrossed, HeartPulse } from "lucide-react";
+import { ChefHat, Dumbbell, UtensilsCrossed, HeartPulse, CalendarCheck } from "lucide-react";
 
 const TABS = [
   { href: "/cliente/ricette", label: "Ricette", icon: ChefHat },
   { href: "/cliente/allenamenti", label: "Allenamenti", icon: Dumbbell },
   { href: "/cliente/cena-fuori", label: "Cena fuori", icon: UtensilsCrossed },
   { href: "/cliente/salute", label: "I miei dati", icon: HeartPulse },
+  { href: "/cliente/check-in", label: "Check-in", icon: CalendarCheck },
 ];
 
 export function ClientNav() {

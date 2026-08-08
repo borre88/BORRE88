@@ -30,12 +30,17 @@ Due aree riservate:
    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
    SUPABASE_SERVICE_ROLE_KEY=
    NEXT_PUBLIC_SITE_URL=
+   RESEND_API_KEY=
+   EMAIL_FROM=
+   CRON_SECRET=
    ```
 
    Le prime due si trovano su Supabase in *Project Settings → API keys*. La
    `SUPABASE_SERVICE_ROLE_KEY` è la chiave segreta "service_role" (stessa pagina):
    serve solo lato server per creare gli account dei clienti, non va mai esposta al
-   browser.
+   browser. `RESEND_API_KEY`/`EMAIL_FROM`/`CRON_SECRET` servono per il promemoria
+   email settimanale (vedi sezione dedicata più sotto) — senza `RESEND_API_KEY`
+   l'app funziona comunque, semplicemente non invia quell'email.
 
 3. Avvia il server di sviluppo:
 
@@ -67,6 +72,28 @@ Questi contenuti vivono in Supabase e si modificano dal **Table Editor** di Supa
 
 Le modifiche compaiono nell'app al primo caricamento successivo (nessun deploy
 necessario).
+
+## Promemoria email settimanale
+
+Ogni lunedì mattina (8:00 UTC) l'app invia automaticamente a tutti i clienti con un
+account collegato un'email che li invita a compilare il check-in settimanale
+(`/cliente/check-in`). Per attivarlo:
+
+1. Crea un account gratuito su [resend.com](https://resend.com) (fino a 3.000
+   email/mese gratis) e genera una **API Key** da *API Keys* nel pannello.
+2. Su Vercel, in *Settings → Environment Variables*, aggiungi:
+   - `RESEND_API_KEY`: la chiave appena creata
+   - `CRON_SECRET`: una stringa segreta a tua scelta (protegge l'endpoint da invii
+     non autorizzati)
+   - `EMAIL_FROM` (facoltativo): all'inizio puoi lasciare il mittente di test di
+     Resend; per una consegna più affidabile e professionale, verifica un tuo
+     dominio in Resend (*Domains → Add Domain*, aggiungendo pochi record DNS) e poi
+     imposta qui un indirizzo come `Nutrition & Performance <no-reply@tuodominio.it>`.
+3. Rifai il deploy: Vercel legge automaticamente `vercel.json` e programma la
+   chiamata settimanale da solo, non serve altro.
+
+Puoi cambiare giorno/orario modificando `schedule` in `vercel.json` (formato cron,
+orario UTC).
 
 ## Sicurezza dei dati (Row Level Security)
 
