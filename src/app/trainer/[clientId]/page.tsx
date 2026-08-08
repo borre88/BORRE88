@@ -10,6 +10,7 @@ import { HealthScoreCard, type HealthArea } from "@/components/health-score-card
 import { CardioStats, AnthropometryStats } from "@/components/computed-stats";
 import { AddMeasurementModal } from "./add-measurement-modal";
 import { DeleteMeasurementButton } from "./delete-measurement-button";
+import { EditProfileModal } from "./edit-profile-modal";
 
 export default async function ClientDetailPage({
   params,
@@ -85,7 +86,22 @@ export default async function ClientDetailPage({
             {client.phone ? ` · ${client.phone}` : ""}
           </p>
         </div>
-        <AddMeasurementModal clientId={clientId} latest={latest} latestActivityLevel={latestMeasurement?.activity_level ?? null} />
+        <div className="flex gap-2">
+          <EditProfileModal
+            clientId={clientId}
+            client={{
+              full_name: client.full_name,
+              phone: client.phone,
+              date_of_birth: client.date_of_birth,
+              gender: client.gender,
+            }}
+          />
+          <AddMeasurementModal
+            clientId={clientId}
+            latest={latest}
+            latestActivityLevel={latestMeasurement?.activity_level ?? null}
+          />
+        </div>
       </div>
 
       {latestMeasurement?.trainer_notes && (

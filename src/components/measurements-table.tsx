@@ -1,12 +1,6 @@
-import { ALL_METRICS, formatDateIt, formatSecondsAsClock, type MeasurementLike, type MetricDef } from "@/lib/metrics";
+import { ALL_METRICS, formatDateIt, type MeasurementLike, type MetricDef } from "@/lib/metrics";
 
 type MeasurementRow = MeasurementLike & { id: string };
-
-function displayValue(m: MetricDef, value: number | null) {
-  if (value === null) return "—";
-  if (m.key === "five_km_time_seconds") return formatSecondsAsClock(value);
-  return value;
-}
 
 export function MeasurementsTable({
   entries,
@@ -49,7 +43,7 @@ export function MeasurementsTable({
                 </td>
                 {metrics.map((m) => (
                   <td key={m.key} className="whitespace-nowrap border-t border-line px-2.5 py-2 font-mono">
-                    {displayValue(m, e[m.key])}
+                    {e[m.key] ?? "—"}
                   </td>
                 ))}
                 {renderRowActions && (

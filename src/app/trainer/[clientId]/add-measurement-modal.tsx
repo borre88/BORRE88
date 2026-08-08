@@ -105,8 +105,8 @@ export function AddMeasurementModal({
                           placeholder="—"
                           className="w-full rounded-md border border-line bg-cream px-2.5 py-1.5 text-[13px] outline-none focus:border-teal"
                         />
-                        {m.key === "five_km_time_seconds" && (
-                          <p className="mt-0.5 text-[10px] text-ink-faint">in secondi, es. 1500 = 25:00</p>
+                        {m.key === "five_km_time_minutes" && (
+                          <p className="mt-0.5 text-[10px] text-ink-faint">es. 24.5 = 24 minuti e 30 secondi</p>
                         )}
                       </div>
                     ))}

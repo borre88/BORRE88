@@ -28,8 +28,8 @@ export async function createClientAccount(
   const genderRaw = String(formData.get("gender") ?? "");
   const gender = genderRaw === "maschio" || genderRaw === "femmina" ? genderRaw : null;
 
-  if (!fullName || !email) {
-    return { error: "Nome ed email sono obbligatori." };
+  if (!fullName || !email || !dateOfBirth || !phone || !gender) {
+    return { error: "Nome, email, telefono, data di nascita e sesso sono obbligatori." };
   }
 
   const admin = createAdminClient();
@@ -151,4 +151,33 @@ export async function deleteMeasurement(clientId: string, measurementId: string)
   const supabase = await createClient();
   await supabase.from("measurements").delete().eq("id", measurementId);
   revalidatePath(`/trainer/${clientId}`);
+}
+
+export async function updateClientProfile(
+  clientId: string,
+  _prevState: ActionState | undefined,
+  formData: FormData
+): Promise<ActionState> {
+  const supabase = await createClient();
+
+  const fullName = String(formData.get("full_name") ?? "").trim();
+  const phone = String(formData.get("phone") ?? "").trim();
+  const dateOfBirth = String(formData.get("date_of_birth") ?? "").trim();
+  const genderRaw = String(formData.get("gender") ?? "");
+  const gender = genderRaw === "maschio" || genderRaw === "femmina" ? genderRaw : null;
+
+  if (!fullName || !phone || !dateOfBirth || !gender) {
+    return { error: "Nome, telefono, data di nascita e sesso sono obbligatori." };
+  }
+
+  const { error } = await supabase
+    .from("clients")
+    .update({ full_name: fullName, phone, date_of_birth: dateOfBirth, gender })
+    .eq("id", clientId);
+
+  if (error) return { error: "Impossibile salvare il profilo." };
+
+  revalidatePath(`/trainer/${clientId}`);
+  revalidatePath("/trainer");
+  return { success: true };
 }

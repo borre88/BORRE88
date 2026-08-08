@@ -165,10 +165,9 @@ export function scoreCardiovascular(m: Measurement, age: number, gender: Gender)
     if (pts <= 1.5) weaknesses.push(`Frequenza cardiaca a riposo elevata (${m.resting_hr} bpm)`);
   }
 
-  if (m.five_km_time_seconds) {
-    const minutes = m.five_km_time_seconds / 60;
+  if (m.five_km_time_minutes) {
     const thresholds = gender === "maschio" ? [20, 25, 30, 35] : [25, 30, 35, 40];
-    const pts = bandPoints(minutes, [6, 4.5, 3, 1.5, 0], thresholds);
+    const pts = bandPoints(m.five_km_time_minutes, [6, 4.5, 3, 1.5, 0], thresholds);
     parts.push({ points: pts, max: 6 });
     if (pts >= 4.5) strengths.push("Buon passo sui 5km");
     if (pts <= 1.5) weaknesses.push("Passo sui 5km da migliorare");
@@ -295,15 +294,11 @@ export function scoreStrength(m: Measurement, gender: Gender): ScoreResult {
       if (pts === 1) weaknesses.push(`${lift.label} ha margine di crescita rispetto al peso corporeo`);
     }
 
-    if (m.pullup_1rm !== null && m.pullup_1rm !== undefined) {
-      let pts: number;
-      if (m.pullup_1rm >= 15) pts = 4;
-      else if (m.pullup_1rm > 0) pts = 3;
-      else if (m.pullup_1rm === 0) pts = 2;
-      else pts = 1;
+    if (m.pullup_max_reps !== null && m.pullup_max_reps !== undefined) {
+      const pts = bandPoints(m.pullup_max_reps, [0, 1, 2, 3, 4], [1, 3, 6, 10]);
       parts.push({ points: pts, max: 4 });
-      if (pts >= 3) strengths.push("Buon massimale di trazioni");
-      if (pts <= 1) weaknesses.push("Massimale di trazioni da sviluppare");
+      if (pts >= 3) strengths.push(`Buone ripetizioni massime di trazioni (${m.pullup_max_reps})`);
+      if (pts <= 1) weaknesses.push("Trazioni da sviluppare");
     }
   }
 

@@ -26,11 +26,19 @@ export function NewClientForm({ onDone }: { onDone: () => void }) {
     <form action={action} className="mb-2.5 rounded-lg bg-cream p-2.5">
       <input name="full_name" placeholder="Nome e cognome" required autoFocus className={inputClass} />
       <input name="email" type="email" placeholder="Email cliente" required className={inputClass} />
-      <input name="phone" type="tel" placeholder="Telefono" className={inputClass} />
+      <input name="phone" type="tel" placeholder="Telefono" required className={inputClass} />
       <div className="mb-1.5 flex gap-1.5">
-        <input name="date_of_birth" type="date" aria-label="Data di nascita" className={`${inputClass} mb-0`} />
-        <select name="gender" aria-label="Sesso" defaultValue="" className={`${inputClass} mb-0`}>
-          <option value="">Sesso</option>
+        <input
+          name="date_of_birth"
+          type="date"
+          aria-label="Data di nascita"
+          required
+          className={`${inputClass} mb-0`}
+        />
+        <select name="gender" aria-label="Sesso" required defaultValue="" className={`${inputClass} mb-0`}>
+          <option value="" disabled>
+            Sesso
+          </option>
           <option value="maschio">Maschio</option>
           <option value="femmina">Femmina</option>
         </select>

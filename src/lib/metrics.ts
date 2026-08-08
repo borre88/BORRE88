@@ -2,7 +2,7 @@ export type MetricKey =
   // Cardiovascolare
   | "vo2max"
   | "resting_hr"
-  | "five_km_time_seconds"
+  | "five_km_time_minutes"
   | "cooper_test_meters"
   // Sonno
   | "hrv"
@@ -20,7 +20,7 @@ export type MetricKey =
   | "squat_1rm"
   | "bench_1rm"
   | "deadlift_1rm"
-  | "pullup_1rm"
+  | "pullup_max_reps"
   // Alimentare
   | "junk_food_weekly"
   | "fruit_veg_daily"
@@ -53,7 +53,7 @@ export const METRIC_GROUPS: MetricGroup[] = [
     metrics: [
       { key: "vo2max", label: "VO2max", unit: "ml/kg/min", higherIsBetter: true, step: 0.1 },
       { key: "resting_hr", label: "FC a riposo", unit: "bpm", higherIsBetter: false, step: 1 },
-      { key: "five_km_time_seconds", label: "Tempo sui 5km", unit: "sec", higherIsBetter: false, step: 1 },
+      { key: "five_km_time_minutes", label: "Tempo sui 5km", unit: "min", higherIsBetter: false, step: 0.1 },
       { key: "cooper_test_meters", label: "Test di Cooper (12 min)", unit: "m", higherIsBetter: true, step: 10 },
     ],
   },
@@ -89,7 +89,7 @@ export const METRIC_GROUPS: MetricGroup[] = [
       { key: "squat_1rm", label: "Squat 1RM", unit: "kg", higherIsBetter: true, step: 1 },
       { key: "bench_1rm", label: "Panca 1RM", unit: "kg", higherIsBetter: true, step: 1 },
       { key: "deadlift_1rm", label: "Stacco 1RM", unit: "kg", higherIsBetter: true, step: 1 },
-      { key: "pullup_1rm", label: "Trazioni 1RM (kg aggiunti)", unit: "kg", higherIsBetter: true, step: 1 },
+      { key: "pullup_max_reps", label: "Trazioni (rip. massime)", unit: "rip.", higherIsBetter: true, step: 1 },
     ],
   },
   {
@@ -145,10 +145,4 @@ export function computeLatestByMetric(
 export function formatDateIt(iso: string) {
   const d = new Date(iso + "T00:00:00");
   return d.toLocaleDateString("it-IT", { day: "2-digit", month: "short" });
-}
-
-export function formatSecondsAsClock(totalSeconds: number) {
-  const minutes = Math.floor(totalSeconds / 60);
-  const seconds = Math.round(totalSeconds % 60);
-  return `${minutes}:${String(seconds).padStart(2, "0")}`;
 }

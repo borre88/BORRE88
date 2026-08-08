@@ -23,12 +23,12 @@ import {
   Droplet,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import { ALL_METRICS, formatSecondsAsClock, type LatestMetric, type MetricDef, type MetricKey } from "@/lib/metrics";
+import { ALL_METRICS, type LatestMetric, type MetricDef, type MetricKey } from "@/lib/metrics";
 
 const ICONS: Record<MetricKey, LucideIcon> = {
   vo2max: Activity,
   resting_hr: HeartPulse,
-  five_km_time_seconds: Timer,
+  five_km_time_minutes: Timer,
   cooper_test_meters: Route,
   hrv: Waves,
   sleep_hours: Moon,
@@ -43,7 +43,7 @@ const ICONS: Record<MetricKey, LucideIcon> = {
   squat_1rm: Dumbbell,
   bench_1rm: Dumbbell,
   deadlift_1rm: Dumbbell,
-  pullup_1rm: Dumbbell,
+  pullup_max_reps: Dumbbell,
   junk_food_weekly: Pizza,
   fruit_veg_daily: Apple,
   alcohol_weekly: Wine,
@@ -52,11 +52,6 @@ const ICONS: Record<MetricKey, LucideIcon> = {
   protein_meals_daily: Egg,
   water_daily_liters: Droplet,
 };
-
-function displayValue(m: MetricDef, value: number) {
-  if (m.key === "five_km_time_seconds") return formatSecondsAsClock(value);
-  return value;
-}
 
 export function SnapshotStrip({
   latest,
@@ -88,7 +83,7 @@ export function SnapshotStrip({
             {data ? (
               <>
                 <div className="flex items-baseline gap-1">
-                  <span className="font-mono text-xl font-medium">{displayValue(m, data.value)}</span>
+                  <span className="font-mono text-xl font-medium">{data.value}</span>
                   <span className="text-[10.5px] text-ink-faint">{m.unit}</span>
                 </div>
                 {delta !== null && Math.abs(delta) > 0.001 ? (
