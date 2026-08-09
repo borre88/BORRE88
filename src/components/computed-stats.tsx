@@ -9,6 +9,7 @@ import {
   type Gender,
   type Measurement,
 } from "@/lib/health-score";
+import { Card } from "@/components/ui/Card";
 
 function StatCard({ label, value, unit }: { label: string; value: string; unit?: string }) {
   return (
@@ -32,20 +33,21 @@ export function CardioStats({ measurement, age }: { measurement: Measurement | n
   }
   const zones = calculateHeartRateZones(age, measurement.resting_hr);
   return (
-    <div className="mb-5 rounded-lg border border-line bg-surface px-4 pb-2 pt-3.5">
-      <div className="mb-2.5 text-sm font-semibold">Zone di allenamento (metodo Karvonen)</div>
-      <div className="grid grid-cols-1 gap-1.5 pb-3 sm:grid-cols-5">
-        {zones.map((z) => (
-          <div key={z.zone} className="rounded-md bg-cream px-2.5 py-2 text-center">
-            <div className="text-[10px] font-semibold uppercase tracking-wide text-gold">Zona {z.zone}</div>
-            <div className="font-mono text-sm font-medium">
-              {z.bpmMin}-{z.bpmMax}
-            </div>
-            <div className="text-[10px] text-ink-faint">{z.label}</div>
-          </div>
-        ))}
-      </div>
-    </div>
+    <Card className="mb-5 px-[18px] pb-2 pt-[18px]">
+      <div className="font-ui font-bold text-[14px]">Zone di allenamento</div>
+      <div className="font-ui mb-1.5 mt-1 font-medium text-[11px] text-faint">metodo Karvonen</div>
+      {zones.map((z) => (
+        <div key={z.zone} className="flex items-center gap-3 border-t border-line-soft py-[11px]">
+          <span className="font-ui w-[52px] shrink-0 font-bold text-[10px] uppercase tracking-[0.1em] text-gold">
+            Zona {z.zone}
+          </span>
+          <span className="w-[70px] shrink-0 font-display font-bold text-[14px]">
+            {z.bpmMin}-{z.bpmMax}
+          </span>
+          <span className="font-ui flex-1 font-medium text-[11.5px] text-muted">{z.label}</span>
+        </div>
+      ))}
+    </Card>
   );
 }
 

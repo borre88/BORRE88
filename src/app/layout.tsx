@@ -14,10 +14,33 @@ const ui = Manrope({
   variable: "--font-ui",
 });
 
+const title = "Nutrition & Performance | Dott. Borrelli Simone";
+const description = "Area riservata clienti: rilevazioni, ricette, allenamenti e cena fuori.";
+
 export const metadata: Metadata = {
-  title: "Nutrition & Performance | Dott. Borrelli Simone",
-  description: "Area riservata clienti: rilevazioni, ricette, allenamenti e cena fuori.",
-  icons: { icon: "/icon.svg", apple: "/apple-icon.png" },
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
+  title,
+  description,
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/favicon.ico", sizes: "32x32" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: "/apple-icon.png",
+  },
+  openGraph: {
+    title,
+    description,
+    images: ["/og-image.png"],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title,
+    description,
+    images: ["/og-image.png"],
+  },
 };
 
 export const viewport: Viewport = {
