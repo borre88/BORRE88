@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 104 104">
-  <rect width="104" height="104" rx="26" fill="#14564A"/>
-  <rect x="7" y="7" width="90" height="90" rx="20" fill="none" stroke="#B08A2E" stroke-width="1"/>
+  <rect width="104" height="104" rx="26" fill="#111110"/>
+  <rect x="7" y="7" width="90" height="90" rx="20" fill="none" stroke="#C9A143" stroke-width="1"/>
   <text x="52" y="63" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#F5F3EF" letter-spacing="-1">N<tspan fill="#C9A143">&amp;</tspan>P</text>
 </svg>
