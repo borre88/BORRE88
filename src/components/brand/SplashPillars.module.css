@@ -1,0 +1,167 @@
+.root {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: #14564a;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 1;
+  transition: opacity 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.leaving {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.stage {
+  position: relative;
+  width: 300px;
+  height: 300px;
+}
+.svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.axis {
+  animation: axDraw 0.5s ease-out backwards;
+}
+@keyframes axDraw {
+  from {
+    stroke-dashoffset: 110;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.ring {
+  transform-origin: 150px 150px;
+  animation: ringIn 0.55s 0.74s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+@keyframes ringIn {
+  from {
+    opacity: 0;
+    transform: scale(0.82);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.poly {
+  transform-origin: 150px 150px;
+  animation: polyIn 0.7s 0.96s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+@keyframes polyIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(1.04);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.mark {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: markIn 0.7s 1.5s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+@keyframes markIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.72);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.03);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.pillar {
+  position: absolute;
+  white-space: nowrap;
+  font: 700 9px var(--font-ui);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(245, 243, 239, 0.7);
+  animation: pillarOut 2.4s ease-out backwards;
+}
+@keyframes pillarOut {
+  0% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  22% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  72% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.86);
+  }
+}
+
+.wordmark {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 96px;
+  text-align: center;
+  animation: fadeUp 0.7s 1.9s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.name {
+  font: 700 19px/1.15 var(--font-display);
+  color: #f5f3ef;
+}
+.sub {
+  font: 600 8.5px var(--font-ui);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: rgba(245, 243, 239, 0.5);
+  margin-top: 10px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .axis,
+  .ring,
+  .poly,
+  .mark,
+  .pillar,
+  .wordmark {
+    animation: none;
+  }
+}
