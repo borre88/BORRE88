@@ -1,42 +1,48 @@
 @import "tailwindcss";
 
 :root {
-  --color-cream: #f5f3ec;
-  --color-surface: #ffffff;
-  --color-ink: #1b2422;
-  --color-ink-soft: #4b5652;
-  --color-ink-faint: #8a9490;
-  --color-teal: #0e5c53;
-  --color-teal-soft: #e3efec;
-  --color-gold: #c6982f;
-  --color-gold-soft: #f5ebd3;
-  --color-line: #e1e0d5;
-  --color-good: #2f7a5c;
-  --color-bad: #b24b32;
+  --bg: #f5f3ef;
+  --surface: #ffffff;
+  --line: #e4e0d7;
+  --line-soft: #efebe2;
+  --ink: #1c1c1a;
+  --muted: rgba(28, 28, 26, 0.5);
+  --faint: rgba(28, 28, 26, 0.4);
+  --brand: #14564a;
+  --brand-tint: #e4ede7;
+  --brand-tint-line: #d5e0d8;
+  --gold: #b08a2e;
+  --gold-bright: #c9a143;
+  --gold-tint: #f5ebd3;
+  --positive: #2f6b4f;
+  --negative: #9b3226;
 }
 
 @theme inline {
-  --color-cream: var(--color-cream);
-  --color-surface: var(--color-surface);
-  --color-ink: var(--color-ink);
-  --color-ink-soft: var(--color-ink-soft);
-  --color-ink-faint: var(--color-ink-faint);
-  --color-teal: var(--color-teal);
-  --color-teal-soft: var(--color-teal-soft);
-  --color-gold: var(--color-gold);
-  --color-gold-soft: var(--color-gold-soft);
-  --color-line: var(--color-line);
-  --color-good: var(--color-good);
-  --color-bad: var(--color-bad);
-  --font-display: var(--font-barlow-condensed);
-  --font-body: var(--font-inter);
-  --font-mono: var(--font-ibm-plex-mono);
+  --color-cream: var(--bg);
+  --color-surface: var(--surface);
+  --color-line: var(--line);
+  --color-line-soft: var(--line-soft);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--muted);
+  --color-ink-faint: var(--faint);
+  --color-teal: var(--brand);
+  --color-teal-soft: var(--brand-tint);
+  --color-teal-soft-line: var(--brand-tint-line);
+  --color-gold: var(--gold);
+  --color-gold-bright: var(--gold-bright);
+  --color-gold-soft: var(--gold-tint);
+  --color-good: var(--positive);
+  --color-bad: var(--negative);
+  --font-display: var(--font-display);
+  --font-body: var(--font-ui);
+  --font-mono: ui-monospace, "SF Mono", "Cascadia Code", Menlo, Consolas, monospace;
 }
 
 body {
-  background: var(--color-cream);
-  color: var(--color-ink);
-  font-family: var(--font-body), Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-ui), Arial, Helvetica, sans-serif;
 }
 
 html {
@@ -71,11 +77,11 @@ button:not(:disabled):not(.no-lift):active {
 .brand-mark {
   background: linear-gradient(
     100deg,
-    var(--color-teal) 0%,
-    var(--color-teal) 35%,
-    #1a7d70 50%,
-    var(--color-teal) 65%,
-    var(--color-teal) 100%
+    var(--brand) 0%,
+    var(--brand) 35%,
+    var(--gold-bright) 50%,
+    var(--brand) 65%,
+    var(--brand) 100%
   );
   background-size: 220% 100%;
   animation: brand-sheen 5s ease-in-out infinite alternate;
