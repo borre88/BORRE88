@@ -5,6 +5,7 @@ import { computeFullReport } from "@/lib/health-report";
 import { HealthReportView } from "@/components/health-report-view";
 import { PrintButton } from "@/components/print-button";
 import { ReportHeader } from "@/components/report-header";
+import { ReportFooter } from "@/components/report-footer";
 
 export default async function ClientReportPage({
   params,
@@ -46,6 +47,7 @@ export default async function ClientReportPage({
         reportDate={latestMeasurement?.date ?? null}
         areas={areas}
       />
+      <ReportFooter />
     </div>
   );
 }
