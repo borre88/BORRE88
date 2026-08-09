@@ -16,6 +16,7 @@ import { WeeklyCheckinsTable } from "@/components/weekly-checkins-table";
 import { AddMeasurementModal } from "./add-measurement-modal";
 import { DeleteMeasurementButton } from "./delete-measurement-button";
 import { EditProfileModal } from "./edit-profile-modal";
+import { MarkCheckinsSeen } from "./mark-checkins-seen";
 
 export default async function ClientDetailPage({
   params,
@@ -112,6 +113,7 @@ export default async function ClientDetailPage({
 
   return (
     <div>
+      <MarkCheckinsSeen clientId={clientId} />
       <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <div className="mb-0.5 text-[10.5px] font-semibold tracking-wide text-gold">SCHEDA ATLETA</div>

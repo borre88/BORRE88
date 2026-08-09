@@ -14,3 +14,15 @@ export function formatWeekLabel(mondayIso: string): string {
   const fmt = (d: Date) => d.toLocaleDateString("it-IT", { day: "2-digit", month: "short" });
   return `${fmt(monday)} - ${fmt(sunday)}`;
 }
+
+/** "oggi", "ieri", "N giorni fa", oppure la data per periodi più lunghi. */
+export function formatRelativeIt(iso: string): string {
+  const date = new Date(iso);
+  const now = new Date();
+  const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
+
+  if (diffDays <= 0) return "oggi";
+  if (diffDays === 1) return "ieri";
+  if (diffDays < 7) return `${diffDays} giorni fa`;
+  return date.toLocaleDateString("it-IT", { day: "2-digit", month: "short" });
+}

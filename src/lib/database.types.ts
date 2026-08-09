@@ -379,6 +379,7 @@ export type Database = {
           id: string
           notes: string | null
           tiredness: number | null
+          viewed_by_trainer_at: string | null
           week_start: string
           weight_kg: number | null
           workouts_count: number | null
@@ -391,6 +392,7 @@ export type Database = {
           id?: string
           notes?: string | null
           tiredness?: number | null
+          viewed_by_trainer_at?: string | null
           week_start: string
           weight_kg?: number | null
           workouts_count?: number | null
@@ -403,6 +405,7 @@ export type Database = {
           id?: string
           notes?: string | null
           tiredness?: number | null
+          viewed_by_trainer_at?: string | null
           week_start?: string
           weight_kg?: number | null
           workouts_count?: number | null

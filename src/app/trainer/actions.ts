@@ -181,3 +181,13 @@ export async function updateClientProfile(
   revalidatePath("/trainer");
   return { success: true };
 }
+
+export async function markCheckinsSeen(clientId: string) {
+  const supabase = await createClient();
+  await supabase
+    .from("weekly_checkins")
+    .update({ viewed_by_trainer_at: new Date().toISOString() })
+    .eq("client_id", clientId)
+    .is("viewed_by_trainer_at", null);
+  revalidatePath("/trainer");
+}
