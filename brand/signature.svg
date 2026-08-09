@@ -1,6 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 150">
-  <text x="200" y="55" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#1C1C1A" letter-spacing="-0.5">nutrition<tspan fill="#B08A2E">&amp;</tspan>performance</text>
-  <line x1="120" y1="78" x2="280" y2="78" stroke="#D8D3C7" stroke-width="1"/>
-  <text x="200" y="100" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="600" letter-spacing="2.5" fill="#5A564D">DOTT. SIMONE BORRELLI</text>
-  <text x="200" y="118" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="500" letter-spacing="1.5" fill="#1C1C1A" fill-opacity="0.5">BIOLOGO NUTRIZIONISTA</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 110" width="420" height="110">
+  <text x="210" y="34" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="30" font-weight="700" fill="#1C1C1A" letter-spacing="-0.6">nutrition<tspan fill="#B08A2E">&amp;</tspan>performance</text>
+  <line x1="60" y1="56" x2="360" y2="56" stroke="#D8D3C7" stroke-width="1"></line>
+  <text x="210" y="76" text-anchor="middle" font-family="Manrope, sans-serif" font-size="11" font-weight="600" letter-spacing="2.8" fill="#5A564D">DOTT. SIMONE BORRELLI</text>
+  <text x="210" y="94" text-anchor="middle" font-family="Manrope, sans-serif" font-size="10" font-weight="500" letter-spacing="1.6" fill="rgba(28,28,26,.45)">BIOLOGO NUTRIZIONISTA</text>
 </svg>
