@@ -1,7 +1,12 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
+import { usePathname } from "next/navigation";
 import { SplashPillars } from "@/components/brand/SplashPillars";
+
+// Solo le pagine di atterraggio dopo il login: mai su una pagina aperta
+// direttamente (es. il referto PDF in una scheda nuova).
+const HOME_PATHS = new Set(["/trainer", "/cliente", "/cliente/ricette"]);
 
 const listeners = new Set<() => void>();
 let dismissed = false;
@@ -29,7 +34,9 @@ function dismiss() {
 }
 
 export function SplashGate({ children, scores }: { children: React.ReactNode; scores?: number[] }) {
-  const show = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const pathname = usePathname();
+  const eligible = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const show = eligible && HOME_PATHS.has(pathname);
 
   return (
     <>
