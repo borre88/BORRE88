@@ -4,6 +4,7 @@ import { calculateAge, type Gender } from "@/lib/health-score";
 import { computeFullReport } from "@/lib/health-report";
 import { HealthReportView } from "@/components/health-report-view";
 import { PrintButton } from "@/components/print-button";
+import { ReportHeader } from "@/components/report-header";
 
 export default async function ClientReportPage({
   params,
@@ -36,6 +37,7 @@ export default async function ClientReportPage({
 
   return (
     <div className="mx-auto max-w-2xl px-5 py-8">
+      <ReportHeader />
       <div className="mb-5 flex justify-end">
         <PrintButton />
       </div>

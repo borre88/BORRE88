@@ -1,5 +1,6 @@
 import { LogoutButton } from "./logout-button";
 import { Logo } from "./brand/Logo";
+import { ThemeToggle } from "./theme-toggle";
 
 export function TopBar({ name, roleLabel }: { name: string; roleLabel: string }) {
   return (
@@ -13,6 +14,7 @@ export function TopBar({ name, roleLabel }: { name: string; roleLabel: string })
       </div>
       <div className="flex items-center gap-3">
         <span className="hidden text-sm font-medium text-ink-soft sm:inline">{name}</span>
+        <ThemeToggle />
         <LogoutButton />
       </div>
     </header>

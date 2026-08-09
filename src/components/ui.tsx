@@ -11,7 +11,7 @@ export function Tag({ children, muted }: { children: React.ReactNode; muted?: bo
   return (
     <span
       className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold tracking-wide ${
-        muted ? "bg-gold-soft text-[#8A6A1F]" : "bg-teal-soft text-teal"
+        muted ? "bg-gold-soft text-gold-ink" : "bg-teal-soft text-teal"
       }`}
     >
       {children}

@@ -27,7 +27,7 @@ export function RadarChart({ aree }: { aree: { nome: string; punteggio: number }
             ly = cy + Math.sin(ang(i)) * (R + 26) + 4;
           const anchor = Math.abs(lx - cx) < 12 ? "middle" : lx > cx ? "end" : "start";
           return (
-            <text key={i} x={lx} y={ly} textAnchor={anchor} fontFamily="var(--font-ui)" fontSize="11" fontWeight="600" fill="#5A564D">
+            <text key={i} x={lx} y={ly} textAnchor={anchor} fontFamily="var(--font-ui)" fontSize="11" fontWeight="600" fill="var(--muted)">
               {a.nome}
             </text>
           );

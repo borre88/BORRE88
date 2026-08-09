@@ -34,7 +34,13 @@ export function MetricChart({ metric, data }: { metric: MetricDef; data: { date:
             <Tooltip
               labelFormatter={(label) => formatDateIt(String(label))}
               formatter={(value) => [`${value} ${metric.unit}`, metric.label] as [string, string]}
-              contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid var(--color-line)" }}
+              contentStyle={{
+                fontSize: 12,
+                borderRadius: 8,
+                border: "1px solid var(--color-line)",
+                backgroundColor: "var(--color-surface)",
+                color: "var(--color-ink)",
+              }}
             />
             <Line
               type="monotone"

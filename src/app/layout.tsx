@@ -45,7 +45,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="it" className={`${display.variable} ${ui.variable} h-full antialiased`}>
+    <html lang="it" className={`${display.variable} ${ui.variable} h-full antialiased`} suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "(function(){try{if(localStorage.getItem('theme')==='dark')document.documentElement.classList.add('dark');}catch(e){}})();",
+          }}
+        />
+      </head>
       <body className="min-h-full bg-cream text-ink font-body">{children}</body>
     </html>
   );

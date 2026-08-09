@@ -39,7 +39,7 @@ export function EditProfileModal({ clientId, client }: { clientId: string; clien
         type="button"
         onClick={() => setOpen(true)}
         className={`flex items-center gap-1.5 rounded-lg border px-4 py-2.5 text-sm font-medium ${
-          missing ? "border-gold bg-gold-soft text-[#8A6A1F]" : "border-line text-ink-soft"
+          missing ? "border-gold bg-gold-soft text-gold-ink" : "border-line text-ink-soft"
         }`}
       >
         <User size={15} strokeWidth={2.2} />
