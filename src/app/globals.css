@@ -34,9 +34,13 @@
   --color-gold-soft: var(--gold-tint);
   --color-good: var(--positive);
   --color-bad: var(--negative);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
   --font-display: var(--font-display);
   --font-body: var(--font-ui);
+  --font-ui: var(--font-ui);
   --font-mono: ui-monospace, "SF Mono", "Cascadia Code", Menlo, Consolas, monospace;
+  --radius-pill: 9999px;
 }
 
 body {
