@@ -42,7 +42,7 @@ export function MeasurementsTable({
                   {formatDateIt(e.date)}
                 </td>
                 {metrics.map((m) => (
-                  <td key={m.key} className="whitespace-nowrap border-t border-line px-2.5 py-2 font-mono">
+                  <td key={m.key} className="whitespace-nowrap border-t border-line px-2.5 py-2 font-display">
                     {e[m.key] ?? "—"}
                   </td>
                 ))}

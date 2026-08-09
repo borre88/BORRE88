@@ -87,7 +87,7 @@ export function SnapshotStrip({
             {data ? (
               <>
                 <div className="flex items-baseline gap-1">
-                  <span className="font-mono text-xl font-medium">{data.value}</span>
+                  <span className="font-display text-xl font-medium">{data.value}</span>
                   <span className="text-[10.5px] text-ink-faint">{m.unit}</span>
                 </div>
                 {delta !== null && Math.abs(delta) > 0.001 ? (

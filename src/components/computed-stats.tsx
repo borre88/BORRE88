@@ -16,7 +16,7 @@ function StatCard({ label, value, unit }: { label: string; value: string; unit?:
     <div className="rounded-lg border border-line bg-cream px-3.5 py-3">
       <div className="mb-1 text-[11px] font-medium text-ink-soft">{label}</div>
       <div className="flex items-baseline gap-1">
-        <span className="font-mono text-lg font-medium">{value}</span>
+        <span className="font-display text-lg font-medium">{value}</span>
         {unit && <span className="text-[10.5px] text-ink-faint">{unit}</span>}
       </div>
     </div>

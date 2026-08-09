@@ -40,7 +40,7 @@ export function HealthReportView({
           <AnimatedNumber
             value={averageScore}
             decimals={1}
-            className={`font-mono text-2xl font-bold ${scoreColor(averageScore)}`}
+            className={`font-display text-2xl font-bold ${scoreColor(averageScore)}`}
           />
           <span className="text-xs text-ink-faint">/ 20</span>
         </div>
@@ -80,7 +80,7 @@ export function HealthReportView({
                 {area.label}
               </div>
               {area.result && (
-                <span className={`flex items-baseline gap-0.5 font-mono text-base font-bold ${scoreColor(area.result.score)}`}>
+                <span className={`flex items-baseline gap-0.5 font-display text-base font-bold ${scoreColor(area.result.score)}`}>
                   <AnimatedNumber value={area.result.score} />/20
                 </span>
               )}

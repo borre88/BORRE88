@@ -107,7 +107,7 @@ export function HealthScoreCard({
             </button>
           </div>
           <div className="mb-4 flex items-baseline gap-1.5">
-            <AnimatedNumber value={result.score} className={`font-mono text-4xl font-bold ${scoreColor(result.score)}`} />
+            <AnimatedNumber value={result.score} className={`font-display text-4xl font-bold ${scoreColor(result.score)}`} />
             <span className="text-sm text-ink-faint">/ 20</span>
           </div>
           {result.strengths.length > 0 && (

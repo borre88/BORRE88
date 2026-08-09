@@ -95,7 +95,7 @@ export function CenaTab({ categories }: { categories: Category[] }) {
           <div className="flex flex-col gap-2.5">
             <div className="flex items-baseline gap-2">
               <Flame size={20} strokeWidth={2.2} className="text-gold" />
-              <span className="font-mono text-3xl font-medium">{estimate.kcal}</span>
+              <span className="font-display text-3xl font-medium">{estimate.kcal}</span>
               <span className="text-xs text-ink-faint">kcal stimate</span>
             </div>
             <div className="flex flex-wrap gap-1.5">

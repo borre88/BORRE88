@@ -44,7 +44,7 @@ export function WeeklyCheckinsTable({ checkins, title = "Check-in settimanali" }
                   {formatWeekLabel(h.week_start)}
                 </td>
                 {COLUMNS.map((c) => (
-                  <td key={c.key} className="whitespace-nowrap border-t border-line px-2.5 py-2 font-mono">
+                  <td key={c.key} className="whitespace-nowrap border-t border-line px-2.5 py-2 font-display">
                     {(h[c.key] as number | null) ?? "—"}
                   </td>
                 ))}

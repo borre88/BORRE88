@@ -30,7 +30,7 @@ export function BloodTestReport({ readings }: { readings: MarkerReading[] }) {
           >
             <div className="flex items-center justify-between">
               <span className="text-[13px] font-medium">{r.label}</span>
-              <span className="flex items-center gap-1 font-mono text-[13px]">
+              <span className="flex items-center gap-1 font-display text-[13px]">
                 {r.status === "high" && <TrendingUp size={13} strokeWidth={2.5} className="text-bad" />}
                 {r.status === "low" && <TrendingDown size={13} strokeWidth={2.5} className="text-bad" />}
                 {r.value} {r.unit}

@@ -22,12 +22,12 @@ export function Tag({ children, muted }: { children: React.ReactNode; muted?: bo
 export function MacroPill({ label, value, wide }: { label: string; value: string | number; wide?: boolean }) {
   return (
     <div
-      className={`flex items-center gap-1 rounded-md bg-cream font-mono text-[11.5px] ${
+      className={`flex items-center gap-1 rounded-md bg-cream text-[11.5px] ${
         wide ? "px-3.5 py-1.5" : "px-2.5 py-0.5"
       }`}
     >
       <span className="font-body text-ink-faint">{label}</span>
-      <span className="font-medium">
+      <span className="font-display font-medium">
         {value}
         {typeof value === "number" ? "g" : ""}
       </span>
