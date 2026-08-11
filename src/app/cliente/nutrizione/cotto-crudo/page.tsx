@@ -2,6 +2,11 @@ import { createClient } from "@/lib/supabase/server";
 import { SectionIntro } from "@/components/ui";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { Card } from "@/components/ui/Card";
+import type { Tables } from "@/lib/database.types";
+
+type ConversionRow = Tables<"cooking_conversions">;
+
+const METHODS = ["padella", "forno", "vapore", "friggitrice_aria"] as const;
 
 const METHOD_LABELS: Record<string, string> = {
   padella: "Padella",
@@ -31,6 +36,16 @@ const CATEGORIES: { key: string; label: string; explanation: string }[] = [
   },
 ];
 
+function groupByIngredient(rows: ConversionRow[]) {
+  const byIngredient = new Map<string, ConversionRow[]>();
+  for (const row of rows) {
+    const list = byIngredient.get(row.ingredient) ?? [];
+    list.push(row);
+    byIngredient.set(row.ingredient, list);
+  }
+  return Array.from(byIngredient.entries());
+}
+
 export default async function CottoCrudoPage() {
   const supabase = await createClient();
   const { data } = await supabase.from("cooking_conversions").select("*").order("position");
@@ -45,47 +60,41 @@ export default async function CottoCrudoPage() {
 
       <div className="space-y-8">
         {CATEGORIES.map((cat) => {
-          const catRows = rows.filter((r) => r.category === cat.key);
-          if (catRows.length === 0) return null;
+          const ingredients = groupByIngredient(rows.filter((r) => r.category === cat.key));
+          if (ingredients.length === 0) return null;
           return (
             <div key={cat.key}>
               <SectionLabel>{cat.label}</SectionLabel>
               <p className="mb-4 mt-1.5 text-[12.5px] leading-relaxed text-ink-soft">{cat.explanation}</p>
-              <Card className="overflow-x-auto p-0">
-                <table className="w-full min-w-[720px] border-collapse text-[12px]">
-                  <thead>
-                    <tr>
-                      {["Ingrediente", "Metodo", "Peso crudo", "Kcal crudo", "Peso cotto", "Kcal cotto", "Kcal/100g crudo", "Kcal/100g cotto"].map(
-                        (h) => (
-                          <th key={h} className="whitespace-nowrap px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wide text-ink-faint">
-                            {h}
-                          </th>
-                        )
-                      )}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {catRows.map((r) => (
-                      <tr key={r.id}>
-                        <td className="whitespace-nowrap border-t border-line-soft px-3 py-2 font-medium">{r.ingredient}</td>
-                        <td className="whitespace-nowrap border-t border-line-soft px-3 py-2 text-ink-soft">
-                          {METHOD_LABELS[r.method] ?? r.method}
-                        </td>
-                        <td className="whitespace-nowrap border-t border-line-soft px-3 py-2 font-display">{r.raw_weight_g}g</td>
-                        <td className="whitespace-nowrap border-t border-line-soft px-3 py-2 font-display">{r.raw_kcal} kcal</td>
-                        <td className="whitespace-nowrap border-t border-line-soft px-3 py-2 font-display">{r.cooked_weight_g}g</td>
-                        <td className="whitespace-nowrap border-t border-line-soft px-3 py-2 font-display">{r.cooked_kcal} kcal</td>
-                        <td className="whitespace-nowrap border-t border-line-soft px-3 py-2 font-display text-ink-soft">
-                          {Math.round((r.raw_kcal / r.raw_weight_g) * 100)} kcal
-                        </td>
-                        <td className="whitespace-nowrap border-t border-line-soft px-3 py-2 font-display font-semibold text-teal">
-                          {Math.round((r.cooked_kcal / r.cooked_weight_g) * 100)} kcal
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </Card>
+              <div className="space-y-3">
+                {ingredients.map(([ingredient, methodRows]) => (
+                  <Card key={ingredient} className="p-4">
+                    <div className="mb-3 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+                      <span className="font-display text-[15px] font-semibold">{ingredient}</span>
+                      <span className="text-[12px] text-ink-faint">
+                        crudo <span className="font-display font-semibold text-ink">{methodRows[0].raw_weight_g}g · {methodRows[0].raw_kcal} kcal</span>
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                      {METHODS.map((m) => {
+                        const r = methodRows.find((row) => row.method === m);
+                        return (
+                          <div key={m} className={`rounded-xl border px-2.5 py-2 ${r ? "border-teal/20 bg-teal/5" : "border-line-soft bg-cream-soft/50"}`}>
+                            <div className="text-[9.5px] font-semibold uppercase tracking-wide text-ink-faint">{METHOD_LABELS[m]}</div>
+                            {r ? (
+                              <div className="mt-0.5 font-display text-[13px] font-semibold text-teal">
+                                {r.cooked_weight_g}g · {r.cooked_kcal} kcal
+                              </div>
+                            ) : (
+                              <div className="mt-0.5 text-[13px] text-ink-faint">—</div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </Card>
+                ))}
+              </div>
             </div>
           );
         })}
