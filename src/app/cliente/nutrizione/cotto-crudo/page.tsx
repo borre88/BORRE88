@@ -6,13 +6,14 @@ import type { Tables } from "@/lib/database.types";
 
 type ConversionRow = Tables<"cooking_conversions">;
 
-const METHODS = ["padella", "forno", "vapore", "friggitrice_aria"] as const;
+const METHODS = ["padella", "forno", "vapore", "friggitrice_aria", "ebollizione"] as const;
 
 const METHOD_LABELS: Record<string, string> = {
   padella: "Padella",
   forno: "Forno",
   vapore: "Vapore",
   friggitrice_aria: "Friggitrice ad aria",
+  ebollizione: "Bollitura",
 };
 
 const CATEGORIES: { key: string; label: string; explanation: string }[] = [
@@ -75,7 +76,7 @@ export default async function CottoCrudoPage() {
                         crudo <span className="font-display font-semibold text-ink">{methodRows[0].raw_weight_g}g · {methodRows[0].raw_kcal} kcal</span>
                       </span>
                     </div>
-                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
                       {METHODS.map((m) => {
                         const r = methodRows.find((row) => row.method === m);
                         return (
