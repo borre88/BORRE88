@@ -129,6 +129,42 @@ export type Database = {
           },
         ]
       }
+      cooking_conversions: {
+        Row: {
+          category: string
+          cooked_kcal: number
+          cooked_weight_g: number
+          id: string
+          ingredient: string
+          method: string
+          position: number
+          raw_kcal: number
+          raw_weight_g: number
+        }
+        Insert: {
+          category: string
+          cooked_kcal: number
+          cooked_weight_g: number
+          id?: string
+          ingredient: string
+          method: string
+          position?: number
+          raw_kcal: number
+          raw_weight_g: number
+        }
+        Update: {
+          category?: string
+          cooked_kcal?: number
+          cooked_weight_g?: number
+          id?: string
+          ingredient?: string
+          method?: string
+          position?: number
+          raw_kcal?: number
+          raw_weight_g?: number
+        }
+        Relationships: []
+      }
       dining_categories: {
         Row: {
           id: string
