@@ -1,8 +1,17 @@
 import { LogoutButton } from "./logout-button";
 import { Logo } from "./brand/Logo";
 import { ThemeToggle } from "./theme-toggle";
+import { InstallAppModal } from "./install-app-modal";
 
-export function TopBar({ name, roleLabel }: { name: string; roleLabel: string }) {
+export function TopBar({
+  name,
+  roleLabel,
+  showInstallHint,
+}: {
+  name: string;
+  roleLabel: string;
+  showInstallHint?: boolean;
+}) {
   return (
     <header className="print:hidden mx-3 mt-3 flex items-center justify-between rounded-pill border border-line bg-surface px-5 py-3 sm:mx-5 sm:mt-4 sm:px-7">
       <div>
@@ -11,6 +20,7 @@ export function TopBar({ name, roleLabel }: { name: string; roleLabel: string })
       </div>
       <div className="flex items-center gap-3">
         <span className="hidden text-sm font-medium text-ink-soft sm:inline">{name}</span>
+        {showInstallHint && <InstallAppModal />}
         <ThemeToggle />
         <LogoutButton />
       </div>
