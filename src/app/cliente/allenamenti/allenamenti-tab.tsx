@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Clock, Dumbbell, Home, ChevronDown, ChevronUp } from "lucide-react";
+import { Clock, Dumbbell, Home, ChevronDown, ChevronUp, Info } from "lucide-react";
 import type { Tables } from "@/lib/database.types";
 import { ChipGroup, SectionIntro, Tag } from "@/components/ui";
 
@@ -75,6 +75,18 @@ export function AllenamentiTab({ workouts }: { workouts: Workout[] }) {
             onChange={setEquipment}
             options={[{ key: "tutti", label: "Tutti" }, ...Object.entries(EQUIP_LABELS).map(([key, label]) => ({ key, label }))]}
           />
+        </div>
+      )}
+
+      {category === "hyrox" && (
+        <div className="mb-4 flex gap-2.5 rounded-lg border border-teal-soft-line bg-teal-soft px-4 py-3">
+          <Info size={16} strokeWidth={2.2} className="mt-0.5 shrink-0 text-teal" />
+          <p className="text-[12.5px] leading-relaxed text-ink">
+            <span className="font-semibold">Come funziona il circuito:</span> ogni scheda è divisa in giri, un giro
+            diverso per riga nella tabella. In ogni giro corri la distanza indicata e passi subito alla stazione,
+            senza fermarti dopo la corsa. Ti fermi solo alla fine della stazione, per il tempo indicato in
+            &quot;Recupero&quot; — poi riparti con la corsa del giro successivo.
+          </p>
         </div>
       )}
 
