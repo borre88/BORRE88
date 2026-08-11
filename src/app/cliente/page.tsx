@@ -70,7 +70,7 @@ export default async function ClienteHub() {
           delay={0}
         >
           {scores ? (
-            <svg viewBox="0 0 120 120" className="mx-auto h-28 w-28 transition-transform duration-300 group-hover:scale-105">
+            <svg viewBox="0 0 120 120" className="mx-auto mt-2 h-24 w-24">
               {[0.5, 1].map((f, i) => (
                 <polygon
                   key={i}
@@ -90,9 +90,7 @@ export default async function ClienteHub() {
               />
             </svg>
           ) : (
-            <div className="flex h-28 items-center justify-center text-center text-[11px] text-ink-faint">
-              Il poligono apparirà qui dopo la prima rilevazione.
-            </div>
+            <div className="mt-2 text-[11px] text-ink-faint">Il poligono apparirà qui dopo la prima rilevazione.</div>
           )}
         </HubCard>
 

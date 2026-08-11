@@ -49,18 +49,19 @@ export function HubCard({
 
           <p className="text-[12.5px] text-ink-faint">{subtitle}</p>
 
-          {stat && (
+          {(stat || children) && (
             <div className="grid grid-rows-[0fr] transition-[grid-template-rows] duration-300 group-hover:grid-rows-[1fr]">
-              <div className="overflow-hidden">
-                <p className="mt-2 flex items-center gap-1.5 text-[12px] font-semibold text-teal opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-                  <span className="h-1 w-1 shrink-0 rounded-full bg-teal" />
-                  {stat}
-                </p>
+              <div className="overflow-hidden opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                {stat && (
+                  <p className="mt-2 flex items-center gap-1.5 text-[12px] font-semibold text-teal">
+                    <span className="h-1 w-1 shrink-0 rounded-full bg-teal" />
+                    {stat}
+                  </p>
+                )}
+                {children}
               </div>
             </div>
           )}
-
-          {children}
         </div>
       </Link>
     </motion.div>
