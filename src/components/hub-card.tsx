@@ -69,8 +69,8 @@ export function HubCard({
           )}
 
           {(stat || children) && (
-            <div className="grid grid-rows-[0fr] transition-[grid-template-rows] duration-300 group-hover:grid-rows-[1fr]">
-              <div className="overflow-hidden opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+            <div className="grid grid-rows-[1fr] transition-[grid-template-rows] duration-300 sm:grid-rows-[0fr] sm:group-hover:grid-rows-[1fr]">
+              <div className="overflow-hidden opacity-100 transition-opacity duration-300 sm:opacity-0 sm:group-hover:opacity-100">
                 {stat && (
                   <p className="mt-2 flex items-center gap-1.5 text-[12px] font-semibold text-teal">
                     <span className="h-1 w-1 shrink-0 rounded-full bg-teal" />

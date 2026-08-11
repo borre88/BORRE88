@@ -1,6 +1,7 @@
-import { HeartPulse, Dumbbell, ChefHat } from "lucide-react";
+import { HeartPulse, Dumbbell, ChefHat, ClipboardCheck, Bell } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getSession } from "@/lib/auth";
+import { getMondayISO } from "@/lib/dates";
 import { calculateAge, type Gender } from "@/lib/health-score";
 import { computeFullReport, synthesizeReport } from "@/lib/health-report";
 import { SectionIntro } from "@/components/ui";
@@ -56,11 +57,22 @@ export default async function ClienteHub() {
     supabase.from("recipes").select("id", { count: "exact", head: true }),
   ]);
 
+  let checkedInThisWeek = false;
+  if (client) {
+    const { data: currentCheckin } = await supabase
+      .from("weekly_checkins")
+      .select("id")
+      .eq("client_id", client.id)
+      .eq("week_start", getMondayISO(new Date()))
+      .maybeSingle();
+    checkedInThisWeek = !!currentCheckin;
+  }
+
   return (
     <div>
       <SectionIntro title="La tua area" subtitle="Scegli cosa vuoi fare." />
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <HubCard
           href="/cliente/valutazione"
           icon={<HeartPulse size={17} strokeWidth={2.2} />}
@@ -125,6 +137,27 @@ export default async function ClienteHub() {
           }
           delay={0.16}
         />
+
+        <HubCard
+          href="/cliente/valutazione/check-in"
+          icon={<ClipboardCheck size={17} strokeWidth={2.2} />}
+          title="Check-in settimanale"
+          subtitle="Aggiornamento rapido da mandare al tuo trainer ogni settimana."
+          delay={0.24}
+        >
+          <div
+            className={`mt-2 flex items-start gap-1.5 rounded-lg border px-2.5 py-2 ${
+              checkedInThisWeek ? "border-teal-soft-line bg-teal-soft" : "border-gold bg-gold-soft"
+            }`}
+          >
+            <Bell size={14} strokeWidth={2.2} className={`mt-0.5 shrink-0 ${checkedInThisWeek ? "text-teal" : "text-gold"}`} />
+            <p className="text-[11.5px] leading-snug text-ink">
+              {checkedInThisWeek
+                ? "Check-in di questa settimana già inviato al tuo coach."
+                : "Non hai ancora mandato il check-in di questa settimana al tuo coach, ricordati di inviarlo."}
+            </p>
+          </div>
+        </HubCard>
       </div>
     </div>
   );
