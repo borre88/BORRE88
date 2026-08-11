@@ -10,6 +10,7 @@ export function HubCard({
   title,
   subtitle,
   stat,
+  items,
   delay = 0,
   children,
 }: {
@@ -18,6 +19,7 @@ export function HubCard({
   title: string;
   subtitle: string;
   stat?: string;
+  items?: string[];
   delay?: number;
   children?: React.ReactNode;
 }) {
@@ -48,6 +50,23 @@ export function HubCard({
           </div>
 
           <p className="text-[12.5px] text-ink-faint">{subtitle}</p>
+
+          {items && items.length > 0 && (
+            <div className="grid grid-rows-[1fr] transition-[grid-template-rows] duration-300 sm:grid-rows-[0fr] sm:group-hover:grid-rows-[1fr]">
+              <div className="overflow-hidden opacity-100 transition-opacity duration-300 sm:opacity-0 sm:group-hover:opacity-100">
+                <div className="mt-2.5 flex flex-wrap gap-1.5">
+                  {items.map((item) => (
+                    <span
+                      key={item}
+                      className="inline-flex items-center rounded-full bg-teal-soft px-2 py-0.5 text-[10px] font-semibold tracking-wide text-teal"
+                    >
+                      {item}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
 
           {(stat || children) && (
             <div className="grid grid-rows-[0fr] transition-[grid-template-rows] duration-300 group-hover:grid-rows-[1fr]">

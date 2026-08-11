@@ -99,6 +99,7 @@ export default async function ClienteHub() {
           icon={<Dumbbell size={17} strokeWidth={2.2} />}
           title="Allenamenti"
           subtitle="Le schede di allenamento in base agli attrezzi che hai."
+          items={["Casa", "Ripetute", "Hyrox", "Mobilità e recupero"]}
           stat={
             workoutsCount
               ? workoutsCount === 1
@@ -114,6 +115,7 @@ export default async function ClienteHub() {
           icon={<ChefHat size={17} strokeWidth={2.2} />}
           title="Nutrizione"
           subtitle="Ricette pronte e calcolo rapido delle calorie per la cena fuori."
+          items={["Ricette", "Cena fuori", "Cotto - Crudo"]}
           stat={
             recipesCount
               ? recipesCount === 1
