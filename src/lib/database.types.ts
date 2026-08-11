@@ -460,6 +460,7 @@ export type Database = {
       }
       workouts: {
         Row: {
+          category: string
           created_at: string
           duration_minutes: number
           equipment: string
@@ -468,6 +469,7 @@ export type Database = {
           name: string
         }
         Insert: {
+          category?: string
           created_at?: string
           duration_minutes: number
           equipment: string
@@ -476,6 +478,7 @@ export type Database = {
           name: string
         }
         Update: {
+          category?: string
           created_at?: string
           duration_minutes?: number
           equipment?: string

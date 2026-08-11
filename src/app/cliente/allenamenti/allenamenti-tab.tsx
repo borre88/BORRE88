@@ -7,6 +7,20 @@ import { ChipGroup, SectionIntro, Tag } from "@/components/ui";
 
 type Workout = Tables<"workouts"> & { workout_exercises: Tables<"workout_exercises">[] };
 
+const CATEGORY_LABELS: Record<string, string> = {
+  casa: "Casa",
+  ripetute: "Ripetute",
+  hyrox: "Hyrox",
+  mobility: "Mobilità e recupero",
+};
+
+const CATEGORY_SUBTITLES: Record<string, string> = {
+  casa: "Schede pronte in base agli attrezzi che hai a disposizione.",
+  ripetute: "Lavoro aerobico a ripetute: 4x4 norvegese, fartlek e altri protocolli.",
+  hyrox: "Circuiti funzionali in stile Hyrox: corsa, wall ball, affondi e stazioni a tempo.",
+  mobility: "Esercizi di allungamento e recupero per le diverse parti del corpo.",
+};
+
 const EQUIP_LABELS: Record<string, string> = {
   nessuno: "Nessun attrezzo",
   manubri: "Manubri",
@@ -20,28 +34,49 @@ const GOAL_LABELS: Record<string, string> = {
 };
 
 export function AllenamentiTab({ workouts }: { workouts: Workout[] }) {
+  const categories = useMemo(() => {
+    const present = new Set(workouts.map((w) => w.category));
+    return Object.keys(CATEGORY_LABELS).filter((c) => present.has(c));
+  }, [workouts]);
+
+  const [category, setCategory] = useState(categories[0] ?? "casa");
   const [equipment, setEquipment] = useState("tutti");
   const [expanded, setExpanded] = useState<string | null>(null);
 
+  const inCategory = useMemo(() => workouts.filter((w) => w.category === category), [workouts, category]);
+
   const filtered = useMemo(
-    () => workouts.filter((w) => equipment === "tutti" || w.equipment === equipment),
-    [workouts, equipment]
+    () =>
+      category === "casa"
+        ? inCategory.filter((w) => equipment === "tutti" || w.equipment === equipment)
+        : inCategory,
+    [inCategory, category, equipment]
   );
 
   return (
     <div>
-      <SectionIntro
-        title="Allenamenti a casa"
-        subtitle="Schede pronte in base agli attrezzi che hai a disposizione."
-      />
+      <SectionIntro title="I tuoi allenamenti" subtitle={CATEGORY_SUBTITLES[category]} />
 
-      <div className="mb-4">
+      <div className="mb-3">
         <ChipGroup
-          value={equipment}
-          onChange={setEquipment}
-          options={[{ key: "tutti", label: "Tutti" }, ...Object.entries(EQUIP_LABELS).map(([key, label]) => ({ key, label }))]}
+          value={category}
+          onChange={(v) => {
+            setCategory(v);
+            setExpanded(null);
+          }}
+          options={categories.map((c) => ({ key: c, label: CATEGORY_LABELS[c] }))}
         />
       </div>
+
+      {category === "casa" && (
+        <div className="mb-4">
+          <ChipGroup
+            value={equipment}
+            onChange={setEquipment}
+            options={[{ key: "tutti", label: "Tutti" }, ...Object.entries(EQUIP_LABELS).map(([key, label]) => ({ key, label }))]}
+          />
+        </div>
+      )}
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {filtered.map((w) => (
@@ -53,10 +88,12 @@ export function AllenamentiTab({ workouts }: { workouts: Workout[] }) {
             >
               <div className="flex-1">
                 <div className="mb-1.5 flex gap-1.5">
-                  <Tag>
-                    <Home size={10} strokeWidth={2.5} className="mr-1 inline" />
-                    {EQUIP_LABELS[w.equipment]}
-                  </Tag>
+                  {category === "casa" && (
+                    <Tag>
+                      <Home size={10} strokeWidth={2.5} className="mr-1 inline" />
+                      {EQUIP_LABELS[w.equipment]}
+                    </Tag>
+                  )}
                   <Tag muted>{GOAL_LABELS[w.goal]}</Tag>
                 </div>
                 <div className="mb-1.5 font-display text-[17px] font-semibold leading-tight">{w.name}</div>
