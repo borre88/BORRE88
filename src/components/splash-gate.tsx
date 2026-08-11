@@ -6,7 +6,7 @@ import { SplashPillars } from "@/components/brand/SplashPillars";
 
 // Solo le pagine di atterraggio dopo il login: mai su una pagina aperta
 // direttamente (es. il referto PDF in una scheda nuova).
-const HOME_PATHS = new Set(["/trainer", "/cliente", "/cliente/ricette"]);
+const HOME_PATHS = new Set(["/trainer", "/cliente"]);
 
 const listeners = new Set<() => void>();
 let dismissed = false;

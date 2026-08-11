@@ -145,6 +145,15 @@ button:not(:disabled):not(.no-lift):active {
   animation: fade-in-up 0.35s ease-out both;
 }
 
+/* Scrollable tab/nav strips: keep the swipe, hide the native scrollbar. */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .brand-mark,
   .ambient-blob,

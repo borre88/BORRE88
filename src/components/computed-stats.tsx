@@ -38,7 +38,10 @@ export function CardioStats({ measurement, age }: { measurement: Measurement | n
       <div className="font-ui mb-1.5 mt-1 font-medium text-[11px] text-faint">metodo Karvonen</div>
       {zones.map((z) => (
         <div key={z.zone} className="flex items-center gap-3 border-t border-line-soft py-[11px]">
-          <span className="font-ui w-[52px] shrink-0 font-bold text-[10px] uppercase tracking-[0.1em] text-gold">
+          <span
+            className="font-ui w-[52px] shrink-0 font-bold text-[10px] uppercase tracking-[0.1em]"
+            style={{ color: ZONE_COLORS[z.zone - 1] }}
+          >
             Zona {z.zone}
           </span>
           <span className="w-[70px] shrink-0 font-display font-bold text-[14px]">
@@ -50,6 +53,9 @@ export function CardioStats({ measurement, age }: { measurement: Measurement | n
     </Card>
   );
 }
+
+/** Verde (recupero) -> rosso (massimale), una tinta per zona. */
+const ZONE_COLORS = ["#2F6B4F", "#5C8A3F", "#B08A2E", "#B3672E", "#9B3226"];
 
 export function AnthropometryStats({
   measurement,

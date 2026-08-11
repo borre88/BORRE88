@@ -14,13 +14,21 @@ const PORTIONS = [
   { key: "large", label: "Abbondante", mult: 1.35 },
 ];
 
+const ALCOHOL_PORTIONS = [
+  { key: "glass", label: "Bicchiere", mult: 1 },
+  { key: "half_bottle", label: "Mezza bottiglia", mult: 2.5 },
+  { key: "bottle", label: "Bottiglia", mult: 5 },
+];
+
 export function CenaTab({ categories }: { categories: Category[] }) {
   const [categoryId, setCategoryId] = useState(categories[0]?.id ?? "");
   const [selectedDish, setSelectedDish] = useState<Dish | null>(null);
   const [portionKey, setPortionKey] = useState("medium");
 
   const category = categories.find((c) => c.id === categoryId);
-  const portion = PORTIONS.find((p) => p.key === portionKey)!;
+  const isAlcohol = category?.id === "alcolici";
+  const portionSet = isAlcohol ? ALCOHOL_PORTIONS : PORTIONS;
+  const portion = portionSet.find((p) => p.key === portionKey) ?? portionSet[0];
 
   const estimate = selectedDish
     ? {
@@ -44,6 +52,7 @@ export function CenaTab({ categories }: { categories: Category[] }) {
           onChange={(v) => {
             setCategoryId(v);
             setSelectedDish(null);
+            setPortionKey(v === "alcolici" ? ALCOHOL_PORTIONS[0].key : "medium");
           }}
           options={categories.map((c) => ({ key: c.id, label: c.label }))}
         />
@@ -75,9 +84,9 @@ export function CenaTab({ categories }: { categories: Category[] }) {
           </div>
 
           <div className="mb-4 flex items-center gap-3">
-            <span className="text-xs font-medium text-ink-soft">Porzione</span>
+            <span className="text-xs font-medium text-ink-soft">{isAlcohol ? "Quantità" : "Porzione"}</span>
             <div className="flex gap-1.5">
-              {PORTIONS.map((p) => (
+              {portionSet.map((p) => (
                 <button
                   key={p.key}
                   type="button"

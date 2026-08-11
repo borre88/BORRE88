@@ -54,7 +54,7 @@ export async function submitWeeklyCheckin(
 
   if (error) return { error: "Impossibile salvare il check-in." };
 
-  revalidatePath("/cliente/check-in");
+  revalidatePath("/cliente/valutazione/check-in");
   revalidatePath("/trainer");
   return { success: true };
 }

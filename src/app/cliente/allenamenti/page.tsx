@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { SectionHeader } from "@/components/section-header";
 import { AllenamentiTab } from "./allenamenti-tab";
 
 export default async function AllenamentiPage() {
@@ -13,5 +14,10 @@ export default async function AllenamentiPage() {
     workout_exercises: [...w.workout_exercises].sort((a, b) => a.position - b.position),
   }));
 
-  return <AllenamentiTab workouts={normalized} />;
+  return (
+    <div>
+      <SectionHeader title="Allenamenti" />
+      <AllenamentiTab workouts={normalized} />
+    </div>
+  );
 }

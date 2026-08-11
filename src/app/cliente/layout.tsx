@@ -5,7 +5,6 @@ import { calculateAge, type Gender } from "@/lib/health-score";
 import { computeFullReport } from "@/lib/health-report";
 import { TopBar } from "@/components/top-bar";
 import { SplashGate } from "@/components/splash-gate";
-import { ClientNav } from "./client-nav";
 
 export default async function ClienteLayout({ children }: { children: React.ReactNode }) {
   const session = await requireRole("cliente");
@@ -46,7 +45,6 @@ export default async function ClienteLayout({ children }: { children: React.Reac
           name={session.profile.full_name ?? session.user.email ?? "Cliente"}
           roleLabel="Area Cliente"
         />
-        <ClientNav />
         <main className="mx-auto max-w-3xl px-5 pb-14 pt-6 sm:px-7">{children}</main>
       </div>
     </SplashGate>

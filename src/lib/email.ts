@@ -24,7 +24,7 @@ export async function sendWeeklyCheckinReminder(to: string, clientName: string) 
         <p>Ciao ${clientName || ""},</p>
         <p>È il momento del tuo check-in settimanale: bastano un paio di minuti per registrare peso, allenamenti fatti, stanchezza, energia e come è andata l'alimentazione questa settimana.</p>
         <p>
-          <a href="${siteUrl}/cliente/check-in" style="display:inline-block;background:#0E5C53;color:#fff;padding:10px 18px;border-radius:8px;text-decoration:none;">
+          <a href="${siteUrl}/cliente/valutazione/check-in" style="display:inline-block;background:#0E5C53;color:#fff;padding:10px 18px;border-radius:8px;text-decoration:none;">
             Compila il check-in
           </a>
         </p>

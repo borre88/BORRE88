@@ -4,11 +4,11 @@ import { createClient } from "@/lib/supabase/server";
 import { getSession } from "@/lib/auth";
 import { calculateAge, type Gender } from "@/lib/health-score";
 import { computeLatestByMetric, METRIC_GROUPS } from "@/lib/metrics";
-import { computeFullReport } from "@/lib/health-report";
+import { computeFullReport, synthesizeReport } from "@/lib/health-report";
 import { SnapshotStrip } from "@/components/snapshot-strip";
 import { MetricChart } from "@/components/metric-chart";
 import { MeasurementsTable } from "@/components/measurements-table";
-import { AreaTabs } from "@/components/area-tabs";
+import { HealthDataView } from "@/components/health-data-view";
 import { HealthScoreCard, type HealthArea } from "@/components/health-score-card";
 import { HealthReportView } from "@/components/health-report-view";
 import { CardioStats, AnthropometryStats } from "@/components/computed-stats";
@@ -51,7 +51,7 @@ export default async function SalutePage() {
   const age = client.date_of_birth ? calculateAge(client.date_of_birth) : null;
   const gender = (client.gender as Gender | null) ?? null;
 
-  const tabs = METRIC_GROUPS.map((group) => ({
+  const pillarTabs = METRIC_GROUPS.map((group) => ({
     key: group.key,
     label: group.label,
     content: (
@@ -81,29 +81,24 @@ export default async function SalutePage() {
     ),
   }));
 
-  tabs.push({
-    key: "report",
-    label: "Report",
-    content: (
-      <div>
-        <div className="mb-4 flex justify-end">
-          <Link
-            href="/cliente/report"
-            target="_blank"
-            className="flex items-center gap-1.5 rounded-lg border border-line px-3.5 py-2 text-xs font-medium text-ink-soft"
-          >
-            <FileText size={14} strokeWidth={2.2} />
-            Apri per scaricare in PDF
-          </Link>
-        </div>
-        <HealthReportView
-          clientName={client.full_name}
-          reportDate={latestMeasurement?.date ?? null}
-          areas={computeFullReport(latestMeasurement, gender, age)}
-        />
+  const areas = computeFullReport(latestMeasurement, gender, age);
+  const hasReport = synthesizeReport(areas).averageScore !== null;
+
+  const reportContent = (
+    <div>
+      <div className="mb-4 flex justify-end">
+        <Link
+          href="/cliente/report"
+          target="_blank"
+          className="flex items-center gap-1.5 rounded-lg border border-line px-3.5 py-2 text-xs font-medium text-ink-soft"
+        >
+          <FileText size={14} strokeWidth={2.2} />
+          Apri per scaricare in PDF
+        </Link>
       </div>
-    ),
-  });
+      <HealthReportView clientName={client.full_name} reportDate={latestMeasurement?.date ?? null} areas={areas} />
+    </div>
+  );
 
   return (
     <div>
@@ -116,7 +111,7 @@ export default async function SalutePage() {
           Il tuo trainer non ha ancora registrato rilevazioni.
         </div>
       ) : (
-        <AreaTabs tabs={tabs} />
+        <HealthDataView reportContent={reportContent} pillarTabs={pillarTabs} hasReport={hasReport} />
       )}
     </div>
   );
