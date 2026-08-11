@@ -1,10 +1,10 @@
-import Link from "next/link";
-import { HeartPulse, Dumbbell, ChefHat, ChevronRight } from "lucide-react";
+import { HeartPulse, Dumbbell, ChefHat } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getSession } from "@/lib/auth";
 import { calculateAge, type Gender } from "@/lib/health-score";
-import { computeFullReport } from "@/lib/health-report";
+import { computeFullReport, synthesizeReport } from "@/lib/health-report";
 import { SectionIntro } from "@/components/ui";
+import { HubCard } from "@/components/hub-card";
 
 const AREA_LABELS = ["Cardiovascolare", "Sonno", "Antropometria", "Forza", "Alimentare"];
 
@@ -32,6 +32,7 @@ export default async function ClienteHub() {
     .single();
 
   let scores: number[] | null = null;
+  let averageScore: number | null = null;
   if (client) {
     const { data: measurements } = await supabase
       .from("measurements")
@@ -43,32 +44,33 @@ export default async function ClienteHub() {
     if (latestMeasurement) {
       const age = client.date_of_birth ? calculateAge(client.date_of_birth) : null;
       const gender = (client.gender as Gender | null) ?? null;
-      const areaScores = computeFullReport(latestMeasurement, gender, age)
-        .map((a) => a.result?.score)
-        .filter((s): s is number => s !== null && s !== undefined);
+      const areas = computeFullReport(latestMeasurement, gender, age);
+      const areaScores = areas.map((a) => a.result?.score).filter((s): s is number => s !== null && s !== undefined);
       if (areaScores.length === 5) scores = areaScores;
+      averageScore = synthesizeReport(areas).averageScore;
     }
   }
+
+  const [{ count: workoutsCount }, { count: recipesCount }] = await Promise.all([
+    supabase.from("workouts").select("id", { count: "exact", head: true }),
+    supabase.from("recipes").select("id", { count: "exact", head: true }),
+  ]);
 
   return (
     <div>
       <SectionIntro title="La tua area" subtitle="Scegli cosa vuoi fare." />
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <Link
+        <HubCard
           href="/cliente/valutazione"
-          className="group rounded-card border border-line bg-surface p-5 transition-colors hover:border-teal"
+          icon={<HeartPulse size={17} strokeWidth={2.2} />}
+          title="Valutazione"
+          subtitle="I tuoi dati, il punteggio salute e il check-in settimanale."
+          stat={averageScore !== null ? `Punteggio medio ${averageScore}/20` : undefined}
+          delay={0}
         >
-          <div className="mb-3 flex items-center gap-2">
-            <HeartPulse size={17} strokeWidth={2.2} className="text-teal" />
-            <div className="font-display text-base font-bold">Valutazione</div>
-            <ChevronRight size={15} className="ml-auto text-ink-faint transition-transform group-hover:translate-x-0.5" />
-          </div>
-          <p className="mb-3 text-[12.5px] text-ink-faint">
-            I tuoi dati, il punteggio salute e il check-in settimanale.
-          </p>
           {scores ? (
-            <svg viewBox="0 0 120 120" className="mx-auto h-28 w-28">
+            <svg viewBox="0 0 120 120" className="mx-auto h-28 w-28 transition-transform duration-300 group-hover:scale-105">
               {[0.5, 1].map((f, i) => (
                 <polygon
                   key={i}
@@ -92,31 +94,37 @@ export default async function ClienteHub() {
               Il poligono apparirà qui dopo la prima rilevazione.
             </div>
           )}
-        </Link>
+        </HubCard>
 
-        <Link
+        <HubCard
           href="/cliente/allenamenti"
-          className="group rounded-card border border-line bg-surface p-5 transition-colors hover:border-teal"
-        >
-          <div className="mb-3 flex items-center gap-2">
-            <Dumbbell size={17} strokeWidth={2.2} className="text-teal" />
-            <div className="font-display text-base font-bold">Allenamenti</div>
-            <ChevronRight size={15} className="ml-auto text-ink-faint transition-transform group-hover:translate-x-0.5" />
-          </div>
-          <p className="text-[12.5px] text-ink-faint">Le schede di allenamento in base agli attrezzi che hai.</p>
-        </Link>
+          icon={<Dumbbell size={17} strokeWidth={2.2} />}
+          title="Allenamenti"
+          subtitle="Le schede di allenamento in base agli attrezzi che hai."
+          stat={
+            workoutsCount
+              ? workoutsCount === 1
+                ? "1 scheda disponibile"
+                : `${workoutsCount} schede disponibili`
+              : undefined
+          }
+          delay={0.08}
+        />
 
-        <Link
+        <HubCard
           href="/cliente/nutrizione"
-          className="group rounded-card border border-line bg-surface p-5 transition-colors hover:border-teal"
-        >
-          <div className="mb-3 flex items-center gap-2">
-            <ChefHat size={17} strokeWidth={2.2} className="text-teal" />
-            <div className="font-display text-base font-bold">Nutrizione</div>
-            <ChevronRight size={15} className="ml-auto text-ink-faint transition-transform group-hover:translate-x-0.5" />
-          </div>
-          <p className="text-[12.5px] text-ink-faint">Ricette pronte e calcolo rapido delle calorie per la cena fuori.</p>
-        </Link>
+          icon={<ChefHat size={17} strokeWidth={2.2} />}
+          title="Nutrizione"
+          subtitle="Ricette pronte e calcolo rapido delle calorie per la cena fuori."
+          stat={
+            recipesCount
+              ? recipesCount === 1
+                ? "1 ricetta pronta"
+                : `${recipesCount} ricette pronte`
+              : undefined
+          }
+          delay={0.16}
+        />
       </div>
     </div>
   );
