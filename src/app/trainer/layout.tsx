@@ -9,7 +9,7 @@ export default async function TrainerLayout({ children }: { children: React.Reac
   const supabase = await createClient();
   const { data: clients } = await supabase
     .from("clients")
-    .select("id, full_name")
+    .select("id, full_name, group_name")
     .order("full_name");
 
   return (

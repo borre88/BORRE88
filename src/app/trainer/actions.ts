@@ -27,6 +27,7 @@ export async function createClientAccount(
   const phone = String(formData.get("phone") ?? "").trim() || null;
   const genderRaw = String(formData.get("gender") ?? "");
   const gender = genderRaw === "maschio" || genderRaw === "femmina" ? genderRaw : null;
+  const groupName = String(formData.get("group_name") ?? "").trim() || null;
 
   if (!fullName || !email || !dateOfBirth || !phone || !gender) {
     return { error: "Nome, email, telefono, data di nascita e sesso sono obbligatori." };
@@ -63,6 +64,7 @@ export async function createClientAccount(
     date_of_birth: dateOfBirth,
     phone,
     gender,
+    group_name: groupName,
   });
 
   if (profileErr || insertErr) {
@@ -165,6 +167,7 @@ export async function updateClientProfile(
   const dateOfBirth = String(formData.get("date_of_birth") ?? "").trim();
   const genderRaw = String(formData.get("gender") ?? "");
   const gender = genderRaw === "maschio" || genderRaw === "femmina" ? genderRaw : null;
+  const groupName = String(formData.get("group_name") ?? "").trim() || null;
 
   if (!fullName || !phone || !dateOfBirth || !gender) {
     return { error: "Nome, telefono, data di nascita e sesso sono obbligatori." };
@@ -172,7 +175,7 @@ export async function updateClientProfile(
 
   const { error } = await supabase
     .from("clients")
-    .update({ full_name: fullName, phone, date_of_birth: dateOfBirth, gender })
+    .update({ full_name: fullName, phone, date_of_birth: dateOfBirth, gender, group_name: groupName })
     .eq("id", clientId);
 
   if (error) return { error: "Impossibile salvare il profilo." };

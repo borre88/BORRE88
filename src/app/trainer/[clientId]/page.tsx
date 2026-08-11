@@ -28,11 +28,16 @@ export default async function ClientDetailPage({
 
   const { data: client } = await supabase
     .from("clients")
-    .select("id, full_name, date_of_birth, gender, phone, email")
+    .select("id, full_name, date_of_birth, gender, phone, email, group_name")
     .eq("id", clientId)
     .single();
 
   if (!client) notFound();
+
+  const { data: allGroups } = await supabase.from("clients").select("group_name").not("group_name", "is", null);
+  const existingGroups = Array.from(new Set((allGroups ?? []).map((g) => g.group_name as string))).sort((a, b) =>
+    a.localeCompare(b)
+  );
 
   const { data: measurements } = await supabase
     .from("measurements")
@@ -122,6 +127,7 @@ export default async function ClientDetailPage({
             {age !== null ? `${age} anni` : "Data di nascita non impostata"}
             {gender ? ` · ${gender}` : ""}
             {client.phone ? ` · ${client.phone}` : ""}
+            {client.group_name ? ` · ${client.group_name}` : ""}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -132,7 +138,9 @@ export default async function ClientDetailPage({
               phone: client.phone,
               date_of_birth: client.date_of_birth,
               gender: client.gender,
+              group_name: client.group_name,
             }}
+            existingGroups={existingGroups}
           />
           <Link
             href={`/trainer/${clientId}/esami-sangue`}

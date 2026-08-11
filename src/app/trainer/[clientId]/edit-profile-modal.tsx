@@ -9,9 +9,18 @@ interface ClientProfile {
   phone: string | null;
   date_of_birth: string | null;
   gender: string | null;
+  group_name: string | null;
 }
 
-export function EditProfileModal({ clientId, client }: { clientId: string; client: ClientProfile }) {
+export function EditProfileModal({
+  clientId,
+  client,
+  existingGroups = [],
+}: {
+  clientId: string;
+  client: ClientProfile;
+  existingGroups?: string[];
+}) {
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
@@ -118,6 +127,23 @@ export function EditProfileModal({ clientId, client }: { clientId: string; clien
                 <option value="maschio">Maschio</option>
                 <option value="femmina">Femmina</option>
               </select>
+
+              <label className="mb-1 mt-3 block text-xs font-medium text-ink-soft" htmlFor="group_name">
+                Gruppo
+              </label>
+              <input
+                id="group_name"
+                name="group_name"
+                placeholder="Squadra, palestra, studio…"
+                list="existing-groups-edit"
+                defaultValue={client.group_name ?? ""}
+                className={inputClass}
+              />
+              <datalist id="existing-groups-edit">
+                {existingGroups.map((g) => (
+                  <option key={g} value={g} />
+                ))}
+              </datalist>
 
               {error && <p className="mt-3 text-xs font-medium text-bad">{error}</p>}
 

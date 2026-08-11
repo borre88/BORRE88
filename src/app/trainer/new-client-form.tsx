@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { createClientAccount } from "./actions";
 
-export function NewClientForm({ onDone }: { onDone: () => void }) {
+export function NewClientForm({ onDone, existingGroups = [] }: { onDone: () => void; existingGroups?: string[] }) {
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
@@ -43,6 +43,17 @@ export function NewClientForm({ onDone }: { onDone: () => void }) {
           <option value="femmina">Femmina</option>
         </select>
       </div>
+      <input
+        name="group_name"
+        placeholder="Gruppo (squadra, palestra, studio…)"
+        list="existing-groups"
+        className={inputClass}
+      />
+      <datalist id="existing-groups">
+        {existingGroups.map((g) => (
+          <option key={g} value={g} />
+        ))}
+      </datalist>
       {error && <p className="mb-1.5 text-[11px] font-medium text-bad">{error}</p>}
       <div className="flex gap-2">
         <button
