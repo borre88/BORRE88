@@ -49,7 +49,7 @@ export function HubCard({
             />
           </div>
 
-          <p className="text-[12.5px] text-ink-faint">{subtitle}</p>
+          <p className="line-clamp-2 min-h-[2.75em] text-[12.5px] leading-snug text-ink-faint">{subtitle}</p>
 
           {items && items.length > 0 && (
             <div className="grid grid-rows-[1fr] transition-[grid-template-rows] duration-300 sm:grid-rows-[0fr] sm:group-hover:grid-rows-[1fr]">

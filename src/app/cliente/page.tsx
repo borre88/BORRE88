@@ -72,7 +72,7 @@ export default async function ClienteHub() {
     <div>
       <SectionIntro title="La tua area" subtitle="Scegli cosa vuoi fare." />
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 items-start gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <HubCard
           href="/cliente/valutazione"
           icon={<HeartPulse size={17} strokeWidth={2.2} />}
