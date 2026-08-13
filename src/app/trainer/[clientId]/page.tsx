@@ -17,6 +17,7 @@ import { AddMeasurementModal } from "./add-measurement-modal";
 import { DeleteMeasurementButton } from "./delete-measurement-button";
 import { EditProfileModal } from "./edit-profile-modal";
 import { MarkCheckinsSeen } from "./mark-checkins-seen";
+import { MarkDeliveryFulfilledButton } from "./mark-delivery-fulfilled-button";
 
 const DELIVERY_GOAL_LABELS: Record<string, string> = {
   definizione: "Definizione",
@@ -212,6 +213,11 @@ export default async function ClientDetailPage({
                 </div>
                 {r.preferences && <p className="mt-1 text-[12px] text-ink-soft">Gusti: {r.preferences}</p>}
                 {r.notes && <p className="mt-0.5 text-[12px] text-ink-soft">Note: {r.notes}</p>}
+                {r.status !== "conclusa" && (
+                  <div className="mt-2">
+                    <MarkDeliveryFulfilledButton clientId={clientId} requestId={r.id} />
+                  </div>
+                )}
               </div>
             ))}
           </div>

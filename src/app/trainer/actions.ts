@@ -185,6 +185,14 @@ export async function updateClientProfile(
   return { success: true };
 }
 
+export async function markDeliveryRequestFulfilled(clientId: string, requestId: string) {
+  const supabase = await createClient();
+  await supabase.from("delivery_requests").update({ status: "conclusa" }).eq("id", requestId);
+  revalidatePath(`/trainer/${clientId}`);
+  revalidatePath("/trainer");
+  revalidatePath("/cliente/delivery");
+}
+
 export async function markCheckinsSeen(clientId: string) {
   const supabase = await createClient();
   await supabase
