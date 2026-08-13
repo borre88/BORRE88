@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { getSession } from "@/lib/auth";
+import { SectionHeader } from "@/components/section-header";
 import { DeliveryTab } from "./delivery-tab";
 
 export default async function DeliveryPage() {
@@ -22,5 +23,10 @@ export default async function DeliveryPage() {
         .maybeSingle()
     : { data: null };
 
-  return <DeliveryTab hasClient={!!client} latestRequest={latestRequest ?? null} />;
+  return (
+    <div>
+      <SectionHeader title="Delivery a domicilio" />
+      <DeliveryTab hasClient={!!client} latestRequest={latestRequest ?? null} />
+    </div>
+  );
 }

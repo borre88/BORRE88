@@ -1,4 +1,4 @@
-import { HeartPulse, Dumbbell, ChefHat, ClipboardCheck, Bell } from "lucide-react";
+import { HeartPulse, Dumbbell, ChefHat, ClipboardCheck, Truck, Bell } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getSession } from "@/lib/auth";
 import { getMondayISO } from "@/lib/dates";
@@ -8,6 +8,13 @@ import { SectionIntro } from "@/components/ui";
 import { HubCard } from "@/components/hub-card";
 
 const AREA_LABELS = ["Cardiovascolare", "Sonno", "Antropometria", "Forza", "Alimentare"];
+
+const DELIVERY_STATUS_LABELS: Record<string, string> = {
+  nuova: "Richiesta inviata",
+  in_lavorazione: "In lavorazione",
+  attiva: "Servizio attivo",
+  conclusa: "Conclusa",
+};
 
 function radarPreviewPoints(scores: number[]) {
   const cx = 60,
@@ -58,21 +65,32 @@ export default async function ClienteHub() {
   ]);
 
   let checkedInThisWeek = false;
+  let latestDeliveryStatus: string | null = null;
   if (client) {
-    const { data: currentCheckin } = await supabase
-      .from("weekly_checkins")
-      .select("id")
-      .eq("client_id", client.id)
-      .eq("week_start", getMondayISO(new Date()))
-      .maybeSingle();
+    const [{ data: currentCheckin }, { data: latestDelivery }] = await Promise.all([
+      supabase
+        .from("weekly_checkins")
+        .select("id")
+        .eq("client_id", client.id)
+        .eq("week_start", getMondayISO(new Date()))
+        .maybeSingle(),
+      supabase
+        .from("delivery_requests")
+        .select("status")
+        .eq("client_id", client.id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+    ]);
     checkedInThisWeek = !!currentCheckin;
+    latestDeliveryStatus = latestDelivery?.status ?? null;
   }
 
   return (
     <div>
       <SectionIntro title="La tua area" subtitle="Scegli cosa vuoi fare." />
 
-      <div className="grid grid-cols-1 items-start gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 items-start gap-3 sm:grid-cols-2 lg:grid-cols-3">
         <HubCard
           href="/cliente/valutazione"
           icon={<HeartPulse size={17} strokeWidth={2.2} />}
@@ -107,6 +125,31 @@ export default async function ClienteHub() {
         </HubCard>
 
         <HubCard
+          href="/cliente/nutrizione"
+          icon={<ChefHat size={17} strokeWidth={2.2} />}
+          title="Nutrizione"
+          subtitle="Ricette pronte e calcolo rapido delle calorie per la cena fuori."
+          items={["Ricette", "Cena fuori", "Cotto - Crudo", "Lista spesa"]}
+          stat={
+            recipesCount
+              ? recipesCount === 1
+                ? "1 ricetta pronta"
+                : `${recipesCount} ricette pronte`
+              : undefined
+          }
+          delay={0.08}
+        />
+
+        <HubCard
+          href="/cliente/delivery"
+          icon={<Truck size={17} strokeWidth={2.2} />}
+          title="Delivery"
+          subtitle="Pasti bilanciati sui tuoi macro, consegnati sottovuoto a casa tua."
+          stat={latestDeliveryStatus ? DELIVERY_STATUS_LABELS[latestDeliveryStatus] ?? latestDeliveryStatus : undefined}
+          delay={0.16}
+        />
+
+        <HubCard
           href="/cliente/allenamenti"
           icon={<Dumbbell size={17} strokeWidth={2.2} />}
           title="Allenamenti"
@@ -119,23 +162,7 @@ export default async function ClienteHub() {
                 : `${workoutsCount} schede disponibili`
               : undefined
           }
-          delay={0.08}
-        />
-
-        <HubCard
-          href="/cliente/nutrizione"
-          icon={<ChefHat size={17} strokeWidth={2.2} />}
-          title="Nutrizione"
-          subtitle="Ricette pronte e calcolo rapido delle calorie per la cena fuori."
-          items={["Ricette", "Cena fuori", "Cotto - Crudo", "Lista spesa", "Delivery"]}
-          stat={
-            recipesCount
-              ? recipesCount === 1
-                ? "1 ricetta pronta"
-                : `${recipesCount} ricette pronte`
-              : undefined
-          }
-          delay={0.16}
+          delay={0.24}
         />
 
         <HubCard
@@ -143,7 +170,7 @@ export default async function ClienteHub() {
           icon={<ClipboardCheck size={17} strokeWidth={2.2} />}
           title="Check settimanale"
           subtitle="Aggiornamento rapido da mandare al tuo coach ogni settimana."
-          delay={0.24}
+          delay={0.32}
         >
           <div
             className={`mt-2 flex items-start gap-1.5 rounded-lg border px-2.5 py-2 ${

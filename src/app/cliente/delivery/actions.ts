@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 
-const PATH = "/cliente/nutrizione/delivery";
+const PATH = "/cliente/delivery";
 
 export interface DeliveryActionState {
   error?: string;
