@@ -168,6 +168,47 @@ export type Database = {
         }
         Relationships: []
       }
+      delivery_requests: {
+        Row: {
+          client_id: string
+          created_at: string
+          goal: string | null
+          id: string
+          notes: string | null
+          preferences: string | null
+          status: string
+          viewed_by_trainer_at: string | null
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          goal?: string | null
+          id?: string
+          notes?: string | null
+          preferences?: string | null
+          status?: string
+          viewed_by_trainer_at?: string | null
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          goal?: string | null
+          id?: string
+          notes?: string | null
+          preferences?: string | null
+          status?: string
+          viewed_by_trainer_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "delivery_requests_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       dining_categories: {
         Row: {
           id: string
@@ -409,6 +450,38 @@ export type Database = {
         }
         Relationships: []
       }
+      shopping_list_items: {
+        Row: {
+          checked: boolean
+          client_id: string
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          checked?: boolean
+          client_id: string
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          checked?: boolean
+          client_id?: string
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shopping_list_items_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       weekly_checkins: {
         Row: {
           client_id: string
@@ -417,6 +490,8 @@ export type Database = {
           energy: number | null
           id: string
           notes: string | null
+          sleep_hours: number | null
+          stress_level: number | null
           tiredness: number | null
           viewed_by_trainer_at: string | null
           week_start: string
@@ -430,6 +505,8 @@ export type Database = {
           energy?: number | null
           id?: string
           notes?: string | null
+          sleep_hours?: number | null
+          stress_level?: number | null
           tiredness?: number | null
           viewed_by_trainer_at?: string | null
           week_start: string
@@ -443,6 +520,8 @@ export type Database = {
           energy?: number | null
           id?: string
           notes?: string | null
+          sleep_hours?: number | null
+          stress_level?: number | null
           tiredness?: number | null
           viewed_by_trainer_at?: string | null
           week_start?: string

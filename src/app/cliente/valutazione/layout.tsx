@@ -2,7 +2,7 @@ import { SectionHeader } from "@/components/section-header";
 
 const SUB_NAV = [
   { href: "/cliente/valutazione", label: "I miei dati" },
-  { href: "/cliente/valutazione/check-in", label: "Check-in" },
+  { href: "/cliente/valutazione/check-in", label: "Check settimanale" },
 ];
 
 export default function ValutazioneLayout({ children }: { children: React.ReactNode }) {

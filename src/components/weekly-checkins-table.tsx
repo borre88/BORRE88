@@ -6,19 +6,21 @@ type Checkin = Tables<"weekly_checkins">;
 const COLUMNS: { key: keyof Checkin; label: string }[] = [
   { key: "weight_kg", label: "Peso" },
   { key: "workouts_count", label: "Allenamenti" },
+  { key: "sleep_hours", label: "Sonno" },
+  { key: "stress_level", label: "Stress" },
   { key: "tiredness", label: "Stanchezza" },
   { key: "energy", label: "Energia" },
-  { key: "diet_slips", label: "Sgarri" },
+  { key: "diet_slips", label: "Pasti sgarro" },
 ];
 
-export function WeeklyCheckinsTable({ checkins, title = "Check-in settimanali" }: { checkins: Checkin[]; title?: string }) {
+export function WeeklyCheckinsTable({ checkins, title = "Check settimanali" }: { checkins: Checkin[]; title?: string }) {
   if (checkins.length === 0) return null;
 
   return (
     <div className="rounded-lg border border-line bg-surface px-4 pb-2 pt-4">
       <div className="mb-2.5 text-sm font-semibold">{title}</div>
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[480px] border-collapse text-[12.5px]">
+        <table className="w-full min-w-[620px] border-collapse text-[12.5px]">
           <thead>
             <tr>
               <th className="whitespace-nowrap px-2.5 py-1.5 text-left text-[10.5px] font-semibold tracking-wide text-ink-faint">

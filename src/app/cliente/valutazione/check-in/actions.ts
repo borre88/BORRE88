@@ -44,6 +44,8 @@ export async function submitWeeklyCheckin(
       week_start: weekStart,
       weight_kg: numeric("weight_kg"),
       workouts_count: numeric("workouts_count"),
+      sleep_hours: numeric("sleep_hours"),
+      stress_level: numeric("stress_level"),
       tiredness: numeric("tiredness"),
       energy: numeric("energy"),
       diet_slips: numeric("diet_slips"),

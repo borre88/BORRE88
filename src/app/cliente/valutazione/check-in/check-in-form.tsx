@@ -57,6 +57,36 @@ export function CheckinForm({ current }: { current: Checkin | null }) {
           />
         </div>
         <div>
+          <label className="mb-1 block text-xs font-medium text-ink-soft" htmlFor="sleep_hours">
+            Ore di sonno medie
+          </label>
+          <input
+            id="sleep_hours"
+            name="sleep_hours"
+            type="number"
+            step={0.5}
+            min={0}
+            max={24}
+            defaultValue={current?.sleep_hours ?? ""}
+            className={inputClass}
+          />
+        </div>
+        <div>
+          <label className="mb-1 block text-xs font-medium text-ink-soft" htmlFor="stress_level">
+            Livello di stress (1-10)
+          </label>
+          <input
+            id="stress_level"
+            name="stress_level"
+            type="number"
+            min={1}
+            max={10}
+            step={1}
+            defaultValue={current?.stress_level ?? ""}
+            className={inputClass}
+          />
+        </div>
+        <div>
           <label className="mb-1 block text-xs font-medium text-ink-soft" htmlFor="tiredness">
             Stanchezza (1-10)
           </label>
@@ -88,7 +118,7 @@ export function CheckinForm({ current }: { current: Checkin | null }) {
         </div>
         <div>
           <label className="mb-1 block text-xs font-medium text-ink-soft" htmlFor="diet_slips">
-            Sgarri nella settimana
+            Pasti sgarro nella settimana
           </label>
           <input
             id="diet_slips"
@@ -114,14 +144,14 @@ export function CheckinForm({ current }: { current: Checkin | null }) {
       />
 
       {error && <p className="mt-3 text-xs font-medium text-bad">{error}</p>}
-      {success && !error && <p className="mt-3 text-xs font-medium text-good">Check-in salvato.</p>}
+      {success && !error && <p className="mt-3 text-xs font-medium text-good">Check salvato.</p>}
 
       <button
         type="submit"
         disabled={pending}
         className="mt-4 rounded-lg bg-teal px-4 py-2.5 text-sm font-medium text-white disabled:opacity-60"
       >
-        {pending ? "Salvataggio…" : current ? "Aggiorna check-in" : "Invia check-in"}
+        {pending ? "Salvataggio…" : current ? "Aggiorna check" : "Invia check"}
       </button>
     </form>
   );

@@ -192,5 +192,10 @@ export async function markCheckinsSeen(clientId: string) {
     .update({ viewed_by_trainer_at: new Date().toISOString() })
     .eq("client_id", clientId)
     .is("viewed_by_trainer_at", null);
+  await supabase
+    .from("delivery_requests")
+    .update({ viewed_by_trainer_at: new Date().toISOString() })
+    .eq("client_id", clientId)
+    .is("viewed_by_trainer_at", null);
   revalidatePath("/trainer");
 }

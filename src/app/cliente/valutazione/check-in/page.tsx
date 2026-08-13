@@ -19,11 +19,11 @@ export default async function CheckinPage() {
     return (
       <div>
         <SectionIntro
-          title="Check-in settimanale"
-          subtitle="Un aggiornamento rapido ogni settimana tra una rilevazione completa e l'altra."
+          title="Check settimanale"
+          subtitle="Un aggiornamento rapido da mandare al tuo coach ogni settimana."
         />
         <p className="text-sm text-ink-faint">
-          Il tuo trainer non ha ancora collegato una scheda cliente al tuo account.
+          Il tuo coach non ha ancora collegato una scheda cliente al tuo account.
         </p>
       </div>
     );
@@ -48,8 +48,8 @@ export default async function CheckinPage() {
   return (
     <div>
       <SectionIntro
-        title="Check-in settimanale"
-        subtitle="Un aggiornamento rapido ogni settimana tra una rilevazione completa e l'altra."
+        title="Check settimanale"
+        subtitle="Un aggiornamento rapido da mandare al tuo coach ogni settimana."
       />
       <CheckinForm current={current ?? null} />
 

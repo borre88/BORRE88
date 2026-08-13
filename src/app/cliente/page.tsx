@@ -77,7 +77,7 @@ export default async function ClienteHub() {
           href="/cliente/valutazione"
           icon={<HeartPulse size={17} strokeWidth={2.2} />}
           title="Valutazione"
-          subtitle="I tuoi dati, il punteggio salute e il check-in settimanale."
+          subtitle="I tuoi dati, il punteggio salute e il check settimanale."
           stat={averageScore !== null ? `Punteggio medio ${averageScore}/20` : undefined}
           delay={0}
         >
@@ -127,7 +127,7 @@ export default async function ClienteHub() {
           icon={<ChefHat size={17} strokeWidth={2.2} />}
           title="Nutrizione"
           subtitle="Ricette pronte e calcolo rapido delle calorie per la cena fuori."
-          items={["Ricette", "Cena fuori", "Cotto - Crudo"]}
+          items={["Ricette", "Cena fuori", "Cotto - Crudo", "Lista spesa", "Delivery"]}
           stat={
             recipesCount
               ? recipesCount === 1
@@ -141,8 +141,8 @@ export default async function ClienteHub() {
         <HubCard
           href="/cliente/valutazione/check-in"
           icon={<ClipboardCheck size={17} strokeWidth={2.2} />}
-          title="Check-in settimanale"
-          subtitle="Aggiornamento rapido da mandare al tuo trainer ogni settimana."
+          title="Check settimanale"
+          subtitle="Aggiornamento rapido da mandare al tuo coach ogni settimana."
           delay={0.24}
         >
           <div
@@ -153,8 +153,8 @@ export default async function ClienteHub() {
             <Bell size={14} strokeWidth={2.2} className={`mt-0.5 shrink-0 ${checkedInThisWeek ? "text-teal" : "text-gold"}`} />
             <p className="text-[11.5px] leading-snug text-ink">
               {checkedInThisWeek
-                ? "Check-in di questa settimana già inviato al tuo coach."
-                : "Non hai ancora mandato il check-in di questa settimana al tuo coach, ricordati di inviarlo."}
+                ? "Check di questa settimana già inviato al tuo coach."
+                : "Non hai ancora mandato il check di questa settimana al tuo coach, ricordati di inviarlo."}
             </p>
           </div>
         </HubCard>

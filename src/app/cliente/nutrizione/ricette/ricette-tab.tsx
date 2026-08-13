@@ -1,9 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { Search, Flame, Clock, ChevronDown, ChevronUp } from "lucide-react";
+import { useMemo, useState, useTransition } from "react";
+import { Search, Flame, Clock, ChevronDown, ChevronUp, ShoppingCart, Check } from "lucide-react";
 import type { Tables } from "@/lib/database.types";
 import { ChipGroup, EmptyState, MacroPill, SectionIntro, Tag } from "@/components/ui";
+import { addItemsToShoppingList } from "../lista-della-spesa/actions";
 
 type Recipe = Tables<"recipes">;
 
@@ -25,6 +26,22 @@ export function RicetteTab({ recipes }: { recipes: Recipe[] }) {
   const [meal, setMeal] = useState("tutti");
   const [query, setQuery] = useState("");
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [addedId, setAddedId] = useState<string | null>(null);
+  const [addError, setAddError] = useState<string | null>(null);
+  const [pending, startTransition] = useTransition();
+
+  function handleAddToShoppingList(r: Recipe) {
+    setAddError(null);
+    startTransition(async () => {
+      const result = await addItemsToShoppingList(r.ingredients);
+      if (result?.error) {
+        setAddError(result.error);
+      } else {
+        setAddedId(r.id);
+        setTimeout(() => setAddedId((cur) => (cur === r.id ? null : cur)), 2200);
+      }
+    });
+  }
 
   const filtered = useMemo(() => {
     return recipes.filter((r) => {
@@ -124,6 +141,28 @@ export function RicetteTab({ recipes }: { recipes: Recipe[] }) {
                       <li key={i}>{s}</li>
                     ))}
                   </ol>
+
+                  <button
+                    type="button"
+                    onClick={() => handleAddToShoppingList(r)}
+                    disabled={pending}
+                    className="mt-3.5 flex w-full items-center justify-center gap-1.5 rounded-lg bg-teal px-4 py-2.5 text-xs font-medium text-white transition-colors disabled:opacity-60"
+                  >
+                    {addedId === r.id ? (
+                      <>
+                        <Check size={14} strokeWidth={2.5} />
+                        Aggiunta alla lista della spesa
+                      </>
+                    ) : (
+                      <>
+                        <ShoppingCart size={14} strokeWidth={2.2} />
+                        Aggiungi alla mia lista della spesa
+                      </>
+                    )}
+                  </button>
+                  {addError && addedId !== r.id && (
+                    <p className="mt-2 text-[11px] font-medium text-bad">{addError}</p>
+                  )}
                 </div>
               )}
             </div>
