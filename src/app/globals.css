@@ -145,6 +145,33 @@ button:not(:disabled):not(.no-lift):active {
   animation: fade-in-up 0.35s ease-out both;
 }
 
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spin-slow {
+  animation: spin-slow 18s linear infinite;
+}
+
+@keyframes pulse-soft {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.06);
+  }
+}
+
+.pulse-soft {
+  animation: pulse-soft 2.6s ease-in-out infinite;
+}
+
 /* Scrollable tab/nav strips: keep the swipe, hide the native scrollbar. */
 .no-scrollbar {
   scrollbar-width: none;
@@ -169,7 +196,9 @@ button:not(:disabled):not(.no-lift):active {
 @media (prefers-reduced-motion: reduce) {
   .brand-mark,
   .ambient-blob,
-  .fade-in-up {
+  .fade-in-up,
+  .spin-slow,
+  .pulse-soft {
     animation: none;
   }
   body {
