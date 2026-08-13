@@ -416,6 +416,7 @@ export type Database = {
           name: string
           protein_g: number
           steps: string[]
+          tags: string[]
           time_minutes: number
         }
         Insert: {
@@ -431,6 +432,7 @@ export type Database = {
           name: string
           protein_g: number
           steps?: string[]
+          tags?: string[]
           time_minutes: number
         }
         Update: {
@@ -446,6 +448,7 @@ export type Database = {
           name?: string
           protein_g?: number
           steps?: string[]
+          tags?: string[]
           time_minutes?: number
         }
         Relationships: []

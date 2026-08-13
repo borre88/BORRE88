@@ -21,11 +21,23 @@ const MEAL_LABELS: Record<string, string> = {
   spuntino: "Spuntino",
 };
 
+const TAG_LABELS: Record<string, string> = {
+  vegano: "Vegano",
+  vegetariano: "Vegetariano",
+  senza_lattosio: "Senza lattosio",
+  senza_glutine: "Senza glutine",
+};
+
 export function RicetteTab({ recipes }: { recipes: Recipe[] }) {
   const [goal, setGoal] = useState("tutti");
   const [meal, setMeal] = useState("tutti");
+  const [tags, setTags] = useState<string[]>([]);
   const [query, setQuery] = useState("");
   const [expanded, setExpanded] = useState<string | null>(null);
+
+  function toggleTag(key: string) {
+    setTags((prev) => (prev.includes(key) ? prev.filter((t) => t !== key) : [...prev, key]));
+  }
   const [addedId, setAddedId] = useState<string | null>(null);
   const [addError, setAddError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
@@ -47,10 +59,11 @@ export function RicetteTab({ recipes }: { recipes: Recipe[] }) {
     return recipes.filter((r) => {
       if (goal !== "tutti" && r.goal !== goal) return false;
       if (meal !== "tutti" && r.meal !== meal) return false;
+      if (tags.length > 0 && !tags.every((t) => r.tags.includes(t))) return false;
       if (query && !r.name.toLowerCase().includes(query.toLowerCase())) return false;
       return true;
     });
-  }, [recipes, goal, meal, query]);
+  }, [recipes, goal, meal, tags, query]);
 
   return (
     <div>
@@ -76,12 +89,26 @@ export function RicetteTab({ recipes }: { recipes: Recipe[] }) {
           options={[{ key: "tutti", label: "Tutti" }, ...Object.entries(GOAL_LABELS).map(([key, label]) => ({ key, label }))]}
         />
       </div>
-      <div className="mb-4">
+      <div className="mb-2">
         <ChipGroup
           value={meal}
           onChange={setMeal}
           options={[{ key: "tutti", label: "Tutti i pasti" }, ...Object.entries(MEAL_LABELS).map(([key, label]) => ({ key, label }))]}
         />
+      </div>
+      <div className="mb-4 flex flex-wrap gap-1.5">
+        {Object.entries(TAG_LABELS).map(([key, label]) => (
+          <button
+            key={key}
+            type="button"
+            onClick={() => toggleTag(key)}
+            className={`rounded-full border px-3.5 py-1.5 text-xs font-medium ${
+              tags.includes(key) ? "border-teal bg-teal text-white" : "border-line bg-surface text-ink-soft"
+            }`}
+          >
+            {label}
+          </button>
+        ))}
       </div>
 
       {filtered.length === 0 ? (
@@ -96,9 +123,14 @@ export function RicetteTab({ recipes }: { recipes: Recipe[] }) {
                 className="flex w-full items-start gap-2 px-4 py-3.5 text-left"
               >
                 <div className="flex-1">
-                  <div className="mb-1.5 flex gap-1.5">
+                  <div className="mb-1.5 flex flex-wrap gap-1.5">
                     <Tag>{MEAL_LABELS[r.meal]}</Tag>
                     <Tag muted>{GOAL_LABELS[r.goal]}</Tag>
+                    {r.tags.map((t) => (
+                      <Tag key={t} muted>
+                        {TAG_LABELS[t] ?? t}
+                      </Tag>
+                    ))}
                   </div>
                   <div className="mb-1.5 font-display text-[17px] font-semibold leading-tight">{r.name}</div>
                   <div className="mb-2 flex gap-3">
