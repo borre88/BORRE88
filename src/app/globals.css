@@ -154,6 +154,18 @@ button:not(:disabled):not(.no-lift):active {
   display: none;
 }
 
+/* iOS Safari zooms the whole page in when a focused form field renders below
+   16px. Our inputs use smaller type sizes for the design, so force 16px only
+   while focused on small screens to stop that auto-zoom without changing how
+   the fields look otherwise. */
+@media (max-width: 640px) {
+  input:focus,
+  textarea:focus,
+  select:focus {
+    font-size: 16px !important;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .brand-mark,
   .ambient-blob,
