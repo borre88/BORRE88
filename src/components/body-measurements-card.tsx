@@ -1,6 +1,10 @@
-import { ArrowRight } from "lucide-react";
+"use client";
+
+import { useState } from "react";
+import { ArrowRight, ChevronDown, ChevronUp } from "lucide-react";
 import type { Tables } from "@/lib/database.types";
 import type { Gender } from "@/lib/health-score";
+import { formatWeekLabel } from "@/lib/dates";
 import { Card } from "@/components/ui/Card";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { BodySilhouette } from "@/components/body-silhouette";
@@ -41,14 +45,23 @@ function round1(n: number) {
 }
 
 export function BodyMeasurementsCard({ checkins, gender }: { checkins: Checkin[]; gender: Gender | null }) {
+  const [showHistory, setShowHistory] = useState(false);
   const silhouetteFill = gender === "maschio" ? "fill-teal" : "fill-teal/50";
   const sorted = [...checkins].sort((a, b) => a.week_start.localeCompare(b.week_start));
   if (sorted.length === 0) return null;
 
-  const first = sorted[0];
-
+  // Iniziale = il primo valore mai inserito per quel campo specifico (non per forza
+  // dalla prima rilevazione in assoluto, dato che il cliente inserisce solo alcune
+  // misure a settimana). Ultimo = il valore più recente per quel campo.
   const rows = BODY_MEASUREMENT_FIELDS.map((f) => {
-    const iniziale = first[f.key];
+    let iniziale: number | null = null;
+    for (let i = 0; i < sorted.length; i++) {
+      const v = sorted[i][f.key];
+      if (v !== null && v !== undefined) {
+        iniziale = v;
+        break;
+      }
+    }
     let ultimo: number | null = null;
     for (let i = sorted.length - 1; i >= 0; i--) {
       const v = sorted[i][f.key];
@@ -57,8 +70,8 @@ export function BodyMeasurementsCard({ checkins, gender }: { checkins: Checkin[]
         break;
       }
     }
-    const diff = iniziale !== null && iniziale !== undefined && ultimo !== null ? round1(ultimo - iniziale) : null;
-    return { ...f, iniziale: iniziale ?? null, ultimo, diff };
+    const diff = iniziale !== null && ultimo !== null ? round1(ultimo - iniziale) : null;
+    return { ...f, iniziale, ultimo, diff };
   }).filter((r) => r.iniziale !== null || r.ultimo !== null);
 
   if (rows.length === 0) {
@@ -79,6 +92,9 @@ export function BodyMeasurementsCard({ checkins, gender }: { checkins: Checkin[]
 
   const totale = rows.reduce((sum, r) => sum + (r.diff ?? 0), 0);
   const hasTotale = rows.some((r) => r.diff !== null);
+
+  const historyRows = sorted.filter((c) => BODY_MEASUREMENT_FIELDS.some((f) => c[f.key] !== null)).reverse();
+  const historyFields = BODY_MEASUREMENT_FIELDS.filter((f) => historyRows.some((c) => c[f.key] !== null));
 
   return (
     <Card className="mb-5 px-4 pb-2 pt-4">
@@ -137,6 +153,55 @@ export function BodyMeasurementsCard({ checkins, gender }: { checkins: Checkin[]
             {totale > 0 ? "+" : ""}
             {round1(totale)}cm
           </span>
+        </div>
+      )}
+
+      {historyRows.length > 0 && (
+        <div className="border-t border-line px-2.5 py-2.5">
+          <button
+            type="button"
+            onClick={() => setShowHistory((v) => !v)}
+            className="no-lift flex w-full items-center justify-between text-[11.5px] font-medium text-ink-soft"
+          >
+            <span>Storico misurazioni ({historyRows.length})</span>
+            {showHistory ? <ChevronUp size={14} strokeWidth={2.2} /> : <ChevronDown size={14} strokeWidth={2.2} />}
+          </button>
+
+          {showHistory && (
+            <div className="mt-2.5 -mx-2.5 overflow-x-auto">
+              <table className="w-full border-collapse text-[12px]" style={{ minWidth: historyFields.length * 76 + 90 }}>
+                <thead>
+                  <tr>
+                    <th className="whitespace-nowrap px-2.5 py-1.5 text-left text-[10px] font-semibold tracking-wide text-ink-faint">
+                      Settimana
+                    </th>
+                    {historyFields.map((f) => (
+                      <th
+                        key={f.key}
+                        className="whitespace-nowrap px-2.5 py-1.5 text-left text-[10px] font-semibold tracking-wide text-ink-faint"
+                      >
+                        {f.label}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {historyRows.map((c) => (
+                    <tr key={c.id}>
+                      <td className="whitespace-nowrap border-t border-line px-2.5 py-2 font-medium">
+                        {formatWeekLabel(c.week_start)}
+                      </td>
+                      {historyFields.map((f) => (
+                        <td key={f.key} className="whitespace-nowrap border-t border-line px-2.5 py-2 font-display text-ink-soft">
+                          {c[f.key] !== null ? `${c[f.key]}cm` : "—"}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       )}
     </Card>

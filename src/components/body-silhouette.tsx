@@ -18,6 +18,8 @@ function smoothClosedPath(points: Point[]): string {
   return d.join(" ");
 }
 
+const mirror = (points: Point[]): Point[] => points.map(([x, y]) => [100 - x, y]);
+
 // Bob-length hair, wider at ear level and tapering back in toward the neck.
 const HAIR_OUTLINE: Point[] = [
   [50, 2],
@@ -34,6 +36,91 @@ const HAIR_OUTLINE: Point[] = [
   [36, 6],
 ];
 
+const TORSO = {
+  maschio: [
+    [24, 42],
+    [19, 55],
+    [21, 72],
+    [27, 95],
+    [29, 115],
+    [31, 148],
+    [69, 148],
+    [71, 115],
+    [73, 95],
+    [79, 72],
+    [81, 55],
+    [76, 42],
+    [50, 36],
+  ] as Point[],
+  femmina: [
+    [28, 44],
+    [23, 58],
+    [24, 72],
+    [28, 98],
+    [24, 118],
+    [25, 148],
+    [75, 148],
+    [76, 118],
+    [72, 98],
+    [76, 72],
+    [77, 58],
+    [72, 44],
+    [50, 38],
+  ] as Point[],
+};
+
+const ARM_LEFT = {
+  maschio: [
+    [22, 44],
+    [16, 70],
+    [15, 110],
+    [17, 165],
+    [23, 165],
+    [22, 110],
+    [23, 72],
+    [27, 50],
+  ] as Point[],
+  femmina: [
+    [26, 46],
+    [21, 68],
+    [20, 108],
+    [22, 162],
+    [27, 162],
+    [26, 108],
+    [26, 72],
+    [30, 52],
+  ] as Point[],
+};
+
+const LEG_LEFT = {
+  maschio: [
+    [31, 148],
+    [27, 180],
+    [24, 220],
+    [22, 260],
+    [21, 285],
+    [19, 296],
+    [38, 296],
+    [36, 285],
+    [35, 255],
+    [38, 210],
+    [46, 150],
+  ] as Point[],
+  femmina: [
+    [28, 148],
+    [25, 180],
+    [22, 218],
+    [21, 258],
+    [20, 284],
+    [18, 296],
+    [36, 296],
+    [34, 284],
+    [33, 254],
+    [35, 208],
+    [44, 150],
+  ] as Point[],
+};
+
 export function BodySilhouette({
   gender,
   className,
@@ -42,6 +129,7 @@ export function BodySilhouette({
   className?: string;
 }) {
   const isMale = gender === "maschio";
+  const key = isMale ? "maschio" : "femmina";
 
   return (
     <svg
@@ -55,33 +143,11 @@ export function BodySilhouette({
 
       <path d="M42,28 L58,28 L60,42 L40,42 Z" />
 
-      <path
-        d={
-          isMale
-            ? "M22,44 C18,50 16,56 18,60 C20,72 24,84 26,95 C24,104 26,110 28,118 C29,130 29,140 30,148 L70,148 C71,140 71,130 72,118 C74,110 76,104 74,95 C76,84 80,72 82,60 C84,56 82,50 78,44 C68,37 58,34 50,34 C42,34 32,37 22,44 Z"
-            : "M28,46 C24,51 22,56 24,62 C25,75 27,85 28,95 C22,105 22,112 24,120 C25,132 25,140 26,148 L74,148 C75,140 75,132 76,120 C78,112 78,105 72,95 C73,85 75,75 76,62 C78,56 76,51 72,46 C64,40 56,38 50,38 C44,38 36,40 28,46 Z"
-        }
-      />
-
-      <path d={isMale ? "M20,46 L15,90 L17,168 L23,168 L24,100 L26,58 Z" : "M25,48 L21,92 L23,166 L28,166 L28,100 L29,60 Z"} />
-      <path
-        d={isMale ? "M80,46 L85,90 L83,168 L77,168 L76,100 L74,58 Z" : "M75,48 L79,92 L77,166 L72,166 L72,100 L71,60 Z"}
-      />
-
-      <path
-        d={
-          isMale
-            ? "M30,148 L25,278 L20,296 L38,296 L38,278 L47,150 Z"
-            : "M28,148 L24,276 L19,296 L37,296 L36,276 L45,150 Z"
-        }
-      />
-      <path
-        d={
-          isMale
-            ? "M70,148 L75,278 L80,296 L62,296 L62,278 L53,150 Z"
-            : "M72,148 L76,276 L81,296 L63,296 L64,276 L55,150 Z"
-        }
-      />
+      <path d={smoothClosedPath(TORSO[key])} />
+      <path d={smoothClosedPath(ARM_LEFT[key])} />
+      <path d={smoothClosedPath(mirror(ARM_LEFT[key]))} />
+      <path d={smoothClosedPath(LEG_LEFT[key])} />
+      <path d={smoothClosedPath(mirror(LEG_LEFT[key]))} />
     </svg>
   );
 }
