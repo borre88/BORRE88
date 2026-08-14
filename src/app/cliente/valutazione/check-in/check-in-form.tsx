@@ -1,14 +1,32 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { Fragment, useState, useTransition } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { submitWeeklyCheckin } from "./actions";
 import type { Tables } from "@/lib/database.types";
-import { BODY_MEASUREMENT_FIELDS } from "@/components/body-measurements-card";
+import type { Gender } from "@/lib/health-score";
+import { BODY_MEASUREMENT_FIELDS, type MeasurementKey } from "@/components/body-measurements-card";
+import { BodySilhouette } from "@/components/body-silhouette";
 
 type Checkin = Tables<"weekly_checkins">;
 
-export function CheckinForm({ current }: { current: Checkin | null }) {
+// Coppie sinistra/destra allineate in altezza alla figura: spalle, petto/vita,
+// fianchi/glutei, cosce, polpacci, polsi.
+const MEASUREMENT_ROWS: [MeasurementKey, MeasurementKey][] = [
+  ["braccio_sx_cm", "braccio_dx_cm"],
+  ["petto_cm", "vita_cm"],
+  ["fianchi_cm", "glutei_cm"],
+  ["coscia_sx_cm", "coscia_dx_cm"],
+  ["polpaccio_sx_cm", "polpaccio_dx_cm"],
+  ["polso_sx_cm", "polso_dx_cm"],
+];
+
+const FIELD_LABELS = Object.fromEntries(BODY_MEASUREMENT_FIELDS.map((f) => [f.key, f.label])) as Record<
+  MeasurementKey,
+  string
+>;
+
+export function CheckinForm({ current, gender }: { current: Checkin | null; gender: Gender | null }) {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [pending, startTransition] = useTransition();
@@ -146,22 +164,47 @@ export function CheckinForm({ current }: { current: Checkin | null }) {
       </button>
 
       {showBody && (
-        <div className="mb-3.5 grid grid-cols-2 gap-3">
-          {BODY_MEASUREMENT_FIELDS.map((f) => (
-            <div key={f.key}>
-              <label className="mb-1 block text-xs font-medium text-ink-soft" htmlFor={f.key}>
-                {f.label} (cm)
-              </label>
-              <input
-                id={f.key}
-                name={f.key}
-                type="number"
-                step={0.1}
-                min={0}
-                defaultValue={current?.[f.key] ?? ""}
-                className={inputClass}
-              />
-            </div>
+        <div
+          className="mb-3.5 grid items-center gap-x-3 gap-y-3"
+          style={{ gridTemplateColumns: "1fr auto 1fr" }}
+        >
+          <div
+            className="flex justify-center"
+            style={{ gridColumn: 2, gridRow: `1 / ${MEASUREMENT_ROWS.length + 1}` }}
+          >
+            <BodySilhouette gender={gender} className="h-28 w-[75px] fill-teal-soft" />
+          </div>
+          {MEASUREMENT_ROWS.map(([leftKey, rightKey], i) => (
+            <Fragment key={leftKey}>
+              <div style={{ gridColumn: 1, gridRow: i + 1 }}>
+                <label className="mb-1 block text-[11px] font-medium leading-tight text-ink-soft" htmlFor={leftKey}>
+                  {FIELD_LABELS[leftKey]} (cm)
+                </label>
+                <input
+                  id={leftKey}
+                  name={leftKey}
+                  type="number"
+                  step={0.1}
+                  min={0}
+                  defaultValue={current?.[leftKey] ?? ""}
+                  className={inputClass}
+                />
+              </div>
+              <div style={{ gridColumn: 3, gridRow: i + 1 }}>
+                <label className="mb-1 block text-[11px] font-medium leading-tight text-ink-soft" htmlFor={rightKey}>
+                  {FIELD_LABELS[rightKey]} (cm)
+                </label>
+                <input
+                  id={rightKey}
+                  name={rightKey}
+                  type="number"
+                  step={0.1}
+                  min={0}
+                  defaultValue={current?.[rightKey] ?? ""}
+                  className={inputClass}
+                />
+              </div>
+            </Fragment>
           ))}
         </div>
       )}

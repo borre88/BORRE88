@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { getSession } from "@/lib/auth";
 import { getMondayISO } from "@/lib/dates";
+import type { Gender } from "@/lib/health-score";
 import { SectionIntro } from "@/components/ui";
 import { WeeklyCheckinsTable } from "@/components/weekly-checkins-table";
 import { CheckinForm } from "./check-in-form";
@@ -11,7 +12,7 @@ export default async function CheckinPage() {
 
   const { data: client } = await supabase
     .from("clients")
-    .select("id")
+    .select("id, gender")
     .eq("profile_id", session!.user.id)
     .single();
 
@@ -51,7 +52,7 @@ export default async function CheckinPage() {
         title="Check settimanale"
         subtitle="Un aggiornamento rapido da mandare al tuo coach ogni settimana."
       />
-      <CheckinForm current={current ?? null} />
+      <CheckinForm current={current ?? null} gender={(client.gender as Gender | null) ?? null} />
 
       {history && history.length > 0 && (
         <div className="mt-5">
