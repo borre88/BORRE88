@@ -165,14 +165,17 @@ export function CheckinForm({ current, gender }: { current: Checkin | null; gend
 
       {showBody && (
         <div
-          className="mb-3.5 grid items-center gap-x-3 gap-y-3"
-          style={{ gridTemplateColumns: "1fr auto 1fr" }}
+          className="mb-3.5 grid items-center gap-x-2 gap-y-3"
+          style={{ gridTemplateColumns: "1fr 14px auto 14px 1fr" }}
         >
           <div
             className="flex justify-center"
-            style={{ gridColumn: 2, gridRow: `1 / ${MEASUREMENT_ROWS.length + 1}` }}
+            style={{ gridColumn: 3, gridRow: `1 / ${MEASUREMENT_ROWS.length + 1}` }}
           >
-            <BodySilhouette gender={gender} className="h-28 w-[75px] fill-teal-soft" />
+            <BodySilhouette
+              gender={gender}
+              className={`h-64 w-[85px] ${gender === "maschio" ? "fill-teal" : "fill-teal/50"}`}
+            />
           </div>
           {MEASUREMENT_ROWS.map(([leftKey, rightKey], i) => (
             <Fragment key={leftKey}>
@@ -190,7 +193,9 @@ export function CheckinForm({ current, gender }: { current: Checkin | null; gend
                   className={inputClass}
                 />
               </div>
-              <div style={{ gridColumn: 3, gridRow: i + 1 }}>
+              <div className="self-center border-t border-dashed border-line" style={{ gridColumn: 2, gridRow: i + 1 }} />
+              <div className="self-center border-t border-dashed border-line" style={{ gridColumn: 4, gridRow: i + 1 }} />
+              <div style={{ gridColumn: 5, gridRow: i + 1 }}>
                 <label className="mb-1 block text-[11px] font-medium leading-tight text-ink-soft" htmlFor={rightKey}>
                   {FIELD_LABELS[rightKey]} (cm)
                 </label>

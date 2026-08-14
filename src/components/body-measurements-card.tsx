@@ -41,6 +41,7 @@ function round1(n: number) {
 }
 
 export function BodyMeasurementsCard({ checkins, gender }: { checkins: Checkin[]; gender: Gender | null }) {
+  const silhouetteFill = gender === "maschio" ? "fill-teal" : "fill-teal/50";
   const sorted = [...checkins].sort((a, b) => a.week_start.localeCompare(b.week_start));
   if (sorted.length === 0) return null;
 
@@ -64,7 +65,7 @@ export function BodyMeasurementsCard({ checkins, gender }: { checkins: Checkin[]
     return (
       <Card className="mb-5 px-4 py-3.5">
         <div className="flex items-center gap-3">
-          <BodySilhouette gender={gender} className="h-14 w-8 shrink-0 fill-teal" />
+          <BodySilhouette gender={gender} className={`h-16 w-6 shrink-0 ${silhouetteFill}`} />
           <div>
             <SectionLabel>Misure corpo</SectionLabel>
             <p className="mt-1 text-[12px] text-ink-faint">
@@ -82,7 +83,7 @@ export function BodyMeasurementsCard({ checkins, gender }: { checkins: Checkin[]
   return (
     <Card className="mb-5 px-4 pb-2 pt-4">
       <div className="mb-3 flex items-center gap-3">
-        <BodySilhouette gender={gender} className="h-14 w-8 shrink-0 fill-teal" />
+        <BodySilhouette gender={gender} className={`h-16 w-6 shrink-0 ${silhouetteFill}`} />
         <div>
           <SectionLabel>Misure corpo</SectionLabel>
           <p className="mt-0.5 text-[11.5px] text-ink-faint">Confronto tra la prima misurazione e le più recenti.</p>
