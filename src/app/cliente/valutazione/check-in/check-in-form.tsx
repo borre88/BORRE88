@@ -5,7 +5,7 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import { submitWeeklyCheckin } from "./actions";
 import type { Tables } from "@/lib/database.types";
 import type { Gender } from "@/lib/health-score";
-import { BODY_MEASUREMENT_FIELDS, type MeasurementKey } from "@/components/body-measurements-card";
+import { BODY_MEASUREMENT_FIELDS, type MeasurementKey } from "@/lib/body-measurements";
 import { BodySilhouette } from "@/components/body-silhouette";
 
 type Checkin = Tables<"weekly_checkins">;

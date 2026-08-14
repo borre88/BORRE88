@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getMondayISO } from "@/lib/dates";
-import { BODY_MEASUREMENT_FIELDS } from "@/components/body-measurements-card";
+import { BODY_MEASUREMENT_FIELDS } from "@/lib/body-measurements";
 
 export interface ActionState {
   error?: string;

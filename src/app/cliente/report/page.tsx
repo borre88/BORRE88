@@ -3,6 +3,7 @@ import { getSession } from "@/lib/auth";
 import { calculateAge, type Gender } from "@/lib/health-score";
 import { computeFullReport } from "@/lib/health-report";
 import { HealthReportView } from "@/components/health-report-view";
+import { BodyMeasurementsSummary } from "@/components/body-measurements-summary";
 import { PrintButton } from "@/components/print-button";
 import { ReportHeader } from "@/components/report-header";
 import { ReportFooter } from "@/components/report-footer";
@@ -35,6 +36,12 @@ export default async function ClientReportPage() {
     .eq("client_id", client.id)
     .order("date", { ascending: true });
 
+  const { data: weeklyCheckins } = await supabase
+    .from("weekly_checkins")
+    .select("*")
+    .eq("client_id", client.id)
+    .order("week_start", { ascending: true });
+
   const entries = measurements ?? [];
   const latestMeasurement = entries.length ? entries[entries.length - 1] : null;
   const age = client.date_of_birth ? calculateAge(client.date_of_birth) : null;
@@ -53,6 +60,7 @@ export default async function ClientReportPage() {
         reportDate={latestMeasurement?.date ?? null}
         areas={areas}
       />
+      <BodyMeasurementsSummary checkins={weeklyCheckins ?? []} gender={gender} />
       <ReportFooter />
     </div>
   );

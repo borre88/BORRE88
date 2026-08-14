@@ -5,74 +5,20 @@ import { ArrowRight, ChevronDown, ChevronUp } from "lucide-react";
 import type { Tables } from "@/lib/database.types";
 import type { Gender } from "@/lib/health-score";
 import { formatWeekLabel } from "@/lib/dates";
+import { BODY_MEASUREMENT_FIELDS, computeBodyMeasurements } from "@/lib/body-measurements";
 import { Card } from "@/components/ui/Card";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { BodySilhouette } from "@/components/body-silhouette";
 
 type Checkin = Tables<"weekly_checkins">;
 
-export type MeasurementKey =
-  | "braccio_sx_cm"
-  | "braccio_dx_cm"
-  | "petto_cm"
-  | "vita_cm"
-  | "fianchi_cm"
-  | "glutei_cm"
-  | "coscia_sx_cm"
-  | "coscia_dx_cm"
-  | "polpaccio_sx_cm"
-  | "polpaccio_dx_cm"
-  | "polso_sx_cm"
-  | "polso_dx_cm";
-
-export const BODY_MEASUREMENT_FIELDS: { key: MeasurementKey; label: string }[] = [
-  { key: "braccio_sx_cm", label: "Braccio SX" },
-  { key: "braccio_dx_cm", label: "Braccio DX" },
-  { key: "petto_cm", label: "Petto" },
-  { key: "vita_cm", label: "Vita" },
-  { key: "fianchi_cm", label: "Fianchi" },
-  { key: "glutei_cm", label: "Glutei" },
-  { key: "coscia_sx_cm", label: "Coscia SX" },
-  { key: "coscia_dx_cm", label: "Coscia DX" },
-  { key: "polpaccio_sx_cm", label: "Polpaccio SX" },
-  { key: "polpaccio_dx_cm", label: "Polpaccio DX" },
-  { key: "polso_sx_cm", label: "Polso SX" },
-  { key: "polso_dx_cm", label: "Polso DX" },
-];
-
-function round1(n: number) {
-  return Math.round(n * 10) / 10;
-}
-
 export function BodyMeasurementsCard({ checkins, gender }: { checkins: Checkin[]; gender: Gender | null }) {
   const [showHistory, setShowHistory] = useState(false);
   const silhouetteFill = gender === "maschio" ? "fill-teal" : "fill-teal/50";
-  const sorted = [...checkins].sort((a, b) => a.week_start.localeCompare(b.week_start));
-  if (sorted.length === 0) return null;
 
-  // Iniziale = il primo valore mai inserito per quel campo specifico (non per forza
-  // dalla prima rilevazione in assoluto, dato che il cliente inserisce solo alcune
-  // misure a settimana). Ultimo = il valore più recente per quel campo.
-  const rows = BODY_MEASUREMENT_FIELDS.map((f) => {
-    let iniziale: number | null = null;
-    for (let i = 0; i < sorted.length; i++) {
-      const v = sorted[i][f.key];
-      if (v !== null && v !== undefined) {
-        iniziale = v;
-        break;
-      }
-    }
-    let ultimo: number | null = null;
-    for (let i = sorted.length - 1; i >= 0; i--) {
-      const v = sorted[i][f.key];
-      if (v !== null && v !== undefined) {
-        ultimo = v;
-        break;
-      }
-    }
-    const diff = iniziale !== null && ultimo !== null ? round1(ultimo - iniziale) : null;
-    return { ...f, iniziale, ultimo, diff };
-  }).filter((r) => r.iniziale !== null || r.ultimo !== null);
+  if (checkins.length === 0) return null;
+
+  const { sorted, rows, totale, hasTotale } = computeBodyMeasurements(checkins);
 
   if (rows.length === 0) {
     return (
@@ -89,9 +35,6 @@ export function BodyMeasurementsCard({ checkins, gender }: { checkins: Checkin[]
       </Card>
     );
   }
-
-  const totale = rows.reduce((sum, r) => sum + (r.diff ?? 0), 0);
-  const hasTotale = rows.some((r) => r.diff !== null);
 
   const historyRows = sorted.filter((c) => BODY_MEASUREMENT_FIELDS.some((f) => c[f.key] !== null)).reverse();
   const historyFields = BODY_MEASUREMENT_FIELDS.filter((f) => historyRows.some((c) => c[f.key] !== null));
@@ -151,7 +94,7 @@ export function BodyMeasurementsCard({ checkins, gender }: { checkins: Checkin[]
           <span className="text-[10.5px] font-semibold uppercase tracking-wide text-ink-faint">Totale</span>
           <span className="font-display text-sm font-semibold">
             {totale > 0 ? "+" : ""}
-            {round1(totale)}cm
+            {totale}cm
           </span>
         </div>
       )}
