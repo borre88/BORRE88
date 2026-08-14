@@ -1,8 +1,10 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import { submitWeeklyCheckin } from "./actions";
 import type { Tables } from "@/lib/database.types";
+import { BODY_MEASUREMENT_FIELDS } from "@/components/body-measurements-card";
 
 type Checkin = Tables<"weekly_checkins">;
 
@@ -10,6 +12,9 @@ export function CheckinForm({ current }: { current: Checkin | null }) {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [pending, startTransition] = useTransition();
+  const [showBody, setShowBody] = useState(
+    () => current !== null && BODY_MEASUREMENT_FIELDS.some((f) => current[f.key] !== null)
+  );
 
   function action(formData: FormData) {
     startTransition(async () => {
@@ -130,6 +135,36 @@ export function CheckinForm({ current }: { current: Checkin | null }) {
           />
         </div>
       </div>
+
+      <button
+        type="button"
+        onClick={() => setShowBody((v) => !v)}
+        className="mb-3.5 flex w-full items-center justify-between rounded-lg border border-line bg-cream px-3 py-2 text-xs font-medium text-ink-soft"
+      >
+        <span>Misure corpo (facoltativo — anche solo alcune)</span>
+        {showBody ? <ChevronUp size={14} strokeWidth={2.2} /> : <ChevronDown size={14} strokeWidth={2.2} />}
+      </button>
+
+      {showBody && (
+        <div className="mb-3.5 grid grid-cols-2 gap-3">
+          {BODY_MEASUREMENT_FIELDS.map((f) => (
+            <div key={f.key}>
+              <label className="mb-1 block text-xs font-medium text-ink-soft" htmlFor={f.key}>
+                {f.label} (cm)
+              </label>
+              <input
+                id={f.key}
+                name={f.key}
+                type="number"
+                step={0.1}
+                min={0}
+                defaultValue={current?.[f.key] ?? ""}
+                className={inputClass}
+              />
+            </div>
+          ))}
+        </div>
+      )}
 
       <label className="mb-1 block text-xs font-medium text-ink-soft" htmlFor="notes">
         Altro da segnalare

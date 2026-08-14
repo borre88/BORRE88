@@ -12,6 +12,7 @@ import { HealthDataView } from "@/components/health-data-view";
 import { HealthScoreCard, type HealthArea } from "@/components/health-score-card";
 import { HealthReportView } from "@/components/health-report-view";
 import { CardioStats, AnthropometryStats } from "@/components/computed-stats";
+import { BodyMeasurementsCard } from "@/components/body-measurements-card";
 import { SectionIntro } from "@/components/ui";
 
 export default async function SalutePage() {
@@ -45,6 +46,12 @@ export default async function SalutePage() {
     .eq("client_id", client.id)
     .order("date", { ascending: true });
 
+  const { data: weeklyCheckins } = await supabase
+    .from("weekly_checkins")
+    .select("*")
+    .eq("client_id", client.id)
+    .order("week_start", { ascending: true });
+
   const entries = measurements ?? [];
   const latest = computeLatestByMetric(entries);
   const latestMeasurement = entries.length ? entries[entries.length - 1] : null;
@@ -59,7 +66,10 @@ export default async function SalutePage() {
         <p className="mb-4 text-[12.5px] text-ink-faint">{group.description}</p>
         {group.key === "cardio" && <CardioStats measurement={latestMeasurement} age={age} />}
         {group.key === "antropometria" && (
-          <AnthropometryStats measurement={latestMeasurement} age={age} gender={gender} />
+          <>
+            <AnthropometryStats measurement={latestMeasurement} age={age} gender={gender} />
+            <BodyMeasurementsCard checkins={weeklyCheckins ?? []} gender={gender} />
+          </>
         )}
         <HealthScoreCard
           area={group.key as HealthArea}

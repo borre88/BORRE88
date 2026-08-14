@@ -12,6 +12,7 @@ import { AreaTabs } from "@/components/area-tabs";
 import { HealthScoreCard, type HealthArea } from "@/components/health-score-card";
 import { HealthReportView } from "@/components/health-report-view";
 import { CardioStats, AnthropometryStats } from "@/components/computed-stats";
+import { BodyMeasurementsCard } from "@/components/body-measurements-card";
 import { WeeklyCheckinsTable } from "@/components/weekly-checkins-table";
 import { AddMeasurementModal } from "./add-measurement-modal";
 import { DeleteMeasurementButton } from "./delete-measurement-button";
@@ -66,6 +67,12 @@ export default async function ClientDetailPage({
     .order("week_start", { ascending: false })
     .limit(8);
 
+  const { data: allWeeklyCheckins } = await supabase
+    .from("weekly_checkins")
+    .select("*")
+    .eq("client_id", clientId)
+    .order("week_start", { ascending: true });
+
   const { data: deliveryRequests } = await supabase
     .from("delivery_requests")
     .select("*")
@@ -87,7 +94,10 @@ export default async function ClientDetailPage({
         <p className="mb-4 text-[12.5px] text-ink-faint">{group.description}</p>
         {group.key === "cardio" && <CardioStats measurement={latestMeasurement} age={age} />}
         {group.key === "antropometria" && (
-          <AnthropometryStats measurement={latestMeasurement} age={age} gender={gender} />
+          <>
+            <AnthropometryStats measurement={latestMeasurement} age={age} gender={gender} />
+            <BodyMeasurementsCard checkins={allWeeklyCheckins ?? []} gender={gender} />
+          </>
         )}
         <HealthScoreCard
           area={group.key as HealthArea}

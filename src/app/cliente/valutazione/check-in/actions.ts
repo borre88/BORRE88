@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getMondayISO } from "@/lib/dates";
+import { BODY_MEASUREMENT_FIELDS } from "@/components/body-measurements-card";
 
 export interface ActionState {
   error?: string;
@@ -38,6 +39,8 @@ export async function submitWeeklyCheckin(
   const notes = String(formData.get("notes") ?? "").trim() || null;
   const weekStart = getMondayISO(new Date());
 
+  const bodyMeasurements = Object.fromEntries(BODY_MEASUREMENT_FIELDS.map((f) => [f.key, numeric(f.key)]));
+
   const { error } = await supabase.from("weekly_checkins").upsert(
     {
       client_id: client.id,
@@ -50,6 +53,7 @@ export async function submitWeeklyCheckin(
       energy: numeric("energy"),
       diet_slips: numeric("diet_slips"),
       notes,
+      ...bodyMeasurements,
     },
     { onConflict: "client_id,week_start" }
   );

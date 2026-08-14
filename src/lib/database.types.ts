@@ -487,46 +487,82 @@ export type Database = {
       }
       weekly_checkins: {
         Row: {
+          braccio_dx_cm: number | null
+          braccio_sx_cm: number | null
           client_id: string
+          coscia_dx_cm: number | null
+          coscia_sx_cm: number | null
           created_at: string
           diet_slips: number | null
           energy: number | null
+          fianchi_cm: number | null
+          glutei_cm: number | null
           id: string
           notes: string | null
+          petto_cm: number | null
+          polpaccio_dx_cm: number | null
+          polpaccio_sx_cm: number | null
+          polso_dx_cm: number | null
+          polso_sx_cm: number | null
           sleep_hours: number | null
           stress_level: number | null
           tiredness: number | null
           viewed_by_trainer_at: string | null
+          vita_cm: number | null
           week_start: string
           weight_kg: number | null
           workouts_count: number | null
         }
         Insert: {
+          braccio_dx_cm?: number | null
+          braccio_sx_cm?: number | null
           client_id: string
+          coscia_dx_cm?: number | null
+          coscia_sx_cm?: number | null
           created_at?: string
           diet_slips?: number | null
           energy?: number | null
+          fianchi_cm?: number | null
+          glutei_cm?: number | null
           id?: string
           notes?: string | null
+          petto_cm?: number | null
+          polpaccio_dx_cm?: number | null
+          polpaccio_sx_cm?: number | null
+          polso_dx_cm?: number | null
+          polso_sx_cm?: number | null
           sleep_hours?: number | null
           stress_level?: number | null
           tiredness?: number | null
           viewed_by_trainer_at?: string | null
+          vita_cm?: number | null
           week_start: string
           weight_kg?: number | null
           workouts_count?: number | null
         }
         Update: {
+          braccio_dx_cm?: number | null
+          braccio_sx_cm?: number | null
           client_id?: string
+          coscia_dx_cm?: number | null
+          coscia_sx_cm?: number | null
           created_at?: string
           diet_slips?: number | null
           energy?: number | null
+          fianchi_cm?: number | null
+          glutei_cm?: number | null
           id?: string
           notes?: string | null
+          petto_cm?: number | null
+          polpaccio_dx_cm?: number | null
+          polpaccio_sx_cm?: number | null
+          polso_dx_cm?: number | null
+          polso_sx_cm?: number | null
           sleep_hours?: number | null
           stress_level?: number | null
           tiredness?: number | null
           viewed_by_trainer_at?: string | null
+          vita_cm?: number | null
           week_start?: string
           weight_kg?: number | null
           workouts_count?: number | null
