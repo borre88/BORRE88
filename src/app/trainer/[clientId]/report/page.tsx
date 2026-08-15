@@ -53,6 +53,7 @@ export default async function ClientReportPage({
         clientName={client.full_name}
         reportDate={latestMeasurement?.date ?? null}
         areas={areas}
+        forcePrintColors
       />
       <BodyMeasurementsSummary checkins={weeklyCheckins ?? []} gender={gender} />
       <ReportFooter />

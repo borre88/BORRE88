@@ -13,10 +13,13 @@ export function HealthReportView({
   clientName,
   reportDate,
   areas,
+  forcePrintColors = false,
 }: {
   clientName: string;
   reportDate: string | null;
   areas: AreaScore[];
+  /** Forza colori fissi nel radar chart, per la stampa/PDF (vedi ReportRadarChart). */
+  forcePrintColors?: boolean;
 }) {
   const { strongAreas, weakAreas, averageScore } = synthesizeReport(areas);
 
@@ -47,7 +50,12 @@ export function HealthReportView({
       )}
 
       <div className="mb-6 rounded-xl border border-line bg-surface px-4 py-3">
-        <ReportRadarChart areas={areas} />
+        <ReportRadarChart
+          areas={areas}
+          gridColor={forcePrintColors ? "#d8d3c7" : undefined}
+          labelColor={forcePrintColors ? "#1c1c1a" : undefined}
+          areaColor={forcePrintColors ? "#14564a" : undefined}
+        />
       </div>
 
       {(strongAreas.length > 0 || weakAreas.length > 0) && (
