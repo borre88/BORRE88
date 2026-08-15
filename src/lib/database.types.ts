@@ -172,30 +172,48 @@ export type Database = {
         Row: {
           client_id: string
           created_at: string
+          deliveries_per_week: number | null
+          delivery_area: string | null
           goal: string | null
           id: string
+          meals: string[] | null
+          meals_per_week: number | null
           notes: string | null
           preferences: string | null
+          preferred_days: string[] | null
+          preferred_time: string | null
           status: string
           viewed_by_trainer_at: string | null
         }
         Insert: {
           client_id: string
           created_at?: string
+          deliveries_per_week?: number | null
+          delivery_area?: string | null
           goal?: string | null
           id?: string
+          meals?: string[] | null
+          meals_per_week?: number | null
           notes?: string | null
           preferences?: string | null
+          preferred_days?: string[] | null
+          preferred_time?: string | null
           status?: string
           viewed_by_trainer_at?: string | null
         }
         Update: {
           client_id?: string
           created_at?: string
+          deliveries_per_week?: number | null
+          delivery_area?: string | null
           goal?: string | null
           id?: string
+          meals?: string[] | null
+          meals_per_week?: number | null
           notes?: string | null
           preferences?: string | null
+          preferred_days?: string[] | null
+          preferred_time?: string | null
           status?: string
           viewed_by_trainer_at?: string | null
         }

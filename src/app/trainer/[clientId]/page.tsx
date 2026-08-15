@@ -33,6 +33,29 @@ const DELIVERY_STATUS_LABELS: Record<string, string> = {
   conclusa: "Conclusa",
 };
 
+const DELIVERY_MEAL_LABELS: Record<string, string> = {
+  colazione: "Colazione",
+  spuntini: "Spuntini",
+  pranzo: "Pranzo",
+  cena: "Cena",
+};
+
+const DELIVERY_AREA_LABELS: Record<string, string> = {
+  milano: "Milano",
+  hinterland: "Hinterland",
+  provincia: "Provincia di Milano",
+};
+
+const DELIVERY_DAY_LABELS: Record<string, string> = {
+  lun: "Lun",
+  mar: "Mar",
+  mer: "Mer",
+  gio: "Gio",
+  ven: "Ven",
+  sab: "Sab",
+  dom: "Dom",
+};
+
 export default async function ClientDetailPage({
   params,
 }: {
@@ -222,7 +245,30 @@ export default async function ClientDetailPage({
                   </span>
                 </div>
                 {r.preferences && <p className="mt-1 text-[12px] text-ink-soft">Gusti: {r.preferences}</p>}
-                {r.notes && <p className="mt-0.5 text-[12px] text-ink-soft">Note: {r.notes}</p>}
+                {r.meals && r.meals.length > 0 && (
+                  <p className="mt-0.5 text-[12px] text-ink-soft">
+                    Pasti interessati: {r.meals.map((m) => DELIVERY_MEAL_LABELS[m] ?? m).join(", ")}
+                  </p>
+                )}
+                {(r.meals_per_week || r.deliveries_per_week) && (
+                  <p className="mt-0.5 text-[12px] text-ink-soft">
+                    {r.meals_per_week && `${r.meals_per_week} pasti/settimana`}
+                    {r.meals_per_week && r.deliveries_per_week && " · "}
+                    {r.deliveries_per_week && `${r.deliveries_per_week} consegne/settimana`}
+                  </p>
+                )}
+                {r.delivery_area && (
+                  <p className="mt-0.5 text-[12px] text-ink-soft">
+                    Area: {DELIVERY_AREA_LABELS[r.delivery_area] ?? r.delivery_area}
+                  </p>
+                )}
+                {r.preferred_days && r.preferred_days.length > 0 && (
+                  <p className="mt-0.5 text-[12px] text-ink-soft">
+                    Giorni preferiti: {r.preferred_days.map((d) => DELIVERY_DAY_LABELS[d] ?? d).join(", ")}
+                  </p>
+                )}
+                {r.preferred_time && <p className="mt-0.5 text-[12px] text-ink-soft">Orari preferiti: {r.preferred_time}</p>}
+                {r.notes && <p className="mt-0.5 text-[12px] text-ink-soft">Altre richieste: {r.notes}</p>}
                 {r.status !== "conclusa" && (
                   <div className="mt-2">
                     <MarkDeliveryFulfilledButton clientId={clientId} requestId={r.id} />

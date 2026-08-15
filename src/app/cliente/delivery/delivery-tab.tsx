@@ -24,6 +24,29 @@ const STATUS_LABELS: Record<string, string> = {
   conclusa: "Conclusa",
 };
 
+const MEAL_OPTIONS: { key: string; label: string }[] = [
+  { key: "colazione", label: "Colazione" },
+  { key: "spuntini", label: "Spuntini" },
+  { key: "pranzo", label: "Pranzo" },
+  { key: "cena", label: "Cena" },
+];
+
+const DAY_OPTIONS: { key: string; label: string }[] = [
+  { key: "lun", label: "Lun" },
+  { key: "mar", label: "Mar" },
+  { key: "mer", label: "Mer" },
+  { key: "gio", label: "Gio" },
+  { key: "ven", label: "Ven" },
+  { key: "sab", label: "Sab" },
+  { key: "dom", label: "Dom" },
+];
+
+const AREA_LABELS: Record<string, string> = {
+  milano: "Milano",
+  hinterland: "Hinterland",
+  provincia: "Provincia di Milano",
+};
+
 const HERO_PILLS = ["100% su misura", "Sottovuoto", "Pronto in freezer"];
 
 const STEPS = [
@@ -219,14 +242,109 @@ export function DeliveryTab({ hasClient, latestRequest }: { hasClient: boolean; 
             />
           </div>
 
+          <div className="mb-3.5">
+            <span className="mb-1.5 block text-xs font-medium text-ink-soft">Pasti interessati</span>
+            <div className="flex flex-wrap gap-1.5">
+              {MEAL_OPTIONS.map((m) => (
+                <label
+                  key={m.key}
+                  className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-line bg-cream px-3 py-1.5 text-[12.5px] has-[:checked]:border-teal has-[:checked]:bg-teal-soft has-[:checked]:text-teal"
+                >
+                  <input type="checkbox" name="meals" value={m.key} className="accent-teal" />
+                  {m.label}
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div className="mb-3.5 grid grid-cols-2 gap-3">
+            <div>
+              <label className="mb-1 block text-xs font-medium text-ink-soft" htmlFor="meals_per_week">
+                Pasti a settimana
+              </label>
+              <input
+                id="meals_per_week"
+                name="meals_per_week"
+                type="number"
+                min={1}
+                inputMode="numeric"
+                placeholder="Es. 10"
+                className="w-full rounded-md border border-line bg-cream px-2.5 py-1.5 text-sm outline-none focus:border-teal"
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-medium text-ink-soft" htmlFor="deliveries_per_week">
+                Consegne a settimana
+              </label>
+              <input
+                id="deliveries_per_week"
+                name="deliveries_per_week"
+                type="number"
+                min={1}
+                inputMode="numeric"
+                placeholder="Es. 2"
+                className="w-full rounded-md border border-line bg-cream px-2.5 py-1.5 text-sm outline-none focus:border-teal"
+              />
+            </div>
+          </div>
+
+          <div className="mb-3.5">
+            <label className="mb-1 block text-xs font-medium text-ink-soft" htmlFor="delivery_area">
+              Area di consegna
+            </label>
+            <select
+              id="delivery_area"
+              name="delivery_area"
+              defaultValue=""
+              className="w-full rounded-md border border-line bg-cream px-2.5 py-1.5 text-sm outline-none focus:border-teal"
+            >
+              <option value="" disabled>
+                Scegli un&apos;area
+              </option>
+              {Object.entries(AREA_LABELS).map(([key, label]) => (
+                <option key={key} value={key}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="mb-3.5">
+            <span className="mb-1.5 block text-xs font-medium text-ink-soft">Giorni di preferenza</span>
+            <div className="flex flex-wrap gap-1.5">
+              {DAY_OPTIONS.map((d) => (
+                <label
+                  key={d.key}
+                  className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-line bg-cream px-3 py-1.5 text-[12.5px] has-[:checked]:border-teal has-[:checked]:bg-teal-soft has-[:checked]:text-teal"
+                >
+                  <input type="checkbox" name="preferred_days" value={d.key} className="accent-teal" />
+                  {d.label}
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div className="mb-3.5">
+            <label className="mb-1 block text-xs font-medium text-ink-soft" htmlFor="preferred_time">
+              Orari di consegna preferiti
+            </label>
+            <input
+              id="preferred_time"
+              name="preferred_time"
+              type="text"
+              placeholder="Es. dopo le 18:00, weekend mattina…"
+              className="w-full rounded-md border border-line bg-cream px-2.5 py-1.5 text-sm outline-none focus:border-teal"
+            />
+          </div>
+
           <label className="mb-1 block text-xs font-medium text-ink-soft" htmlFor="notes">
-            Altre richieste
+            Altre richieste particolari
           </label>
           <textarea
             id="notes"
             name="notes"
             rows={2}
-            placeholder="Numero di pasti a settimana, frequenza di consegna, altro…"
+            placeholder="Confezionamento, imballaggi, altro…"
             className="w-full rounded-md border border-line bg-cream px-2.5 py-1.5 text-sm outline-none focus:border-teal"
           />
 
