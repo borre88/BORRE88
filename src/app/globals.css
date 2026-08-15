@@ -17,6 +17,7 @@
   --gold-ink: #8a6a1f;
   --positive: #2f6b4f;
   --negative: #9b3226;
+  --chart-grid: #d8d3c7;
 }
 
 :root.dark {
@@ -36,6 +37,7 @@
   --gold-ink: #e3c077;
   --positive: #4ea684;
   --negative: #d9695a;
+  --chart-grid: rgba(245, 243, 239, 0.34);
 }
 
 /* Il report/PDF deve restare leggibile (sfondo chiaro, testo scuro) anche
@@ -59,6 +61,7 @@
   --gold-ink: #8a6a1f;
   --positive: #2f6b4f;
   --negative: #9b3226;
+  --chart-grid: #d8d3c7;
   background: var(--bg);
   color: var(--ink);
 }

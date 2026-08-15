@@ -12,8 +12,8 @@ export function ReportRadarChart({ areas }: { areas: AreaScore[] }) {
   return (
     <ResponsiveContainer width="100%" height={280}>
       <RadarChart data={data} outerRadius="75%">
-        <PolarGrid stroke="var(--color-line)" />
-        <PolarAngleAxis dataKey="label" tick={{ fontSize: 11.5, fill: "var(--color-ink-soft)" }} />
+        <PolarGrid stroke="var(--chart-grid)" />
+        <PolarAngleAxis dataKey="label" tick={{ fontSize: 11.5, fill: "var(--color-ink)" }} />
         <PolarRadiusAxis domain={[0, 20]} tick={false} axisLine={false} tickCount={5} />
         <Radar
           dataKey="score"

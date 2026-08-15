@@ -16,16 +16,16 @@ export function MetricChart({ metric, data }: { metric: MetricDef; data: { date:
       ) : (
         <ResponsiveContainer width="100%" height={140}>
           <LineChart data={data} margin={{ top: 8, right: 12, left: -12, bottom: 0 }}>
-            <CartesianGrid stroke="var(--color-line)" vertical={false} />
+            <CartesianGrid stroke="var(--chart-grid)" vertical={false} />
             <XAxis
               dataKey="date"
               tickFormatter={formatDateIt}
-              tick={{ fontSize: 10, fill: "var(--color-ink-faint)" }}
-              axisLine={{ stroke: "var(--color-line)" }}
+              tick={{ fontSize: 10, fill: "var(--color-ink-soft)" }}
+              axisLine={{ stroke: "var(--chart-grid)" }}
               tickLine={false}
             />
             <YAxis
-              tick={{ fontSize: 10, fill: "var(--color-ink-faint)" }}
+              tick={{ fontSize: 10, fill: "var(--color-ink-soft)" }}
               axisLine={false}
               tickLine={false}
               width={34}
