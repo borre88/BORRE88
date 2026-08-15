@@ -10,7 +10,7 @@ export function BodyMeasurementsSummary({ checkins, gender }: { checkins: Checki
   const { rows, totale, hasTotale } = computeBodyMeasurements(checkins);
   if (rows.length === 0) return null;
 
-  const silhouetteFill = gender === "maschio" ? "fill-teal" : "fill-teal/50";
+  const silhouetteFill = gender === "maschio" ? "bg-teal" : "bg-teal/50";
 
   return (
     <div className="mt-8 border-t border-line pt-6">

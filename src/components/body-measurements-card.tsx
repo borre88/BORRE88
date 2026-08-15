@@ -14,7 +14,7 @@ type Checkin = Tables<"weekly_checkins">;
 
 export function BodyMeasurementsCard({ checkins, gender }: { checkins: Checkin[]; gender: Gender | null }) {
   const [showHistory, setShowHistory] = useState(false);
-  const silhouetteFill = gender === "maschio" ? "fill-teal" : "fill-teal/50";
+  const silhouetteFill = gender === "maschio" ? "bg-teal" : "bg-teal/50";
 
   if (checkins.length === 0) return null;
 

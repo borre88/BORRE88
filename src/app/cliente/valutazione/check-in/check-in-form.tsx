@@ -174,7 +174,7 @@ export function CheckinForm({ current, gender }: { current: Checkin | null; gend
           >
             <BodySilhouette
               gender={gender}
-              className={`h-64 w-[85px] ${gender === "maschio" ? "fill-teal" : "fill-teal/50"}`}
+              className={`h-64 w-[85px] ${gender === "maschio" ? "bg-teal" : "bg-teal/50"}`}
             />
           </div>
           {MEASUREMENT_ROWS.map(([leftKey, rightKey], i) => (
