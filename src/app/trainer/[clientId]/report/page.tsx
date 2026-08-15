@@ -44,7 +44,7 @@ export default async function ClientReportPage({
   const areas = computeFullReport(latestMeasurement, gender, age);
 
   return (
-    <div className="mx-auto max-w-2xl px-5 py-8">
+    <div className="report-light mx-auto max-w-2xl px-5 py-8">
       <ReportHeader />
       <div className="mb-5 flex justify-end">
         <PrintButton />

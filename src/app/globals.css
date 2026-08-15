@@ -38,6 +38,31 @@
   --negative: #d9695a;
 }
 
+/* Il report/PDF deve restare leggibile (sfondo chiaro, testo scuro) anche
+   quando l'app è in dark mode: la stampa del browser spesso ignora gli
+   sfondi ma non i colori del testo, quindi ereditare le variabili dark
+   qui produrrebbe testo quasi bianco su pagina bianca. */
+.report-light {
+  --bg: #f5f3ef;
+  --surface: #ffffff;
+  --line: #e4e0d7;
+  --line-soft: #efebe2;
+  --ink: #1c1c1a;
+  --muted: rgba(28, 28, 26, 0.5);
+  --faint: rgba(28, 28, 26, 0.4);
+  --brand: #14564a;
+  --brand-tint: #e4ede7;
+  --brand-tint-line: #d5e0d8;
+  --gold: #b08a2e;
+  --gold-bright: #c9a143;
+  --gold-tint: #f5ebd3;
+  --gold-ink: #8a6a1f;
+  --positive: #2f6b4f;
+  --negative: #9b3226;
+  background: var(--bg);
+  color: var(--ink);
+}
+
 @theme inline {
   --color-cream: var(--bg);
   --color-surface: var(--surface);
