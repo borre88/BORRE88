@@ -14,18 +14,20 @@ function Section({ title, children }: { title: string; children: React.ReactNode
  * trattamenti effettivamente svolti dall'app (vedi README / codebase):
  * dati raccolti, finalità, e i tre sub-responsabili tecnici in uso
  * (Supabase per database/autenticazione, Vercel per l'hosting, Resend per
- * le email di promemoria). I punti contrassegnati con [•] richiedono una
- * conferma o un dato specifico dal titolare (indirizzo, P.IVA, periodo di
- * conservazione) prima della pubblicazione definitiva — vedi nota in fondo.
+ * le email di promemoria).
  */
 export function PrivacyPolicyContent() {
   return (
     <div>
       <Section title="1. Titolare del trattamento">
         <p>
-          Il titolare del trattamento dei dati è il Dott. Simone Borrelli, biologo nutrizionista [• indicare
-          indirizzo dello studio professionale e, se presente, P.IVA/Codice Fiscale], contattabile all&apos;indirizzo
-          email <a href={`mailto:${CONTACT_EMAIL}`} className="text-teal underline underline-offset-2">{CONTACT_EMAIL}</a>.
+          Il titolare del trattamento dei dati è il Dott. Simone Borrelli, biologo nutrizionista, con studio in Via
+          della Chiesa Rossa 21, 20142 Milano (MI) — P.IVA 10588130962, Codice Fiscale BRRSMN88B28D969R —
+          contattabile all&apos;indirizzo email{" "}
+          <a href={`mailto:${CONTACT_EMAIL}`} className="text-teal underline underline-offset-2">
+            {CONTACT_EMAIL}
+          </a>
+          .
         </p>
       </Section>
 
@@ -108,10 +110,10 @@ export function PrivacyPolicyContent() {
 
       <Section title="5. Per quanto tempo conserviamo i dati">
         <p>
-          Conserviamo i tuoi dati per tutta la durata del rapporto professionale e, dopo la sua cessazione, per il
-          periodo previsto dalla normativa fiscale e civilistica applicabile [• confermare il periodo, es. 10 anni
-          dalla cessazione del rapporto], salvo termini diversi previsti dalla legge. Puoi comunque chiedere la
-          cancellazione anticipata dei tuoi dati secondo quanto indicato al punto 7.
+          Conserviamo i tuoi dati per tutta la durata del rapporto professionale e, dopo la sua cessazione, per 10
+          anni, in linea con i termini di conservazione previsti dalla normativa fiscale e civilistica applicabile,
+          salvo termini diversi previsti dalla legge. Puoi comunque chiedere la cancellazione anticipata dei tuoi
+          dati secondo quanto indicato al punto 7.
         </p>
       </Section>
 
@@ -150,7 +152,7 @@ export function PrivacyPolicyContent() {
       <Section title="8. Responsabile della Protezione dei Dati (DPO)">
         <p>
           Non è stato nominato un Responsabile della Protezione dei Dati (DPO) in quanto non ricorrono i presupposti
-          previsti dall&apos;art. 37 GDPR [• da confermare in base alla reale organizzazione dello studio].
+          previsti dall&apos;art. 37 GDPR.
         </p>
       </Section>
     </div>
