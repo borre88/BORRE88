@@ -193,6 +193,14 @@ export async function markDeliveryRequestFulfilled(clientId: string, requestId: 
   revalidatePath("/cliente/delivery");
 }
 
+export async function markSupplementRequestFulfilled(clientId: string, requestId: string) {
+  const supabase = await createClient();
+  await supabase.from("supplement_requests").update({ status: "conclusa" }).eq("id", requestId);
+  revalidatePath(`/trainer/${clientId}`);
+  revalidatePath("/trainer");
+  revalidatePath("/cliente/integrazioni");
+}
+
 export async function markCheckinsSeen(clientId: string) {
   const supabase = await createClient();
   await supabase
@@ -202,6 +210,11 @@ export async function markCheckinsSeen(clientId: string) {
     .is("viewed_by_trainer_at", null);
   await supabase
     .from("delivery_requests")
+    .update({ viewed_by_trainer_at: new Date().toISOString() })
+    .eq("client_id", clientId)
+    .is("viewed_by_trainer_at", null);
+  await supabase
+    .from("supplement_requests")
     .update({ viewed_by_trainer_at: new Date().toISOString() })
     .eq("client_id", clientId)
     .is("viewed_by_trainer_at", null);

@@ -503,6 +503,44 @@ export type Database = {
           },
         ]
       }
+      supplement_requests: {
+        Row: {
+          client_id: string
+          created_at: string
+          id: string
+          items: string[] | null
+          notes: string | null
+          status: string
+          viewed_by_trainer_at: string | null
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          id?: string
+          items?: string[] | null
+          notes?: string | null
+          status?: string
+          viewed_by_trainer_at?: string | null
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          id?: string
+          items?: string[] | null
+          notes?: string | null
+          status?: string
+          viewed_by_trainer_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supplement_requests_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       weekly_checkins: {
         Row: {
           braccio_dx_cm: number | null

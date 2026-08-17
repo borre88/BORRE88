@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { FileText, FlaskConical, Truck } from "lucide-react";
+import { FileText, FlaskConical, Truck, Pill } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { calculateAge, type Gender } from "@/lib/health-score";
 import { computeLatestByMetric, METRIC_GROUPS } from "@/lib/metrics";
@@ -19,6 +19,7 @@ import { DeleteMeasurementButton } from "./delete-measurement-button";
 import { EditProfileModal } from "./edit-profile-modal";
 import { MarkCheckinsSeen } from "./mark-checkins-seen";
 import { MarkDeliveryFulfilledButton } from "./mark-delivery-fulfilled-button";
+import { MarkSupplementFulfilledButton } from "./mark-supplement-fulfilled-button";
 
 const DELIVERY_GOAL_LABELS: Record<string, string> = {
   definizione: "Definizione",
@@ -54,6 +55,23 @@ const DELIVERY_DAY_LABELS: Record<string, string> = {
   ven: "Ven",
   sab: "Sab",
   dom: "Dom",
+};
+
+const SUPPLEMENT_STATUS_LABELS: Record<string, string> = {
+  nuova: "Nuova",
+  in_lavorazione: "In lavorazione",
+  conclusa: "Conclusa",
+};
+
+const SUPPLEMENT_PRODUCT_LABELS: Record<string, string> = {
+  whey: "Proteine Whey",
+  isolate: "Isolato proteico",
+  creatina: "Creatina monoidrato",
+  omega3: "Omega-3",
+  multivitaminico: "Multivitaminico",
+  bcaa: "BCAA / EAA",
+  preworkout: "Pre-workout",
+  collagene: "Collagene",
 };
 
 export default async function ClientDetailPage({
@@ -98,6 +116,13 @@ export default async function ClientDetailPage({
 
   const { data: deliveryRequests } = await supabase
     .from("delivery_requests")
+    .select("*")
+    .eq("client_id", clientId)
+    .order("created_at", { ascending: false })
+    .limit(5);
+
+  const { data: supplementRequests } = await supabase
+    .from("supplement_requests")
     .select("*")
     .eq("client_id", clientId)
     .order("created_at", { ascending: false })
@@ -272,6 +297,40 @@ export default async function ClientDetailPage({
                 {r.status !== "conclusa" && (
                   <div className="mt-2">
                     <MarkDeliveryFulfilledButton clientId={clientId} requestId={r.id} />
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {supplementRequests && supplementRequests.length > 0 && (
+        <div className="mb-5 rounded-lg border border-line bg-surface px-4 pb-2 pt-4">
+          <div className="mb-2.5 flex items-center gap-1.5 text-sm font-semibold">
+            <Pill size={15} strokeWidth={2.2} className="text-teal" />
+            Richieste integratori (Mowe Nutrition)
+          </div>
+          <div className="space-y-2 pb-2.5">
+            {supplementRequests.map((r) => (
+              <div key={r.id} className="rounded-lg border border-line bg-cream px-3.5 py-2.5">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[12.5px] font-medium text-ink">
+                    {SUPPLEMENT_STATUS_LABELS[r.status] ?? r.status}
+                  </span>
+                  <span className="shrink-0 text-[11px] text-ink-faint">
+                    {new Date(r.created_at).toLocaleDateString("it-IT")}
+                  </span>
+                </div>
+                {r.items && r.items.length > 0 && (
+                  <p className="mt-1 text-[12px] text-ink-soft">
+                    Prodotti: {r.items.map((i) => SUPPLEMENT_PRODUCT_LABELS[i] ?? i).join(", ")}
+                  </p>
+                )}
+                {r.notes && <p className="mt-0.5 text-[12px] text-ink-soft">Note: {r.notes}</p>}
+                {r.status !== "conclusa" && (
+                  <div className="mt-2">
+                    <MarkSupplementFulfilledButton clientId={clientId} requestId={r.id} />
                   </div>
                 )}
               </div>

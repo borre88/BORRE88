@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { motion } from "framer-motion";
+import Link from "next/link";
 import { ShieldCheck } from "lucide-react";
 import { BrandMark } from "@/components/brand-mark";
 import { login, type LoginState } from "./actions";
@@ -74,8 +75,11 @@ export default function LoginPage() {
         </form>
 
         <p className="mt-6 text-[10.5px] leading-relaxed text-ink-faint">
-          Se non hai ancora un account, contatta il tuo personal trainer: gli accessi vengono creati
-          direttamente da lui.
+          Non hai ancora un account?{" "}
+          <Link href="/registrati" className="font-medium text-teal underline underline-offset-2">
+            Registrati qui
+          </Link>
+          .
         </p>
       </motion.div>
     </div>

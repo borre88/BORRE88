@@ -1,4 +1,4 @@
-import { HeartPulse, Dumbbell, ChefHat, ClipboardCheck, Truck, Bell } from "lucide-react";
+import { HeartPulse, Dumbbell, ChefHat, ClipboardCheck, Truck, Pill, Bell } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getSession } from "@/lib/auth";
 import { getMondayISO } from "@/lib/dates";
@@ -150,6 +150,14 @@ export default async function ClienteHub() {
         />
 
         <HubCard
+          href="/cliente/integrazioni"
+          icon={<Pill size={17} strokeWidth={2.2} />}
+          title="Integrazioni"
+          subtitle="Il catalogo Mowe Nutrition: scegli cosa ti serve, pensiamo noi al resto."
+          delay={0.24}
+        />
+
+        <HubCard
           href="/cliente/allenamenti"
           icon={<Dumbbell size={17} strokeWidth={2.2} />}
           title="Allenamenti"
@@ -162,7 +170,7 @@ export default async function ClienteHub() {
                 : `${workoutsCount} schede disponibili`
               : undefined
           }
-          delay={0.24}
+          delay={0.32}
         />
 
         <HubCard
@@ -170,7 +178,7 @@ export default async function ClienteHub() {
           icon={<ClipboardCheck size={17} strokeWidth={2.2} />}
           title="Check settimanale"
           subtitle="Aggiornamento rapido da mandare al tuo coach ogni settimana."
-          delay={0.32}
+          delay={0.4}
         >
           <div
             className={`mt-2 flex items-start gap-1.5 rounded-lg border px-2.5 py-2 ${

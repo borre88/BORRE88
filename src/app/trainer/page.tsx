@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Bell, Truck } from "lucide-react";
+import { Bell, Truck, Pill } from "lucide-react";
 import { getSession } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { formatRelativeIt, formatWeekLabel } from "@/lib/dates";
@@ -17,7 +17,14 @@ const DELIVERY_GOAL_LABELS: Record<string, string> = {
 
 type Notification =
   | { type: "checkin"; id: string; client_id: string; created_at: string; checkin: Tables<"weekly_checkins"> }
-  | { type: "delivery"; id: string; client_id: string; created_at: string; delivery: Tables<"delivery_requests"> };
+  | { type: "delivery"; id: string; client_id: string; created_at: string; delivery: Tables<"delivery_requests"> }
+  | {
+      type: "supplement";
+      id: string;
+      client_id: string;
+      created_at: string;
+      supplement: Tables<"supplement_requests">;
+    };
 
 function scoreColor(score: number) {
   if (score >= 15) return "text-good";
@@ -38,7 +45,7 @@ export default async function TrainerHome() {
   const clientIds = (clients ?? []).map((c) => c.id);
   const nameById = new Map((clients ?? []).map((c) => [c.id, c.full_name]));
 
-  const [{ data: unseenCheckins }, { data: unseenDelivery }] = clientIds.length
+  const [{ data: unseenCheckins }, { data: unseenDelivery }, { data: unseenSupplement }] = clientIds.length
     ? await Promise.all([
         supabase
           .from("weekly_checkins")
@@ -52,8 +59,14 @@ export default async function TrainerHome() {
           .in("client_id", clientIds)
           .is("viewed_by_trainer_at", null)
           .order("created_at", { ascending: false }),
+        supabase
+          .from("supplement_requests")
+          .select("*")
+          .in("client_id", clientIds)
+          .is("viewed_by_trainer_at", null)
+          .order("created_at", { ascending: false }),
       ])
-    : [{ data: [] }, { data: [] }];
+    : [{ data: [] }, { data: [] }, { data: [] }];
 
   const notifications: Notification[] = [
     ...(unseenCheckins ?? []).map((c) => ({
@@ -69,6 +82,13 @@ export default async function TrainerHome() {
       client_id: d.client_id,
       created_at: d.created_at,
       delivery: d,
+    })),
+    ...(unseenSupplement ?? []).map((s) => ({
+      type: "supplement" as const,
+      id: s.id,
+      client_id: s.client_id,
+      created_at: s.created_at,
+      supplement: s,
     })),
   ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
@@ -92,19 +112,27 @@ export default async function TrainerHome() {
             >
               <div className="flex items-start gap-2.5">
                 {n.type === "delivery" && <Truck size={15} strokeWidth={2.2} className="mt-0.5 shrink-0 text-teal" />}
+                {n.type === "supplement" && <Pill size={15} strokeWidth={2.2} className="mt-0.5 shrink-0 text-teal" />}
                 <div>
                   <div className="text-sm font-semibold">{nameById.get(n.client_id) ?? "Cliente"}</div>
-                  {n.type === "checkin" ? (
+                  {n.type === "checkin" && (
                     <div className="text-xs text-ink-faint">
                       Check settimana {formatWeekLabel(n.checkin.week_start)}
                       {n.checkin.weight_kg !== null && ` · peso ${n.checkin.weight_kg}kg`}
                       {n.checkin.workouts_count !== null && ` · ${n.checkin.workouts_count} allenamenti`}
                       {n.checkin.energy !== null && ` · energia ${n.checkin.energy}/10`}
                     </div>
-                  ) : (
+                  )}
+                  {n.type === "delivery" && (
                     <div className="text-xs text-ink-faint">
                       Richiesta servizio delivery a domicilio
                       {n.delivery.goal && ` · obiettivo ${DELIVERY_GOAL_LABELS[n.delivery.goal] ?? n.delivery.goal}`}
+                    </div>
+                  )}
+                  {n.type === "supplement" && (
+                    <div className="text-xs text-ink-faint">
+                      Richiesta integratori (Mowe Nutrition)
+                      {n.supplement.items && n.supplement.items.length > 0 && ` · ${n.supplement.items.length} prodotti`}
                     </div>
                   )}
                 </div>
