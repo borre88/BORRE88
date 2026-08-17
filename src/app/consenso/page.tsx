@@ -1,5 +1,8 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { getSession } from "@/lib/auth";
+import { PrivacyPolicyContent } from "@/components/legal/privacy-policy-content";
+import { HealthConsentContent } from "@/components/legal/health-consent-content";
 import { acceptConsent } from "./actions";
 
 export default async function ConsensoPage() {
@@ -19,36 +22,24 @@ export default async function ConsensoPage() {
       </p>
 
       <form action={acceptConsent} className="mt-6 space-y-5">
-        <section className="rounded-xl border border-dashed border-gold bg-gold-soft p-4">
-          <div className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-gold">
-            Segnaposto — da completare con un consulente privacy
+        <section className="rounded-xl border border-line bg-surface p-4">
+          <h2 className="font-display text-lg font-semibold">Informativa privacy</h2>
+          <div className="mt-3 max-h-72 overflow-y-auto rounded-lg border border-line-soft bg-cream p-3.5">
+            <PrivacyPolicyContent />
           </div>
-          <h2 className="font-display text-lg font-semibold">Informativa privacy (art. 13 GDPR)</h2>
-          <p className="mt-2 text-xs leading-relaxed text-ink-soft">
-            [Qui andrà il testo dell&apos;informativa privacy: titolare del trattamento, finalità e base
-            giuridica, tipologie di dati trattati, tempi di conservazione, eventuali soggetti terzi
-            (es. Supabase come responsabile del trattamento), diritti dell&apos;interessato (accesso,
-            rettifica, cancellazione, portabilità) e modalità per esercitarli.]
-          </p>
           <label className="mt-3 flex items-start gap-2 text-xs text-ink-soft">
             <input type="checkbox" required className="mt-0.5" />
             Ho letto e compreso l&apos;informativa privacy.
           </label>
         </section>
 
-        <section className="rounded-xl border border-dashed border-gold bg-gold-soft p-4">
-          <div className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-gold">
-            Segnaposto — da completare con un consulente privacy
-          </div>
+        <section className="rounded-xl border border-line bg-surface p-4">
           <h2 className="font-display text-lg font-semibold">
             Consenso al trattamento dei dati sulla salute (art. 9 GDPR)
           </h2>
-          <p className="mt-2 text-xs leading-relaxed text-ink-soft">
-            [Qui andrà la richiesta di consenso esplicito al trattamento dei dati relativi alla
-            salute che il tuo personal trainer registrerà nel tempo (sonno, frequenza cardiaca,
-            VO2max, massimali, peso), necessario in quanto categoria particolare di dati ai sensi
-            dell&apos;art. 9 GDPR.]
-          </p>
+          <div className="mt-3">
+            <HealthConsentContent />
+          </div>
           <label className="mt-3 flex items-start gap-2 text-xs text-ink-soft">
             <input type="checkbox" required className="mt-0.5" />
             Do il mio consenso esplicito al trattamento dei miei dati relativi alla salute per le
@@ -63,6 +54,14 @@ export default async function ConsensoPage() {
           Accetto e continuo
         </button>
       </form>
+
+      <p className="mt-4 text-center text-[11px] text-ink-faint">
+        Puoi leggere l&apos;informativa completa anche su{" "}
+        <Link href="/privacy" target="_blank" className="text-teal underline underline-offset-2">
+          questa pagina
+        </Link>
+        .
+      </p>
     </div>
   );
 }

@@ -30,6 +30,13 @@ export default function RegistratiPage() {
             Accedi
           </Link>
         </p>
+        <p className="mt-1.5 text-[10.5px] leading-relaxed text-ink-faint">
+          Creando un account accetti la nostra{" "}
+          <Link href="/privacy" target="_blank" className="font-medium text-teal underline underline-offset-2">
+            informativa privacy
+          </Link>
+          .
+        </p>
       </div>
     </div>
   );
