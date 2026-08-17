@@ -1,4 +1,5 @@
-import { HeartPulse, ClipboardCheck, FileDown, ChefHat, Truck, Pill, Dumbbell } from "lucide-react";
+import Link from "next/link";
+import { ArrowLeft, HeartPulse, ClipboardCheck, FileDown, ChefHat, Truck, Pill, Dumbbell } from "lucide-react";
 import { ReportHeader } from "@/components/report-header";
 import { ReportFooter } from "@/components/report-footer";
 import { PrintButton } from "@/components/print-button";
@@ -44,6 +45,13 @@ const SECTIONS = [
 export default function GuidaPage() {
   return (
     <div className="report-light mx-auto max-w-2xl px-5 py-8">
+      <Link
+        href="/cliente"
+        className="print:hidden mb-4 inline-flex items-center gap-1.5 text-xs font-medium text-ink-faint hover:text-teal"
+      >
+        <ArrowLeft size={14} strokeWidth={2.2} />
+        Torna alla tua area
+      </Link>
       <ReportHeader />
       <div className="mb-5 flex justify-end">
         <PrintButton />

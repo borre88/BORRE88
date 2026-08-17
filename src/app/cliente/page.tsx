@@ -154,6 +154,7 @@ export default async function ClienteHub() {
           icon={<Pill size={17} strokeWidth={2.2} />}
           title="Integrazioni"
           subtitle="Il catalogo Mowe Nutrition: scegli cosa ti serve, pensiamo noi al resto."
+          items={["Whey", "Creatina", "Omega-3", "Multivitaminico"]}
           delay={0.24}
         />
 
