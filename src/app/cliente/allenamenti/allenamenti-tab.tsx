@@ -55,7 +55,7 @@ export function AllenamentiTab({ workouts }: { workouts: Workout[] }) {
 
   return (
     <div>
-      <SectionIntro title="I tuoi allenamenti" subtitle={CATEGORY_SUBTITLES[category]} />
+      <SectionIntro title="Workout on holiday" subtitle={CATEGORY_SUBTITLES[category]} />
 
       <div className="mb-3">
         <ChipGroup

@@ -633,6 +633,85 @@ export type Database = {
           },
         ]
       }
+      workout_assignment_exercises: {
+        Row: {
+          assignment_id: string
+          id: string
+          name: string
+          position: number
+          reps: string
+          rest: string
+          sets: number
+        }
+        Insert: {
+          assignment_id: string
+          id?: string
+          name: string
+          position?: number
+          reps: string
+          rest: string
+          sets: number
+        }
+        Update: {
+          assignment_id?: string
+          id?: string
+          name?: string
+          position?: number
+          reps?: string
+          rest?: string
+          sets?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workout_assignment_exercises_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "workout_assignments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workout_assignments: {
+        Row: {
+          category: string | null
+          client_id: string
+          created_at: string
+          date: string
+          duration_minutes: number | null
+          id: string
+          name: string
+          notes: string | null
+        }
+        Insert: {
+          category?: string | null
+          client_id: string
+          created_at?: string
+          date: string
+          duration_minutes?: number | null
+          id?: string
+          name: string
+          notes?: string | null
+        }
+        Update: {
+          category?: string | null
+          client_id?: string
+          created_at?: string
+          date?: string
+          duration_minutes?: number | null
+          id?: string
+          name?: string
+          notes?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workout_assignments_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       workout_exercises: {
         Row: {
           id: string

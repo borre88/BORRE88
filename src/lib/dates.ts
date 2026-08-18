@@ -26,3 +26,29 @@ export function formatRelativeIt(iso: string): string {
   if (diffDays < 7) return `${diffDays} giorni fa`;
   return date.toLocaleDateString("it-IT", { day: "2-digit", month: "short" });
 }
+
+/** YYYY-MM-DD per una Date, in ora locale (evita lo shift UTC di toISOString). */
+export function toISODate(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+/** Griglia di 6 settimane (Lun-Dom, 42 giorni) per il mese dato, coi giorni dei mesi adiacenti a riempimento. */
+export function getMonthGrid(year: number, month: number): Date[] {
+  const first = new Date(year, month, 1);
+  const firstWeekday = (first.getDay() + 6) % 7; // 0 = lunedì .. 6 = domenica
+  const start = new Date(year, month, 1 - firstWeekday);
+  return Array.from({ length: 42 }, (_, i) => {
+    const d = new Date(start);
+    d.setDate(start.getDate() + i);
+    return d;
+  });
+}
+
+/** Es. "Marzo 2026". */
+export function formatMonthLabel(year: number, month: number): string {
+  const label = new Date(year, month, 1).toLocaleDateString("it-IT", { month: "long", year: "numeric" });
+  return label.charAt(0).toUpperCase() + label.slice(1);
+}

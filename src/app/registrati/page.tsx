@@ -1,10 +1,19 @@
 import Link from "next/link";
+import { ShieldCheck } from "lucide-react";
 import { BrandMark } from "@/components/brand-mark";
 import { SignupForm } from "./signup-form";
 
 export default function RegistratiPage() {
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden p-5 py-10">
+      <Link
+        href="/privacy"
+        target="_blank"
+        className="absolute right-4 top-4 z-10 flex items-center gap-1.5 rounded-full border border-line bg-surface px-3 py-1.5 text-xs font-medium text-ink-soft hover:border-teal hover:text-teal"
+      >
+        <ShieldCheck size={13} strokeWidth={2.2} />
+        Privacy
+      </Link>
       <div
         aria-hidden
         className="ambient-blob pointer-events-none absolute -left-24 -top-24 h-72 w-72 rounded-full bg-teal/20 blur-3xl"

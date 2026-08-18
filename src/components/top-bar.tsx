@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BookOpen } from "lucide-react";
+import { BookOpen, ShieldCheck } from "lucide-react";
 import { LogoutButton } from "./logout-button";
 import { Logo } from "./brand/Logo";
 import { ThemeToggle } from "./theme-toggle";
@@ -35,6 +35,15 @@ export function TopBar({
           </Link>
         )}
         {showInstallHint && <InstallAppModal />}
+        <Link
+          href="/privacy"
+          target="_blank"
+          aria-label="Informativa privacy"
+          title="Informativa privacy"
+          className="flex h-8 w-8 items-center justify-center rounded-full border border-line text-ink-soft hover:border-teal hover:text-teal"
+        >
+          <ShieldCheck size={15} strokeWidth={2.2} />
+        </Link>
         <ThemeToggle />
         <LogoutButton />
       </div>
