@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { sendWorkoutAssignedEmail } from "@/lib/email";
 
 export interface WorkoutAssignmentInput {
   name: string;
@@ -57,6 +58,15 @@ export async function upsertWorkoutAssignment(
   if (rows.length > 0) {
     const { error: exErr } = await supabase.from("workout_assignment_exercises").insert(rows);
     if (exErr) return { error: "Allenamento salvato, ma non è stato possibile salvare gli esercizi." };
+  }
+
+  const { data: client } = await supabase.from("clients").select("email, full_name").eq("id", clientId).single();
+  if (client?.email) {
+    try {
+      await sendWorkoutAssignedEmail(client.email, client.full_name, name, date);
+    } catch {
+      // L'email è un extra: non deve far fallire il salvataggio dell'allenamento.
+    }
   }
 
   revalidatePath(`/trainer/${clientId}/allenamenti`);
