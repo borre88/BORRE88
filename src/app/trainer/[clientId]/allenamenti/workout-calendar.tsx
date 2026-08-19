@@ -26,6 +26,18 @@ const CATEGORY_CATALOG_LABELS: Record<string, string> = {
   ripetute: "Ripetute",
   hyrox: "Hyrox",
   mobility: "Mobilità e recupero",
+  gym: "Palestra (GYM)",
+};
+
+const SUBCATEGORY_CATALOG_LABELS: Record<string, string> = {
+  push: "Push",
+  pull: "Pull",
+  leg: "Leg",
+  leg_focus_quad: "Leg Focus Quadricipiti",
+  leg_focus_femorali: "Leg Focus Femorali",
+  leg_focus_glutei: "Leg Focus Glutei",
+  full_body: "Full Body",
+  full_body_restart: "Full Body Restart",
 };
 
 function emptyRow(): ExerciseRow {
@@ -55,6 +67,43 @@ export function TrainerWorkoutCalendar({
   const [notes, setNotes] = useState("");
   const [rows, setRows] = useState<ExerciseRow[]>([emptyRow()]);
 
+  const [catCategory, setCatCategory] = useState("");
+  const [catWorkoutOrSub, setCatWorkoutOrSub] = useState("");
+  const [catLevel, setCatLevel] = useState<number | null>(null);
+
+  const catalogCategories = useMemo(() => {
+    const present = new Set(catalog.map((w) => w.category));
+    return Object.keys(CATEGORY_CATALOG_LABELS).filter((c) => present.has(c));
+  }, [catalog]);
+
+  const catalogWorkoutsInCategory = useMemo(
+    () => catalog.filter((w) => w.category === catCategory),
+    [catalog, catCategory]
+  );
+
+  const catalogGymSubcategories = useMemo(() => {
+    if (catCategory !== "gym") return [];
+    const present = new Set(
+      catalogWorkoutsInCategory.map((w) => w.subcategory).filter((s): s is string => s !== null)
+    );
+    return Object.keys(SUBCATEGORY_CATALOG_LABELS).filter((s) => present.has(s));
+  }, [catCategory, catalogWorkoutsInCategory]);
+
+  const catalogGymLevels = useMemo(
+    () =>
+      catalogWorkoutsInCategory
+        .filter((w) => w.subcategory === catWorkoutOrSub && w.level !== null)
+        .map((w) => w.level as number)
+        .sort((a, b) => a - b),
+    [catalogWorkoutsInCategory, catWorkoutOrSub]
+  );
+
+  function resetCatalogPicker() {
+    setCatCategory("");
+    setCatWorkoutOrSub("");
+    setCatLevel(null);
+  }
+
   const assignment = byDate.get(selected) ?? null;
 
   function selectDay(iso: string) {
@@ -69,6 +118,7 @@ export function TrainerWorkoutCalendar({
     setDuration("");
     setNotes("");
     setRows([emptyRow()]);
+    resetCatalogPicker();
     setError(null);
     setEditing(true);
   }
@@ -90,6 +140,7 @@ export function TrainerWorkoutCalendar({
           }))
         : [emptyRow()]
     );
+    resetCatalogPicker();
     setError(null);
     setEditing(true);
   }
@@ -261,31 +312,93 @@ export function TrainerWorkoutCalendar({
         {editing && (
           <div>
             {catalog.length > 0 && (
-              <div className="mb-3.5">
-                <label className="mb-1 block text-xs font-medium text-ink-soft" htmlFor="catalog-prefill">
+              <div className="mb-3.5 rounded-lg border border-line bg-cream p-3">
+                <span className="mb-2 block text-xs font-medium text-ink-soft">
                   Parti da un allenamento del catalogo (facoltativo)
-                </label>
-                <select
-                  id="catalog-prefill"
-                  defaultValue=""
-                  onChange={(e) => e.target.value && applyCatalogPrefill(e.target.value)}
-                  className="w-full rounded-md border border-line bg-cream px-2.5 py-1.5 text-sm outline-none focus:border-teal"
-                >
-                  <option value="">Nessuno — crea da zero</option>
-                  {Object.entries(CATEGORY_CATALOG_LABELS).map(([catKey, catLabel]) => {
-                    const inCat = catalog.filter((w) => w.category === catKey);
-                    if (inCat.length === 0) return null;
-                    return (
-                      <optgroup key={catKey} label={catLabel}>
-                        {inCat.map((w) => (
-                          <option key={w.id} value={w.id}>
-                            {w.name}
-                          </option>
-                        ))}
-                      </optgroup>
-                    );
-                  })}
-                </select>
+                </span>
+
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                  <div>
+                    <label className="mb-1 block text-[10.5px] font-medium text-ink-faint" htmlFor="catalog-category">
+                      Categoria
+                    </label>
+                    <select
+                      id="catalog-category"
+                      value={catCategory}
+                      onChange={(e) => {
+                        setCatCategory(e.target.value);
+                        setCatWorkoutOrSub("");
+                        setCatLevel(null);
+                      }}
+                      className="w-full rounded-md border border-line bg-surface px-2.5 py-1.5 text-sm outline-none focus:border-teal"
+                    >
+                      <option value="">Scegli…</option>
+                      {catalogCategories.map((c) => (
+                        <option key={c} value={c}>
+                          {CATEGORY_CATALOG_LABELS[c]}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="mb-1 block text-[10.5px] font-medium text-ink-faint" htmlFor="catalog-workout">
+                      Allenamento
+                    </label>
+                    <select
+                      id="catalog-workout"
+                      value={catWorkoutOrSub}
+                      disabled={!catCategory}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setCatWorkoutOrSub(value);
+                        setCatLevel(null);
+                        if (catCategory !== "gym" && value) applyCatalogPrefill(value);
+                      }}
+                      className="w-full rounded-md border border-line bg-surface px-2.5 py-1.5 text-sm outline-none focus:border-teal disabled:opacity-50"
+                    >
+                      <option value="">Scegli…</option>
+                      {catCategory === "gym"
+                        ? catalogGymSubcategories.map((s) => (
+                            <option key={s} value={s}>
+                              {SUBCATEGORY_CATALOG_LABELS[s]}
+                            </option>
+                          ))
+                        : catalogWorkoutsInCategory.map((w) => (
+                            <option key={w.id} value={w.id}>
+                              {w.name}
+                            </option>
+                          ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="mb-1 block text-[10.5px] font-medium text-ink-faint" htmlFor="catalog-level">
+                      Livello
+                    </label>
+                    <select
+                      id="catalog-level"
+                      value={catLevel ?? ""}
+                      disabled={catCategory !== "gym" || !catWorkoutOrSub}
+                      onChange={(e) => {
+                        const lvl = Number(e.target.value);
+                        setCatLevel(lvl);
+                        const w = catalogWorkoutsInCategory.find(
+                          (x) => x.subcategory === catWorkoutOrSub && x.level === lvl
+                        );
+                        if (w) applyCatalogPrefill(w.id);
+                      }}
+                      className="w-full rounded-md border border-line bg-surface px-2.5 py-1.5 text-sm outline-none focus:border-teal disabled:opacity-50"
+                    >
+                      <option value="">Scegli…</option>
+                      {catalogGymLevels.map((l) => (
+                        <option key={l} value={l}>
+                          Livello {l}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
               </div>
             )}
 
