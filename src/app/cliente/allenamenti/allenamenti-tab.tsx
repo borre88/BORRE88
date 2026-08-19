@@ -12,6 +12,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   ripetute: "Ripetute",
   hyrox: "Hyrox",
   mobility: "Mobilità e recupero",
+  gym: "Palestra (GYM)",
 };
 
 const CATEGORY_SUBTITLES: Record<string, string> = {
@@ -19,6 +20,7 @@ const CATEGORY_SUBTITLES: Record<string, string> = {
   ripetute: "Lavoro aerobico a ripetute: 4x4 norvegese, fartlek e altri protocolli.",
   hyrox: "Circuiti funzionali in stile Hyrox: corsa, wall ball, affondi e stazioni a tempo.",
   mobility: "Esercizi di allungamento e recupero per le diverse parti del corpo.",
+  gym: "Schede da palestra per gruppo muscolare, con 5 livelli di esperienza: scegli la categoria e il tuo livello.",
 };
 
 const EQUIP_LABELS: Record<string, string> = {
@@ -33,6 +35,25 @@ const GOAL_LABELS: Record<string, string> = {
   dimagrimento: "Dimagrimento",
 };
 
+const SUBCATEGORY_LABELS: Record<string, string> = {
+  push: "Push",
+  pull: "Pull",
+  leg: "Leg",
+  leg_focus_quad: "Leg Focus Quad",
+  leg_focus_femorali: "Leg Focus Femorali",
+  leg_focus_glutei: "Leg Focus Glutei",
+  full_body: "Full Body",
+  full_body_restart: "Full Body Restart",
+};
+
+const LEVEL_DESCRIPTIONS: Record<number, string> = {
+  1: "Conosci gli esercizi ma hai poca dimestichezza: si parte con movimenti semplici.",
+  2: "Conosci gli esercizi e hai una buona tecnica.",
+  3: "Ti alleni in autonomia e sai gestire i carichi per un effort ottimale.",
+  4: "Ti alleni regolarmente da solo e conosci tecniche di allenamento avanzate.",
+  5: "Livello pro: ti alleni da anni in autonomia, anche in preparazione gara.",
+};
+
 export function AllenamentiTab({ workouts }: { workouts: Workout[] }) {
   const categories = useMemo(() => {
     const present = new Set(workouts.map((w) => w.category));
@@ -45,13 +66,19 @@ export function AllenamentiTab({ workouts }: { workouts: Workout[] }) {
 
   const inCategory = useMemo(() => workouts.filter((w) => w.category === category), [workouts, category]);
 
-  const filtered = useMemo(
-    () =>
-      category === "casa"
-        ? inCategory.filter((w) => equipment === "tutti" || w.equipment === equipment)
-        : inCategory,
-    [inCategory, category, equipment]
-  );
+  const gymSubcategories = useMemo(() => {
+    const present = new Set(inCategory.map((w) => w.subcategory).filter((s): s is string => s !== null));
+    return Object.keys(SUBCATEGORY_LABELS).filter((s) => present.has(s));
+  }, [inCategory]);
+
+  const [subcategory, setSubcategory] = useState(gymSubcategories[0] ?? "push");
+  const [level, setLevel] = useState(1);
+
+  const filtered = useMemo(() => {
+    if (category === "casa") return inCategory.filter((w) => equipment === "tutti" || w.equipment === equipment);
+    if (category === "gym") return inCategory.filter((w) => w.subcategory === subcategory && w.level === level);
+    return inCategory;
+  }, [inCategory, category, equipment, subcategory, level]);
 
   return (
     <div>
@@ -76,6 +103,35 @@ export function AllenamentiTab({ workouts }: { workouts: Workout[] }) {
             options={[{ key: "tutti", label: "Tutti" }, ...Object.entries(EQUIP_LABELS).map(([key, label]) => ({ key, label }))]}
           />
         </div>
+      )}
+
+      {category === "gym" && (
+        <>
+          <div className="mb-3">
+            <ChipGroup
+              value={subcategory}
+              onChange={(v) => {
+                setSubcategory(v);
+                setExpanded(null);
+              }}
+              options={gymSubcategories.map((s) => ({ key: s, label: SUBCATEGORY_LABELS[s] }))}
+            />
+          </div>
+          <div className="mb-4">
+            <ChipGroup
+              value={String(level)}
+              onChange={(v) => {
+                setLevel(Number(v));
+                setExpanded(null);
+              }}
+              options={[1, 2, 3, 4, 5].map((l) => ({ key: String(l), label: `Livello ${l}` }))}
+            />
+          </div>
+          <div className="mb-4 flex gap-2.5 rounded-lg border border-teal-soft-line bg-teal-soft px-4 py-3">
+            <Info size={16} strokeWidth={2.2} className="mt-0.5 shrink-0 text-teal" />
+            <p className="text-[12.5px] leading-relaxed text-ink">{LEVEL_DESCRIPTIONS[level]}</p>
+          </div>
+        </>
       )}
 
       {category === "hyrox" && (
@@ -106,6 +162,7 @@ export function AllenamentiTab({ workouts }: { workouts: Workout[] }) {
                       {EQUIP_LABELS[w.equipment]}
                     </Tag>
                   )}
+                  {category === "gym" && w.level !== null && <Tag>Livello {w.level}</Tag>}
                   <Tag muted>{GOAL_LABELS[w.goal]}</Tag>
                 </div>
                 <div className="mb-1.5 font-display text-[17px] font-semibold leading-tight">{w.name}</div>

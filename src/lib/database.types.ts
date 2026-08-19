@@ -758,7 +758,9 @@ export type Database = {
           equipment: string
           goal: string
           id: string
+          level: number | null
           name: string
+          subcategory: string | null
         }
         Insert: {
           category?: string
@@ -767,7 +769,9 @@ export type Database = {
           equipment: string
           goal: string
           id?: string
+          level?: number | null
           name: string
+          subcategory?: string | null
         }
         Update: {
           category?: string
@@ -776,7 +780,9 @@ export type Database = {
           equipment?: string
           goal?: string
           id?: string
+          level?: number | null
           name?: string
+          subcategory?: string | null
         }
         Relationships: []
       }
