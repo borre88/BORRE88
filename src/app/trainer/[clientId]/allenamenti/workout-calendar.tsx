@@ -3,6 +3,7 @@
 import { useMemo, useState, useTransition } from "react";
 import { Clock, Dumbbell, CalendarX, Plus, Trash2, Pencil, X } from "lucide-react";
 import type { Tables } from "@/lib/database.types";
+import { renderZoneTokens, type HeartRateZone } from "@/lib/health-score";
 import { MonthCalendar } from "@/components/month-calendar";
 import { Tag } from "@/components/ui";
 import { toISODate } from "@/lib/dates";
@@ -27,6 +28,7 @@ const CATEGORY_CATALOG_LABELS: Record<string, string> = {
   hyrox: "Hyrox",
   mobility: "Mobilità e recupero",
   gym: "Palestra (GYM)",
+  corsa: "Corsa",
 };
 
 const SUBCATEGORY_CATALOG_LABELS: Record<string, string> = {
@@ -38,7 +40,14 @@ const SUBCATEGORY_CATALOG_LABELS: Record<string, string> = {
   leg_focus_glutei: "Leg Focus Glutei",
   full_body: "Full Body",
   full_body_restart: "Full Body Restart",
+  zona2: "Corsa Zona 2",
+  intervalli: "Ripetute Zona 3/4",
+  soglia: "Soglia",
+  fartlek: "Fartlek",
 };
+
+/** Categorie che hanno il terzo passaggio "Livello" nel selettore a cascata. */
+const LEVELED_CATALOG_CATEGORIES = new Set(["gym", "corsa"]);
 
 function emptyRow(): ExerciseRow {
   return { key: crypto.randomUUID(), name: "", sets: "3", reps: "10", rest: "60s" };
@@ -48,10 +57,12 @@ export function TrainerWorkoutCalendar({
   clientId,
   assignments,
   catalog,
+  zones = null,
 }: {
   clientId: string;
   assignments: Assignment[];
   catalog: CatalogWorkout[];
+  zones?: HeartRateZone[] | null;
 }) {
   const byDate = useMemo(() => new Map(assignments.map((a) => [a.date, a])), [assignments]);
   const markedDates = useMemo(() => new Set(assignments.map((a) => a.date)), [assignments]);
@@ -81,13 +92,15 @@ export function TrainerWorkoutCalendar({
     [catalog, catCategory]
   );
 
+  const catIsLeveled = LEVELED_CATALOG_CATEGORIES.has(catCategory);
+
   const catalogGymSubcategories = useMemo(() => {
-    if (catCategory !== "gym") return [];
+    if (!catIsLeveled) return [];
     const present = new Set(
       catalogWorkoutsInCategory.map((w) => w.subcategory).filter((s): s is string => s !== null)
     );
     return Object.keys(SUBCATEGORY_CATALOG_LABELS).filter((s) => present.has(s));
-  }, [catCategory, catalogWorkoutsInCategory]);
+  }, [catIsLeveled, catalogWorkoutsInCategory]);
 
   const catalogGymLevels = useMemo(
     () =>
@@ -155,10 +168,10 @@ export function TrainerWorkoutCalendar({
       w.workout_exercises.length > 0
         ? w.workout_exercises.map((ex) => ({
             key: crypto.randomUUID(),
-            name: ex.name,
+            name: renderZoneTokens(ex.name, zones),
             sets: String(ex.sets),
             reps: ex.reps,
-            rest: ex.rest,
+            rest: renderZoneTokens(ex.rest, zones),
           }))
         : [emptyRow()]
     );
@@ -353,12 +366,12 @@ export function TrainerWorkoutCalendar({
                         const value = e.target.value;
                         setCatWorkoutOrSub(value);
                         setCatLevel(null);
-                        if (catCategory !== "gym" && value) applyCatalogPrefill(value);
+                        if (!catIsLeveled && value) applyCatalogPrefill(value);
                       }}
                       className="w-full rounded-md border border-line bg-surface px-2.5 py-1.5 text-sm outline-none focus:border-teal disabled:opacity-50"
                     >
                       <option value="">Scegli…</option>
-                      {catCategory === "gym"
+                      {catIsLeveled
                         ? catalogGymSubcategories.map((s) => (
                             <option key={s} value={s}>
                               {SUBCATEGORY_CATALOG_LABELS[s]}
@@ -379,7 +392,7 @@ export function TrainerWorkoutCalendar({
                     <select
                       id="catalog-level"
                       value={catLevel ?? ""}
-                      disabled={catCategory !== "gym" || !catWorkoutOrSub}
+                      disabled={!catIsLeveled || !catWorkoutOrSub}
                       onChange={(e) => {
                         const lvl = Number(e.target.value);
                         setCatLevel(lvl);

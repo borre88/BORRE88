@@ -127,6 +127,19 @@ export function vo2maxFromCooperTest(distanceMeters: number): number {
   return (distanceMeters - 504.9) / 44.73;
 }
 
+/** "Z2" -> "Zona 2 (127-145 bpm)", or "Zona 2" if the client's zones aren't available yet. */
+export function formatZoneLabel(zones: HeartRateZone[] | null, zoneNum: number): string {
+  const z = zones?.find((zz) => zz.zone === zoneNum);
+  return z ? `Zona ${zoneNum} (${z.bpmMin}-${z.bpmMax} bpm)` : `Zona ${zoneNum}`;
+}
+
+const ZONE_TOKEN_RE = /\{Z([1-5])\}/g;
+
+/** Replaces {Z1}..{Z5} tokens in workout/exercise text with the client's actual bpm range. */
+export function renderZoneTokens(text: string, zones: HeartRateZone[] | null): string {
+  return text.replace(ZONE_TOKEN_RE, (_, n: string) => formatZoneLabel(zones, Number(n)));
+}
+
 // ---------------------------------------------------------------------------
 // Scoring. Every area is scored out of 20. Thresholds below are reasonable,
 // general-population defaults (not personalized clinical ranges) meant as a

@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { getSession } from "@/lib/auth";
+import { calculateAge, calculateHeartRateZones } from "@/lib/health-score";
 import { SectionHeader } from "@/components/section-header";
 import { AllenamentiTabs } from "./allenamenti-tabs";
 
@@ -9,9 +10,23 @@ export default async function AllenamentiPage() {
 
   const { data: client } = await supabase
     .from("clients")
-    .select("id")
+    .select("id, date_of_birth")
     .eq("profile_id", session!.user.id)
     .single();
+
+  const { data: latestMeasurement } = client
+    ? await supabase
+        .from("measurements")
+        .select("resting_hr")
+        .eq("client_id", client.id)
+        .order("date", { ascending: false })
+        .limit(1)
+        .maybeSingle()
+    : { data: null };
+
+  const age = client?.date_of_birth ? calculateAge(client.date_of_birth) : null;
+  const zones =
+    age !== null && latestMeasurement?.resting_hr ? calculateHeartRateZones(age, latestMeasurement.resting_hr) : null;
 
   const { data: assignments } = client
     ? await supabase
@@ -36,7 +51,7 @@ export default async function AllenamentiPage() {
   return (
     <div>
       <SectionHeader title="Allenamenti" />
-      <AllenamentiTabs assignments={normalizedAssignments} workouts={normalizedWorkouts} />
+      <AllenamentiTabs assignments={normalizedAssignments} workouts={normalizedWorkouts} zones={zones} />
     </div>
   );
 }

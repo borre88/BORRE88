@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { Clock, Dumbbell, Home, ChevronDown, ChevronUp, Info } from "lucide-react";
 import type { Tables } from "@/lib/database.types";
+import { renderZoneTokens, type HeartRateZone } from "@/lib/health-score";
 import { ChipGroup, SectionIntro, Tag } from "@/components/ui";
 
 type Workout = Tables<"workouts"> & { workout_exercises: Tables<"workout_exercises">[] };
@@ -13,6 +14,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   hyrox: "Hyrox",
   mobility: "Mobilità e recupero",
   gym: "Palestra (GYM)",
+  corsa: "Corsa",
 };
 
 const CATEGORY_SUBTITLES: Record<string, string> = {
@@ -21,7 +23,11 @@ const CATEGORY_SUBTITLES: Record<string, string> = {
   hyrox: "Circuiti funzionali in stile Hyrox: corsa, wall ball, affondi e stazioni a tempo.",
   mobility: "Esercizi di allungamento e recupero per le diverse parti del corpo.",
   gym: "Schede da palestra per gruppo muscolare, con 5 livelli di esperienza: scegli la categoria e il tuo livello.",
+  corsa: "Corsa strutturata per zona cardiaca, con 5 livelli di esperienza: le zone bpm sono calcolate sui tuoi dati.",
 };
+
+/** Categorie con sottocategoria + livello (chip a due passaggi), invece del filtro attrezzatura. */
+const LEVELED_CATEGORIES = new Set(["gym", "corsa"]);
 
 const EQUIP_LABELS: Record<string, string> = {
   nessuno: "Nessun attrezzo",
@@ -44,6 +50,10 @@ const SUBCATEGORY_LABELS: Record<string, string> = {
   leg_focus_glutei: "Leg Focus Glutei",
   full_body: "Full Body",
   full_body_restart: "Full Body Restart",
+  zona2: "Corsa Zona 2",
+  intervalli: "Ripetute Zona 3/4",
+  soglia: "Soglia",
+  fartlek: "Fartlek",
 };
 
 const LEVEL_DESCRIPTIONS: Record<number, string> = {
@@ -54,7 +64,7 @@ const LEVEL_DESCRIPTIONS: Record<number, string> = {
   5: "Livello pro: ti alleni da anni in autonomia, anche in preparazione gara.",
 };
 
-export function AllenamentiTab({ workouts }: { workouts: Workout[] }) {
+export function AllenamentiTab({ workouts, zones = null }: { workouts: Workout[]; zones?: HeartRateZone[] | null }) {
   const categories = useMemo(() => {
     const present = new Set(workouts.map((w) => w.category));
     return Object.keys(CATEGORY_LABELS).filter((c) => present.has(c));
@@ -66,19 +76,21 @@ export function AllenamentiTab({ workouts }: { workouts: Workout[] }) {
 
   const inCategory = useMemo(() => workouts.filter((w) => w.category === category), [workouts, category]);
 
-  const gymSubcategories = useMemo(() => {
+  const leveledSubcategories = useMemo(() => {
     const present = new Set(inCategory.map((w) => w.subcategory).filter((s): s is string => s !== null));
     return Object.keys(SUBCATEGORY_LABELS).filter((s) => present.has(s));
   }, [inCategory]);
 
-  const [subcategory, setSubcategory] = useState(gymSubcategories[0] ?? "push");
+  const [subcategory, setSubcategory] = useState(leveledSubcategories[0] ?? "push");
   const [level, setLevel] = useState(1);
+
+  const isLeveled = LEVELED_CATEGORIES.has(category);
 
   const filtered = useMemo(() => {
     if (category === "casa") return inCategory.filter((w) => equipment === "tutti" || w.equipment === equipment);
-    if (category === "gym") return inCategory.filter((w) => w.subcategory === subcategory && w.level === level);
+    if (isLeveled) return inCategory.filter((w) => w.subcategory === subcategory && w.level === level);
     return inCategory;
-  }, [inCategory, category, equipment, subcategory, level]);
+  }, [inCategory, category, equipment, isLeveled, subcategory, level]);
 
   return (
     <div>
@@ -105,7 +117,7 @@ export function AllenamentiTab({ workouts }: { workouts: Workout[] }) {
         </div>
       )}
 
-      {category === "gym" && (
+      {isLeveled && (
         <>
           <div className="mb-3">
             <ChipGroup
@@ -114,7 +126,7 @@ export function AllenamentiTab({ workouts }: { workouts: Workout[] }) {
                 setSubcategory(v);
                 setExpanded(null);
               }}
-              options={gymSubcategories.map((s) => ({ key: s, label: SUBCATEGORY_LABELS[s] }))}
+              options={leveledSubcategories.map((s) => ({ key: s, label: SUBCATEGORY_LABELS[s] }))}
             />
           </div>
           <div className="mb-4">
@@ -131,6 +143,15 @@ export function AllenamentiTab({ workouts }: { workouts: Workout[] }) {
             <Info size={16} strokeWidth={2.2} className="mt-0.5 shrink-0 text-teal" />
             <p className="text-[12.5px] leading-relaxed text-ink">{LEVEL_DESCRIPTIONS[level]}</p>
           </div>
+          {category === "corsa" && !zones && (
+            <div className="mb-4 flex gap-2.5 rounded-lg border border-gold bg-gold-soft px-4 py-3">
+              <Info size={16} strokeWidth={2.2} className="mt-0.5 shrink-0 text-gold" />
+              <p className="text-[12.5px] leading-relaxed text-ink">
+                Le zone qui sotto sono indicative: inserisci la tua FC a riposo (e la data di nascita) nella
+                Valutazione per vedere i bpm calcolati su di te.
+              </p>
+            </div>
+          )}
         </>
       )}
 
@@ -162,7 +183,7 @@ export function AllenamentiTab({ workouts }: { workouts: Workout[] }) {
                       {EQUIP_LABELS[w.equipment]}
                     </Tag>
                   )}
-                  {category === "gym" && w.level !== null && <Tag>Livello {w.level}</Tag>}
+                  {isLeveled && w.level !== null && <Tag>Livello {w.level}</Tag>}
                   <Tag muted>{GOAL_LABELS[w.goal]}</Tag>
                 </div>
                 <div className="mb-1.5 font-display text-[17px] font-semibold leading-tight">{w.name}</div>
@@ -194,10 +215,10 @@ export function AllenamentiTab({ workouts }: { workouts: Workout[] }) {
                   <tbody>
                     {w.workout_exercises.map((ex) => (
                       <tr key={ex.id}>
-                        <td className="border-t border-line px-2 py-1.5">{ex.name}</td>
+                        <td className="border-t border-line px-2 py-1.5">{renderZoneTokens(ex.name, zones)}</td>
                         <td className="border-t border-line px-2 py-1.5">{ex.sets}</td>
                         <td className="border-t border-line px-2 py-1.5">{ex.reps}</td>
-                        <td className="border-t border-line px-2 py-1.5">{ex.rest}</td>
+                        <td className="border-t border-line px-2 py-1.5">{renderZoneTokens(ex.rest, zones)}</td>
                       </tr>
                     ))}
                   </tbody>

@@ -2,14 +2,31 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
+import { calculateAge, calculateHeartRateZones } from "@/lib/health-score";
 import { TrainerWorkoutCalendar } from "./workout-calendar";
 
 export default async function ClientAllenamentiPage({ params }: { params: Promise<{ clientId: string }> }) {
   const { clientId } = await params;
   const supabase = await createClient();
 
-  const { data: client } = await supabase.from("clients").select("id, full_name").eq("id", clientId).single();
+  const { data: client } = await supabase
+    .from("clients")
+    .select("id, full_name, date_of_birth")
+    .eq("id", clientId)
+    .single();
   if (!client) notFound();
+
+  const { data: latestMeasurement } = await supabase
+    .from("measurements")
+    .select("resting_hr")
+    .eq("client_id", clientId)
+    .order("date", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  const age = client.date_of_birth ? calculateAge(client.date_of_birth) : null;
+  const zones =
+    age !== null && latestMeasurement?.resting_hr ? calculateHeartRateZones(age, latestMeasurement.resting_hr) : null;
 
   const { data: assignments } = await supabase
     .from("workout_assignments")
@@ -39,7 +56,12 @@ export default async function ClientAllenamentiPage({ params }: { params: Promis
         Torna alla scheda cliente
       </Link>
       <h1 className="mb-4 font-display text-lg font-bold">Allenamenti — {client.full_name}</h1>
-      <TrainerWorkoutCalendar clientId={clientId} assignments={normalizedAssignments} catalog={normalizedCatalog} />
+      <TrainerWorkoutCalendar
+        clientId={clientId}
+        assignments={normalizedAssignments}
+        catalog={normalizedCatalog}
+        zones={zones}
+      />
     </div>
   );
 }
