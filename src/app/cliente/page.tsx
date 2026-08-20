@@ -7,7 +7,7 @@ import { computeFullReport, synthesizeReport } from "@/lib/health-report";
 import { SectionIntro } from "@/components/ui";
 import { HubCard } from "@/components/hub-card";
 
-const AREA_LABELS = ["Cardiovascolare", "Sonno", "Antropometria", "Forza", "Alimentare"];
+const AREA_LABELS = ["Cardiovascolare", "Sonno", "Antropometria", "Forza", "Nutrizione"];
 
 const DELIVERY_STATUS_LABELS: Record<string, string> = {
   nuova: "Richiesta inviata",

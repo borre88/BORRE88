@@ -8,7 +8,7 @@ const SECTIONS = [
   {
     icon: HeartPulse,
     title: "Valutazione",
-    text: "La tua area salute, aggiornata dal tuo trainer a ogni rilevazione. Trovi il punteggio (da 1 a 20) per 5 aree — cardiovascolare, sonno, antropometria, forza, alimentare — con i grafici di andamento nel tempo e il confronto tra la prima misura e le più recenti per le misure del corpo.",
+    text: "La tua area salute, aggiornata dal tuo trainer a ogni rilevazione. Trovi il punteggio (da 1 a 20) per 5 aree — cardiovascolare, sonno, antropometria, forza, nutrizione — con i grafici di andamento nel tempo e il confronto tra la prima misura e le più recenti per le misure del corpo.",
   },
   {
     icon: ClipboardCheck,

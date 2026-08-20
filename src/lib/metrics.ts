@@ -21,7 +21,7 @@ export type MetricKey =
   | "bench_1rm"
   | "deadlift_1rm"
   | "pullup_max_reps"
-  // Alimentare
+  // Nutrizione
   | "junk_food_weekly"
   | "fruit_veg_daily"
   | "alcohol_weekly"
@@ -94,8 +94,8 @@ export const METRIC_GROUPS: MetricGroup[] = [
   },
   {
     key: "alimentare",
-    label: "Salute alimentare",
-    description: "Abitudini alimentari e idratazione.",
+    label: "Salute nutrizionale",
+    description: "Abitudini nutrizionali e idratazione.",
     metrics: [
       { key: "junk_food_weekly", label: "Cibo spazzatura", unit: "volte/sett.", higherIsBetter: false, step: 1 },
       { key: "fruit_veg_daily", label: "Frutta e verdura", unit: "porzioni/giorno", higherIsBetter: true, step: 1 },

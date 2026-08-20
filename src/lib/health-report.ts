@@ -28,7 +28,7 @@ export function computeFullReport(
       { key: "sonno", label: "Sonno", result: null, missingReason: "Nessuna rilevazione" },
       { key: "antropometria", label: "Antropometria", result: null, missingReason: "Nessuna rilevazione" },
       { key: "forza", label: "Forza", result: null, missingReason: "Nessuna rilevazione" },
-      { key: "alimentare", label: "Alimentare", result: null, missingReason: "Nessuna rilevazione" },
+      { key: "alimentare", label: "Nutrizione", result: null, missingReason: "Nessuna rilevazione" },
     ];
   }
 
@@ -52,7 +52,7 @@ export function computeFullReport(
       result: gender ? scoreStrength(measurement, gender) : null,
       missingReason: gender ? undefined : "Serve il sesso",
     },
-    { key: "alimentare", label: "Alimentare", result: scoreNutrition(measurement) },
+    { key: "alimentare", label: "Nutrizione", result: scoreNutrition(measurement) },
   ];
 }
 

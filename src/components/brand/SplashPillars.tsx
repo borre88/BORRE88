@@ -7,7 +7,7 @@ const PILLARS = [
   { label: "Sonno", x: 252.7, y: 116.6, delay: 0.22, pos: { top: 98, right: -8 } },
   { label: "Antropometria", x: 213.5, y: 237.4, delay: 0.34, pos: { bottom: 32, right: 2 } },
   { label: "Forza", x: 86.5, y: 237.4, delay: 0.46, pos: { bottom: 32, left: 12 } },
-  { label: "Alimentare", x: 47.3, y: 116.6, delay: 0.58, pos: { top: 98, left: -14 } },
+  { label: "Nutrizione", x: 47.3, y: 116.6, delay: 0.58, pos: { top: 98, left: -14 } },
 ];
 
 /** Poligono interno: usa i punteggi reali del cliente (0–20) se disponibili. */
