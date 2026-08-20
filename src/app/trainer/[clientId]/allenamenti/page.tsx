@@ -3,7 +3,9 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { calculateAge, calculateHeartRateZones } from "@/lib/health-score";
+import { AreaTabs } from "@/components/area-tabs";
 import { TrainerWorkoutCalendar } from "./workout-calendar";
+import { LibraryManager } from "./library-manager";
 
 export default async function ClientAllenamentiPage({ params }: { params: Promise<{ clientId: string }> }) {
   const { clientId } = await params;
@@ -46,6 +48,13 @@ export default async function ClientAllenamentiPage({ params }: { params: Promis
     workout_exercises: [...w.workout_exercises].sort((a, b) => a.position - b.position),
   }));
 
+  const { data: libraryRows } = await supabase
+    .from("client_workout_library")
+    .select("workout_id")
+    .eq("client_id", clientId);
+
+  const assignedWorkoutIds = (libraryRows ?? []).map((r) => r.workout_id);
+
   return (
     <div>
       <Link
@@ -56,11 +65,28 @@ export default async function ClientAllenamentiPage({ params }: { params: Promis
         Torna alla scheda cliente
       </Link>
       <h1 className="mb-4 font-display text-lg font-bold">Allenamenti — {client.full_name}</h1>
-      <TrainerWorkoutCalendar
-        clientId={clientId}
-        assignments={normalizedAssignments}
-        catalog={normalizedCatalog}
-        zones={zones}
+      <AreaTabs
+        tabs={[
+          {
+            key: "calendario",
+            label: "Calendario",
+            content: (
+              <TrainerWorkoutCalendar
+                clientId={clientId}
+                assignments={normalizedAssignments}
+                catalog={normalizedCatalog}
+                zones={zones}
+              />
+            ),
+          },
+          {
+            key: "libreria",
+            label: "Libreria cliente",
+            content: (
+              <LibraryManager clientId={clientId} catalog={normalizedCatalog} initialAssignedIds={assignedWorkoutIds} />
+            ),
+          },
+        ]}
       />
     </div>
   );

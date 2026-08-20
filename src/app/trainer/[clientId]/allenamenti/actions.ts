@@ -80,3 +80,27 @@ export async function deleteWorkoutAssignment(clientId: string, assignmentId: st
   revalidatePath(`/trainer/${clientId}/allenamenti`);
   revalidatePath("/cliente/allenamenti");
 }
+
+/** Aggiunge o rimuove uno o più allenamenti del catalogo dalla libreria visibile al cliente. */
+export async function setClientLibraryWorkouts(clientId: string, workoutIds: string[], enabled: boolean) {
+  if (workoutIds.length === 0) return;
+  const supabase = await createClient();
+
+  if (enabled) {
+    await supabase
+      .from("client_workout_library")
+      .upsert(
+        workoutIds.map((workout_id) => ({ client_id: clientId, workout_id })),
+        { onConflict: "client_id,workout_id", ignoreDuplicates: true }
+      );
+  } else {
+    await supabase
+      .from("client_workout_library")
+      .delete()
+      .eq("client_id", clientId)
+      .in("workout_id", workoutIds);
+  }
+
+  revalidatePath(`/trainer/${clientId}/allenamenti`);
+  revalidatePath("/cliente/allenamenti");
+}

@@ -26,7 +26,7 @@ export function AllenamentiTabs({
         { key: "calendario", label: "Calendario", content: <CalendarView assignments={assignments} /> },
         {
           key: "holiday",
-          label: "Workout on holiday",
+          label: "Workout list",
           content: <AllenamentiTab workouts={workouts} zones={zones} />,
         },
       ]}

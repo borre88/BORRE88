@@ -78,6 +78,42 @@ export type Database = {
           },
         ]
       }
+      client_workout_library: {
+        Row: {
+          client_id: string
+          created_at: string
+          id: string
+          workout_id: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          id?: string
+          workout_id: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          id?: string
+          workout_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_workout_library_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_workout_library_workout_id_fkey"
+            columns: ["workout_id"]
+            isOneToOne: false
+            referencedRelation: "workouts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clients: {
         Row: {
           created_at: string
@@ -804,7 +840,7 @@ export type Database = {
 
 type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
 
-type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
+type DefaultSchema = DatabaseWithoutInternals["public"]
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends

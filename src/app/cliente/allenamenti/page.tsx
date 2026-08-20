@@ -41,12 +41,23 @@ export default async function AllenamentiPage() {
     workout_assignment_exercises: [...a.workout_assignment_exercises].sort((x, y) => x.position - y.position),
   }));
 
-  const { data: workouts } = await supabase.from("workouts").select("*, workout_exercises(*)").order("name");
+  const { data: libraryRows } = client
+    ? await supabase
+        .from("client_workout_library")
+        .select("workouts(*, workout_exercises(*))")
+        .eq("client_id", client.id)
+    : { data: null };
 
-  const normalizedWorkouts = (workouts ?? []).map((w) => ({
-    ...w,
-    workout_exercises: [...w.workout_exercises].sort((a, b) => a.position - b.position),
-  }));
+  const libraryWorkouts = (libraryRows ?? [])
+    .map((r) => r.workouts)
+    .filter((w): w is NonNullable<typeof w> => w !== null);
+
+  const normalizedWorkouts = libraryWorkouts
+    .map((w) => ({
+      ...w,
+      workout_exercises: [...w.workout_exercises].sort((a, b) => a.position - b.position),
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name));
 
   return (
     <div>

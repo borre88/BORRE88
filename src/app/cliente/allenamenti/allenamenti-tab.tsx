@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { Clock, Dumbbell, Home, ChevronDown, ChevronUp, Info } from "lucide-react";
 import type { Tables } from "@/lib/database.types";
 import { renderZoneTokens, type HeartRateZone } from "@/lib/health-score";
-import { ChipGroup, SectionIntro, Tag } from "@/components/ui";
+import { ChipGroup, EmptyState, SectionIntro, Tag } from "@/components/ui";
 
 type Workout = Tables<"workouts"> & { workout_exercises: Tables<"workout_exercises">[] };
 
@@ -92,9 +92,21 @@ export function AllenamentiTab({ workouts, zones = null }: { workouts: Workout[]
     return inCategory;
   }, [inCategory, category, equipment, isLeveled, subcategory, level]);
 
+  if (workouts.length === 0) {
+    return (
+      <div>
+        <SectionIntro
+          title="Workout list"
+          subtitle="Gli allenamenti che il tuo trainer sceglie per te compariranno qui."
+        />
+        <EmptyState text="Il tuo trainer non ha ancora aggiunto allenamenti alla tua lista." />
+      </div>
+    );
+  }
+
   return (
     <div>
-      <SectionIntro title="Workout on holiday" subtitle={CATEGORY_SUBTITLES[category]} />
+      <SectionIntro title="Workout list" subtitle={CATEGORY_SUBTITLES[category]} />
 
       <div className="mb-3">
         <ChipGroup
