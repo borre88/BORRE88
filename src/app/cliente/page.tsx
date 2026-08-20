@@ -60,7 +60,12 @@ export default async function ClienteHub() {
   }
 
   const [{ count: workoutsCount }, { count: recipesCount }] = await Promise.all([
-    supabase.from("workouts").select("id", { count: "exact", head: true }),
+    client
+      ? supabase
+          .from("client_workout_library")
+          .select("id", { count: "exact", head: true })
+          .eq("client_id", client.id)
+      : Promise.resolve({ count: 0 }),
     supabase.from("recipes").select("id", { count: "exact", head: true }),
   ]);
 
