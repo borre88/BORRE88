@@ -112,6 +112,7 @@ const FOOD_CATEGORY_DOT: Record<string, string> = {
   bevande: "bg-teal",
   dolci_snack: "bg-bad",
   condimenti: "bg-teal",
+  integratori: "bg-gold-bright",
   altro: "bg-ink-faint",
 };
 
@@ -180,6 +181,7 @@ export const FOOD_CATEGORY_LABELS: Record<string, string> = {
   bevande: "Bevande",
   dolci_snack: "Dolci e snack",
   condimenti: "Condimenti e spezie",
+  integratori: "Integratori",
   altro: "Altro",
 };
 
