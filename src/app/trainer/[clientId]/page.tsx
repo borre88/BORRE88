@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { FileText, FlaskConical, Truck, Pill, Dumbbell } from "lucide-react";
+import { FileText, FlaskConical, Truck, Pill, Dumbbell, Apple } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { calculateAge, type Gender } from "@/lib/health-score";
 import { computeLatestByMetric, METRIC_GROUPS } from "@/lib/metrics";
@@ -234,6 +234,13 @@ export default async function ClientDetailPage({
           >
             <Dumbbell size={15} strokeWidth={2.2} />
             Allenamenti
+          </Link>
+          <Link
+            href={`/trainer/${clientId}/diete`}
+            className="flex items-center gap-1.5 rounded-lg border border-line px-4 py-2.5 text-sm font-medium text-ink-soft"
+          >
+            <Apple size={15} strokeWidth={2.2} />
+            Diete
           </Link>
           <AddMeasurementModal
             clientId={clientId}

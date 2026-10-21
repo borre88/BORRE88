@@ -1,4 +1,4 @@
-import { HeartPulse, Dumbbell, ChefHat, ClipboardCheck, Truck, Pill, Bell } from "lucide-react";
+import { HeartPulse, Dumbbell, ChefHat, ClipboardCheck, Truck, Pill, Bell, Apple } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getSession } from "@/lib/auth";
 import { getMondayISO } from "@/lib/dates";
@@ -69,9 +69,17 @@ export default async function ClienteHub() {
     supabase.from("recipes").select("id", { count: "exact", head: true }),
   ]);
 
+  let activeDietPlanName: string | null = null;
   let checkedInThisWeek = false;
   let latestDeliveryStatus: string | null = null;
   if (client) {
+    const { data: activePlan } = await supabase
+      .from("diet_plans")
+      .select("name")
+      .eq("client_id", client.id)
+      .eq("active", true)
+      .maybeSingle();
+    activeDietPlanName = activePlan?.name ?? null;
     const [{ data: currentCheckin }, { data: latestDelivery }] = await Promise.all([
       supabase
         .from("weekly_checkins")
@@ -128,6 +136,15 @@ export default async function ClienteHub() {
             <div className="mt-2 text-[11px] text-ink-faint">Il poligono apparirà qui dopo la prima rilevazione.</div>
           )}
         </HubCard>
+
+        <HubCard
+          href="/cliente/diete"
+          icon={<Apple size={17} strokeWidth={2.2} />}
+          title="Diete"
+          subtitle="Il piano alimentare che il tuo trainer costruisce per te."
+          stat={activeDietPlanName ?? undefined}
+          delay={0.04}
+        />
 
         <HubCard
           href="/cliente/nutrizione"

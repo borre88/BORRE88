@@ -263,6 +263,208 @@ export type Database = {
           },
         ]
       }
+      diet_plan_days: {
+        Row: {
+          id: string
+          label: string | null
+          plan_id: string
+          target_carbs_g: number | null
+          target_fat_g: number | null
+          target_kcal: number | null
+          target_protein_g: number | null
+          weekday: number
+        }
+        Insert: {
+          id?: string
+          label?: string | null
+          plan_id: string
+          target_carbs_g?: number | null
+          target_fat_g?: number | null
+          target_kcal?: number | null
+          target_protein_g?: number | null
+          weekday: number
+        }
+        Update: {
+          id?: string
+          label?: string | null
+          plan_id?: string
+          target_carbs_g?: number | null
+          target_fat_g?: number | null
+          target_kcal?: number | null
+          target_protein_g?: number | null
+          weekday?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "diet_plan_days_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "diet_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      diet_plan_meal_items: {
+        Row: {
+          custom_name: string | null
+          food_id: string | null
+          id: string
+          meal_id: string
+          position: number
+          quantity_g: number
+          recipe_id: string | null
+        }
+        Insert: {
+          custom_name?: string | null
+          food_id?: string | null
+          id?: string
+          meal_id: string
+          position?: number
+          quantity_g: number
+          recipe_id?: string | null
+        }
+        Update: {
+          custom_name?: string | null
+          food_id?: string | null
+          id?: string
+          meal_id?: string
+          position?: number
+          quantity_g?: number
+          recipe_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "diet_plan_meal_items_food_id_fkey"
+            columns: ["food_id"]
+            isOneToOne: false
+            referencedRelation: "foods"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "diet_plan_meal_items_meal_id_fkey"
+            columns: ["meal_id"]
+            isOneToOne: false
+            referencedRelation: "diet_plan_meals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "diet_plan_meal_items_recipe_id_fkey"
+            columns: ["recipe_id"]
+            isOneToOne: false
+            referencedRelation: "recipes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      diet_plan_meals: {
+        Row: {
+          created_at: string
+          id: string
+          meal_type: string
+          name: string | null
+          notes: string | null
+          plan_id: string
+          position: number
+          weekday: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          meal_type: string
+          name?: string | null
+          notes?: string | null
+          plan_id: string
+          position?: number
+          weekday: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          meal_type?: string
+          name?: string | null
+          notes?: string | null
+          plan_id?: string
+          position?: number
+          weekday?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "diet_plan_meals_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "diet_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      diet_plans: {
+        Row: {
+          active: boolean
+          bmr: number | null
+          client_id: string
+          created_at: string
+          duration_weeks: number
+          id: string
+          macro_only: boolean
+          name: string
+          notes: string | null
+          pal: number | null
+          phase: string | null
+          start_date: string
+          target_carbs_g: number | null
+          target_fat_g: number | null
+          target_kcal: number | null
+          target_protein_g: number | null
+          tdee: number | null
+        }
+        Insert: {
+          active?: boolean
+          bmr?: number | null
+          client_id: string
+          created_at?: string
+          duration_weeks?: number
+          id?: string
+          macro_only?: boolean
+          name: string
+          notes?: string | null
+          pal?: number | null
+          phase?: string | null
+          start_date?: string
+          target_carbs_g?: number | null
+          target_fat_g?: number | null
+          target_kcal?: number | null
+          target_protein_g?: number | null
+          tdee?: number | null
+        }
+        Update: {
+          active?: boolean
+          bmr?: number | null
+          client_id?: string
+          created_at?: string
+          duration_weeks?: number
+          id?: string
+          macro_only?: boolean
+          name?: string
+          notes?: string | null
+          pal?: number | null
+          phase?: string | null
+          start_date?: string
+          target_carbs_g?: number | null
+          target_fat_g?: number | null
+          target_kcal?: number | null
+          target_protein_g?: number | null
+          tdee?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "diet_plans_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       dining_categories: {
         Row: {
           id: string
@@ -318,6 +520,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      foods: {
+        Row: {
+          carbs_100g: number
+          category: string
+          created_at: string
+          fat_100g: number
+          fiber_100g: number
+          id: string
+          kcal_100g: number
+          name: string
+          protein_100g: number
+          source: string
+        }
+        Insert: {
+          carbs_100g?: number
+          category: string
+          created_at?: string
+          fat_100g?: number
+          fiber_100g?: number
+          id?: string
+          kcal_100g: number
+          name: string
+          protein_100g?: number
+          source?: string
+        }
+        Update: {
+          carbs_100g?: number
+          category?: string
+          created_at?: string
+          fat_100g?: number
+          fiber_100g?: number
+          id?: string
+          kcal_100g?: number
+          name?: string
+          protein_100g?: number
+          source?: string
+        }
+        Relationships: []
       }
       measurements: {
         Row: {

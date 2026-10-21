@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Plus, Users, User, Search, ChevronDown, ChevronUp } from "lucide-react";
+import { Plus, Users, User, Search, ChevronDown, ChevronUp, Apple } from "lucide-react";
 import { NewClientForm } from "./new-client-form";
 import { DeleteClientButton } from "./delete-client-button";
 
@@ -63,6 +63,16 @@ export function ClientSidebar({ clients }: { clients: ClientSummary[] }) {
 
   return (
     <aside className="print:hidden w-full shrink-0 border-b border-line bg-surface p-4 sm:w-64 sm:border-b-0 sm:border-r sm:p-5">
+      <Link
+        href="/trainer/alimenti"
+        className={`mb-4 flex items-center gap-2 rounded-lg px-2 py-2 text-[13px] font-medium ${
+          pathname === "/trainer/alimenti" ? "bg-teal-soft text-teal" : "text-ink-soft"
+        }`}
+      >
+        <Apple size={14} strokeWidth={2.2} />
+        Database Alimenti
+      </Link>
+
       <div className="mb-2 flex items-center justify-between text-[10.5px] font-semibold tracking-wide text-ink-faint">
         <span className="flex items-center gap-1.5">
           <Users size={13} strokeWidth={2.2} /> CLIENTI
