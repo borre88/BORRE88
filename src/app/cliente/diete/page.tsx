@@ -1,12 +1,16 @@
 import { createClient } from "@/lib/supabase/server";
 import { getSession } from "@/lib/auth";
-import { SectionIntro, Tag, EmptyState } from "@/components/ui";
+import { SectionIntro, EmptyState } from "@/components/ui";
 import {
   PHASE_LABELS,
+  PHASE_ACCENT,
+  MACRO_ACCENT,
   MEAL_TYPES,
   MEAL_TYPE_LABELS,
   WEEKDAY_LABELS,
   scaleFoodToQuantity,
+  mealTypeDotClass,
+  todayWeekdayMon0,
   type DietPhase,
 } from "@/lib/diet-calc";
 import type { Tables } from "@/lib/database.types";
@@ -80,20 +84,54 @@ export default async function ClienteDietePage() {
     return { kcal: Math.round(kcal), protein: Math.round(protein), carbs: Math.round(carbs), fat: Math.round(fat) };
   }
 
+  const today = todayWeekdayMon0();
+
   return (
     <div>
       <SectionIntro title="Diete" subtitle="Il piano alimentare che il tuo trainer ha costruito per te." />
 
       <div className="mb-5 rounded-xl border border-line bg-surface px-5 py-4">
         <div className="mb-1.5 flex flex-wrap items-center gap-1.5">
-          {plan.phase && <Tag>{PHASE_LABELS[plan.phase as DietPhase] ?? plan.phase}</Tag>}
+          {plan.phase &&
+            (() => {
+              const accent = PHASE_ACCENT[plan.phase as DietPhase];
+              return (
+                <span
+                  className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold tracking-wide ${accent.border} ${accent.bg} ${accent.text}`}
+                >
+                  <span className={`h-1.5 w-1.5 rounded-full ${accent.dot}`} />
+                  {PHASE_LABELS[plan.phase as DietPhase] ?? plan.phase}
+                </span>
+              );
+            })()}
         </div>
         <div className="font-display text-lg font-semibold">{plan.name}</div>
         <div className="mt-1 text-[12.5px] text-ink-faint">
           {plan.target_kcal ? `${plan.target_kcal} kcal` : "Target non impostato"}
-          {plan.target_protein_g ? ` · Proteine ${plan.target_protein_g}g` : ""}
-          {plan.target_carbs_g ? ` · Carboidrati ${plan.target_carbs_g}g` : ""}
-          {plan.target_fat_g ? ` · Grassi ${plan.target_fat_g}g` : ""}
+          {plan.target_protein_g ? (
+            <>
+              {" · "}
+              <span className={MACRO_ACCENT.protein.text}>Proteine {plan.target_protein_g}g</span>
+            </>
+          ) : (
+            ""
+          )}
+          {plan.target_carbs_g ? (
+            <>
+              {" · "}
+              <span className={MACRO_ACCENT.carbs.text}>Carboidrati {plan.target_carbs_g}g</span>
+            </>
+          ) : (
+            ""
+          )}
+          {plan.target_fat_g ? (
+            <>
+              {" · "}
+              <span className={MACRO_ACCENT.fat.text}>Grassi {plan.target_fat_g}g</span>
+            </>
+          ) : (
+            ""
+          )}
         </div>
         {plan.notes && <p className="mt-2.5 whitespace-pre-line text-[13px] leading-relaxed text-ink-soft">{plan.notes}</p>}
       </div>
@@ -111,9 +149,15 @@ export default async function ClienteDietePage() {
             <thead>
               <tr className="bg-cream">
                 <th className="w-32 px-3 py-2 text-left text-[10.5px] font-semibold text-ink-faint">Pasto</th>
-                {WEEKDAY_LABELS.map((w) => (
-                  <th key={w} className="min-w-[150px] px-2 py-2 text-left text-[10.5px] font-semibold text-ink-faint">
+                {WEEKDAY_LABELS.map((w, weekday) => (
+                  <th
+                    key={w}
+                    className={`min-w-[150px] px-2 py-2 text-left text-[10.5px] font-semibold ${
+                      weekday === today ? "text-teal" : "text-ink-faint"
+                    }`}
+                  >
                     {w}
+                    {weekday === today && <span className="ml-1 inline-block h-1.5 w-1.5 rounded-full bg-teal align-middle" />}
                   </th>
                 ))}
               </tr>
@@ -121,11 +165,16 @@ export default async function ClienteDietePage() {
             <tbody>
               {mealTypeRows.map((mealType) => (
                 <tr key={mealType} className="border-t border-line align-top">
-                  <td className="px-3 py-2 font-medium text-ink-soft">{MEAL_TYPE_LABELS[mealType] ?? mealType}</td>
+                  <td className="px-3 py-2 font-medium text-ink-soft">
+                    <span className="flex items-center gap-1.5">
+                      <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${mealTypeDotClass(mealType)}`} />
+                      {MEAL_TYPE_LABELS[mealType] ?? mealType}
+                    </span>
+                  </td>
                   {WEEKDAY_LABELS.map((_, weekday) => {
                     const meal = meals.find((m) => m.weekday === weekday && m.meal_type === mealType);
                     return (
-                      <td key={weekday} className="px-2 py-2">
+                      <td key={weekday} className={`px-2 py-2 ${weekday === today ? "bg-teal-soft/40" : ""}`}>
                         {meal && meal.diet_plan_meal_items.length > 0 ? (
                           <div className="space-y-1">
                             {meal.diet_plan_meal_items.map((item) => {
@@ -155,45 +204,45 @@ export default async function ClienteDietePage() {
                   const totals = dayTotals(weekday);
                   const target = dayOverrides.get(weekday)?.target_kcal ?? plan.target_kcal;
                   return (
-                    <td key={weekday} className="px-2 py-2">
+                    <td key={weekday} className={`px-2 py-2 ${weekday === today ? "bg-teal-soft/40" : ""}`}>
                       {totals.kcal} {target ? <span className="font-normal text-ink-faint">/ {target}</span> : null}
                     </td>
                   );
                 })}
               </tr>
-              <tr className="text-[11px] text-ink-faint">
-                <td className="px-3 py-1">Proteine (g)</td>
+              <tr className="text-[11px]">
+                <td className={`px-3 py-1 font-medium ${MACRO_ACCENT.protein.text}`}>Proteine (g)</td>
                 {WEEKDAY_LABELS.map((_, weekday) => {
                   const totals = dayTotals(weekday);
                   const t = dayOverrides.get(weekday)?.target_protein_g ?? plan.target_protein_g;
                   return (
-                    <td key={weekday} className="px-2 py-1">
+                    <td key={weekday} className={`px-2 py-1 ${MACRO_ACCENT.protein.text} ${weekday === today ? "bg-teal-soft/40" : ""}`}>
                       {totals.protein}
                       {t ? ` / ${t}` : ""}
                     </td>
                   );
                 })}
               </tr>
-              <tr className="text-[11px] text-ink-faint">
-                <td className="px-3 py-1">Carboidrati (g)</td>
+              <tr className="text-[11px]">
+                <td className={`px-3 py-1 font-medium ${MACRO_ACCENT.carbs.text}`}>Carboidrati (g)</td>
                 {WEEKDAY_LABELS.map((_, weekday) => {
                   const totals = dayTotals(weekday);
                   const t = dayOverrides.get(weekday)?.target_carbs_g ?? plan.target_carbs_g;
                   return (
-                    <td key={weekday} className="px-2 py-1">
+                    <td key={weekday} className={`px-2 py-1 ${MACRO_ACCENT.carbs.text} ${weekday === today ? "bg-teal-soft/40" : ""}`}>
                       {totals.carbs}
                       {t ? ` / ${t}` : ""}
                     </td>
                   );
                 })}
               </tr>
-              <tr className="text-[11px] text-ink-faint">
-                <td className="px-3 py-1">Grassi (g)</td>
+              <tr className="text-[11px]">
+                <td className={`px-3 py-1 font-medium ${MACRO_ACCENT.fat.text}`}>Grassi (g)</td>
                 {WEEKDAY_LABELS.map((_, weekday) => {
                   const totals = dayTotals(weekday);
                   const t = dayOverrides.get(weekday)?.target_fat_g ?? plan.target_fat_g;
                   return (
-                    <td key={weekday} className="px-2 py-1">
+                    <td key={weekday} className={`px-2 py-1 ${MACRO_ACCENT.fat.text} ${weekday === today ? "bg-teal-soft/40" : ""}`}>
                       {totals.fat}
                       {t ? ` / ${t}` : ""}
                     </td>

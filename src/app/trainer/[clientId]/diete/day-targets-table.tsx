@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { WEEKDAY_LABELS_SHORT } from "@/lib/diet-calc";
+import { WEEKDAY_LABELS_SHORT, MACRO_ACCENT, dayLabelDotClass } from "@/lib/diet-calc";
+
+const LABEL_PRESETS = ["Ricarica", "Scarico", "Allenamento", "Gara"];
 import type { Tables } from "@/lib/database.types";
 import { upsertPlanDay, clearPlanDayOverride } from "./actions";
 
@@ -61,9 +63,9 @@ export function DayTargetsTable({
             <th className="px-3 py-2 text-left text-[10.5px] font-semibold text-ink-faint">Giorno</th>
             <th className="px-3 py-2 text-left text-[10.5px] font-semibold text-ink-faint">Etichetta</th>
             <th className="px-3 py-2 text-right text-[10.5px] font-semibold text-ink-faint">Kcal</th>
-            <th className="px-3 py-2 text-right text-[10.5px] font-semibold text-ink-faint">P (g)</th>
-            <th className="px-3 py-2 text-right text-[10.5px] font-semibold text-ink-faint">C (g)</th>
-            <th className="px-3 py-2 text-right text-[10.5px] font-semibold text-ink-faint">G (g)</th>
+            <th className={`px-3 py-2 text-right text-[10.5px] font-semibold ${MACRO_ACCENT.protein.text}`}>P (g)</th>
+            <th className={`px-3 py-2 text-right text-[10.5px] font-semibold ${MACRO_ACCENT.carbs.text}`}>C (g)</th>
+            <th className={`px-3 py-2 text-right text-[10.5px] font-semibold ${MACRO_ACCENT.fat.text}`}>G (g)</th>
           </tr>
         </thead>
         <tbody>
@@ -126,13 +128,22 @@ function DayRow({
     <tr className="border-t border-line">
       <td className="px-3 py-1.5 font-medium">{label}</td>
       <td className="px-3 py-1.5">
-        <input
-          value={dayLabel}
-          onChange={(e) => setDayLabel(e.target.value)}
-          onBlur={() => onSave(weekday, dayLabel, kcal, protein, carbs, fat)}
-          placeholder="+ etichetta"
-          className="w-28 rounded border border-line bg-cream px-1.5 py-1 text-[12px] outline-none focus:border-teal"
-        />
+        <div className="flex items-center gap-1.5">
+          <span className={`h-2 w-2 shrink-0 rounded-full ${dayLabelDotClass(dayLabel)}`} />
+          <input
+            value={dayLabel}
+            onChange={(e) => setDayLabel(e.target.value)}
+            onBlur={() => onSave(weekday, dayLabel, kcal, protein, carbs, fat)}
+            placeholder="+ etichetta"
+            list={`day-label-presets-${weekday}`}
+            className="w-24 rounded border border-line bg-cream px-1.5 py-1 text-[12px] outline-none focus:border-teal"
+          />
+          <datalist id={`day-label-presets-${weekday}`}>
+            {LABEL_PRESETS.map((p) => (
+              <option key={p} value={p} />
+            ))}
+          </datalist>
+        </div>
       </td>
       <td className="px-3 py-1.5 text-right">
         <input

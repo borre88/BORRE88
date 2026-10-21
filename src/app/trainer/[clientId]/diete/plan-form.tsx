@@ -1,12 +1,15 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
-import { Sparkles, X } from "lucide-react";
+import { Flame, Zap, Target, Sparkles, X } from "lucide-react";
 import { ACTIVITY_LABELS, ACTIVITY_MULTIPLIERS, calculateBMR, type Gender } from "@/lib/health-score";
 import {
   PHASE_LABELS,
   SPEED_LABELS,
   PHASE_SPEED_VARIATION,
+  PHASE_ACCENT,
+  BALANCE_ACCENT,
+  MACRO_ACCENT,
   calculateTargetKcal,
   classifyEnergyBalance,
   suggestMacroSplit,
@@ -156,14 +159,28 @@ export function PlanForm({
 
       <div className="mb-4">
         <span className="mb-1.5 block text-xs font-medium text-ink-soft">Fase obiettivo</span>
-        <ChipGroup
-          value={phase}
-          onChange={(v) => {
-            setPhase(v as DietPhase);
-            setVariationOverride(null);
-          }}
-          options={Object.entries(PHASE_LABELS).map(([key, label]) => ({ key, label }))}
-        />
+        <div className="flex flex-wrap gap-1.5">
+          {(Object.entries(PHASE_LABELS) as [DietPhase, string][]).map(([key, label]) => {
+            const accent = PHASE_ACCENT[key];
+            const selected = phase === key;
+            return (
+              <button
+                key={key}
+                type="button"
+                onClick={() => {
+                  setPhase(key);
+                  setVariationOverride(null);
+                }}
+                className={`flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-medium ${
+                  selected ? `${accent.border} ${accent.bg} ${accent.text}` : "border-line bg-surface text-ink-soft"
+                }`}
+              >
+                <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${accent.dot}`} />
+                {label}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       <div className="mb-4">
@@ -224,17 +241,24 @@ export function PlanForm({
       </div>
 
       <div className="mb-4 grid grid-cols-1 gap-2.5 sm:grid-cols-3">
-        <div className="rounded-lg border border-line bg-cream px-3.5 py-3">
-          <div className="text-[10.5px] font-semibold uppercase tracking-wide text-ink-faint">BMR (basale)</div>
+        <div className="rounded-lg border border-teal-soft-line bg-teal-soft px-3.5 py-3">
+          <div className="mb-1 flex items-center gap-1.5 text-[10.5px] font-semibold uppercase tracking-wide text-teal">
+            <Flame size={12} strokeWidth={2.4} />
+            BMR (basale)
+          </div>
           <div className="font-display text-xl font-bold">{bmr !== null ? Math.round(bmr) : "—"} kcal</div>
-          {(!gender || age === null) && <div className="mt-1 text-[11px] text-gold">Servono sesso e data di nascita</div>}
+          {(!gender || age === null) && <div className="mt-1 text-[11px] text-gold-ink">Servono sesso e data di nascita</div>}
         </div>
-        <div className="rounded-lg border border-line bg-cream px-3.5 py-3">
-          <div className="text-[10.5px] font-semibold uppercase tracking-wide text-ink-faint">TDEE (mantenimento)</div>
+        <div className="rounded-lg border border-teal-soft-line bg-teal-soft px-3.5 py-3">
+          <div className="mb-1 flex items-center gap-1.5 text-[10.5px] font-semibold uppercase tracking-wide text-teal">
+            <Zap size={12} strokeWidth={2.4} />
+            TDEE (mantenimento)
+          </div>
           <div className="font-display text-xl font-bold">{tdee !== null ? Math.round(tdee) : "—"} kcal</div>
         </div>
-        <div className="rounded-lg border border-gold bg-gold-soft px-3.5 py-3">
-          <div className="text-[10.5px] font-semibold uppercase tracking-wide text-gold-ink">
+        <div className={`rounded-lg border px-3.5 py-3 ${BALANCE_ACCENT[balance].border} ${BALANCE_ACCENT[balance].bg}`}>
+          <div className={`mb-1 flex items-center gap-1.5 text-[10.5px] font-semibold uppercase tracking-wide ${BALANCE_ACCENT[balance].text}`}>
+            <Target size={12} strokeWidth={2.4} />
             Target calorico — {BALANCE_LABELS[balance]}
           </div>
           <div className="font-display text-xl font-bold">{targetKcal ?? "—"} kcal</div>
@@ -265,9 +289,12 @@ export function PlanForm({
       </div>
 
       <div className="mb-4 grid grid-cols-1 gap-2.5 sm:grid-cols-3">
-        <div className="rounded-lg border border-line bg-surface px-3.5 py-3">
+        <div className={`rounded-lg border px-3.5 py-3 ${MACRO_ACCENT.protein.border} ${MACRO_ACCENT.protein.bg}`}>
           <div className="mb-1.5 flex items-center justify-between">
-            <span className="text-[10.5px] font-semibold uppercase tracking-wide text-ink-faint">Proteine</span>
+            <span className={`flex items-center gap-1.5 text-[10.5px] font-semibold uppercase tracking-wide ${MACRO_ACCENT.protein.text}`}>
+              <span className={`h-1.5 w-1.5 rounded-full ${MACRO_ACCENT.protein.dot}`} />
+              Proteine
+            </span>
             <span className="text-[10.5px] text-ink-faint">{effectiveProtein * 4} kcal</span>
           </div>
           <input
@@ -277,16 +304,22 @@ export function PlanForm({
             className={inputClass}
           />
         </div>
-        <div className="rounded-lg border border-line bg-surface px-3.5 py-3">
+        <div className={`rounded-lg border px-3.5 py-3 ${MACRO_ACCENT.fat.border} ${MACRO_ACCENT.fat.bg}`}>
           <div className="mb-1.5 flex items-center justify-between">
-            <span className="text-[10.5px] font-semibold uppercase tracking-wide text-ink-faint">Grassi</span>
+            <span className={`flex items-center gap-1.5 text-[10.5px] font-semibold uppercase tracking-wide ${MACRO_ACCENT.fat.text}`}>
+              <span className={`h-1.5 w-1.5 rounded-full ${MACRO_ACCENT.fat.dot}`} />
+              Grassi
+            </span>
             <span className="text-[10.5px] text-ink-faint">{effectiveFat * 9} kcal</span>
           </div>
           <input type="number" value={effectiveFat} onChange={(e) => setFatG(Number(e.target.value))} className={inputClass} />
         </div>
-        <div className="rounded-lg border border-line bg-surface px-3.5 py-3">
+        <div className={`rounded-lg border px-3.5 py-3 ${MACRO_ACCENT.carbs.border} ${MACRO_ACCENT.carbs.bg}`}>
           <div className="mb-1.5 flex items-center justify-between">
-            <span className="text-[10.5px] font-semibold uppercase tracking-wide text-ink-faint">Carboidrati</span>
+            <span className={`flex items-center gap-1.5 text-[10.5px] font-semibold uppercase tracking-wide ${MACRO_ACCENT.carbs.text}`}>
+              <span className={`h-1.5 w-1.5 rounded-full ${MACRO_ACCENT.carbs.dot}`} />
+              Carboidrati
+            </span>
             <span className="text-[10.5px] text-ink-faint">{effectiveCarbs * 4} kcal</span>
           </div>
           <input

@@ -3,7 +3,15 @@
 import { useMemo, useState, useTransition } from "react";
 import { Plus, Trash2, Copy } from "lucide-react";
 import type { Tables } from "@/lib/database.types";
-import { MEAL_TYPES, MEAL_TYPE_LABELS, WEEKDAY_LABELS_SHORT, scaleFoodToQuantity } from "@/lib/diet-calc";
+import {
+  MEAL_TYPES,
+  MEAL_TYPE_LABELS,
+  WEEKDAY_LABELS_SHORT,
+  MACRO_ACCENT,
+  scaleFoodToQuantity,
+  mealTypeDotClass,
+  todayWeekdayMon0,
+} from "@/lib/diet-calc";
 import {
   addMeal,
   deleteMeal,
@@ -41,6 +49,7 @@ export function WeeklyMealGrid({
   const [pending, startTransition] = useTransition();
   const [copyFrom, setCopyFrom] = useState(0);
   const [copyTo, setCopyTo] = useState<Set<number>>(new Set());
+  const today = useMemo(() => todayWeekdayMon0(), []);
 
   const foodsById = useMemo(() => new Map(foods.map((f) => [f.id, f])), [foods]);
 
@@ -137,9 +146,15 @@ export function WeeklyMealGrid({
           <thead>
             <tr className="bg-cream">
               <th className="w-32 px-3 py-2 text-left text-[10.5px] font-semibold text-ink-faint">Pasto</th>
-              {WEEKDAY_LABELS_SHORT.map((w) => (
-                <th key={w} className="min-w-[150px] px-2 py-2 text-left text-[10.5px] font-semibold text-ink-faint">
+              {WEEKDAY_LABELS_SHORT.map((w, weekday) => (
+                <th
+                  key={w}
+                  className={`min-w-[150px] px-2 py-2 text-left text-[10.5px] font-semibold ${
+                    weekday === today ? "text-teal" : "text-ink-faint"
+                  }`}
+                >
                   {w}
+                  {weekday === today && <span className="ml-1 inline-block h-1.5 w-1.5 rounded-full bg-teal align-middle" />}
                 </th>
               ))}
             </tr>
@@ -147,11 +162,16 @@ export function WeeklyMealGrid({
           <tbody>
             {mealTypeRows.map((mealType) => (
               <tr key={mealType} className="border-t border-line align-top">
-                <td className="px-3 py-2 font-medium text-ink-soft">{MEAL_TYPE_LABELS[mealType] ?? mealType}</td>
+                <td className="px-3 py-2 font-medium text-ink-soft">
+                  <span className="flex items-center gap-1.5">
+                    <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${mealTypeDotClass(mealType)}`} />
+                    {MEAL_TYPE_LABELS[mealType] ?? mealType}
+                  </span>
+                </td>
                 {WEEKDAY_LABELS_SHORT.map((_, weekday) => {
                   const meal = mealAt(weekday, mealType);
                   return (
-                    <td key={weekday} className="px-2 py-2">
+                    <td key={weekday} className={`px-2 py-2 ${weekday === today ? "bg-teal-soft/40" : ""}`}>
                       {meal ? (
                         <MealCell clientId={clientId} meal={meal} foods={foods} foodsById={foodsById} />
                       ) : (
@@ -175,48 +195,48 @@ export function WeeklyMealGrid({
                 const override = dayOverrides.get(weekday);
                 const kcalTarget = override?.target_kcal ?? targetKcal;
                 return (
-                  <td key={weekday} className="px-2 py-2">
+                  <td key={weekday} className={`px-2 py-2 ${weekday === today ? "bg-teal-soft/40" : ""}`}>
                     {totals.kcal} {kcalTarget ? <span className="font-normal text-ink-faint">/ {kcalTarget}</span> : null}
                   </td>
                 );
               })}
             </tr>
-            <tr className="text-[11px] text-ink-faint">
-              <td className="px-3 py-1">Proteine (g)</td>
+            <tr className="text-[11px]">
+              <td className={`px-3 py-1 font-medium ${MACRO_ACCENT.protein.text}`}>Proteine (g)</td>
               {WEEKDAY_LABELS_SHORT.map((_, weekday) => {
                 const totals = dayTotals(weekday);
                 const override = dayOverrides.get(weekday);
                 const t = override?.target_protein_g ?? targetProtein;
                 return (
-                  <td key={weekday} className="px-2 py-1">
+                  <td key={weekday} className={`px-2 py-1 ${MACRO_ACCENT.protein.text} ${weekday === today ? "bg-teal-soft/40" : ""}`}>
                     {totals.protein}
                     {t ? ` / ${t}` : ""}
                   </td>
                 );
               })}
             </tr>
-            <tr className="text-[11px] text-ink-faint">
-              <td className="px-3 py-1">Carboidrati (g)</td>
+            <tr className="text-[11px]">
+              <td className={`px-3 py-1 font-medium ${MACRO_ACCENT.carbs.text}`}>Carboidrati (g)</td>
               {WEEKDAY_LABELS_SHORT.map((_, weekday) => {
                 const totals = dayTotals(weekday);
                 const override = dayOverrides.get(weekday);
                 const t = override?.target_carbs_g ?? targetCarbs;
                 return (
-                  <td key={weekday} className="px-2 py-1">
+                  <td key={weekday} className={`px-2 py-1 ${MACRO_ACCENT.carbs.text} ${weekday === today ? "bg-teal-soft/40" : ""}`}>
                     {totals.carbs}
                     {t ? ` / ${t}` : ""}
                   </td>
                 );
               })}
             </tr>
-            <tr className="text-[11px] text-ink-faint">
-              <td className="px-3 py-1">Grassi (g)</td>
+            <tr className="text-[11px]">
+              <td className={`px-3 py-1 font-medium ${MACRO_ACCENT.fat.text}`}>Grassi (g)</td>
               {WEEKDAY_LABELS_SHORT.map((_, weekday) => {
                 const totals = dayTotals(weekday);
                 const override = dayOverrides.get(weekday);
                 const t = override?.target_fat_g ?? targetFat;
                 return (
-                  <td key={weekday} className="px-2 py-1">
+                  <td key={weekday} className={`px-2 py-1 ${MACRO_ACCENT.fat.text} ${weekday === today ? "bg-teal-soft/40" : ""}`}>
                     {totals.fat}
                     {t ? ` / ${t}` : ""}
                   </td>

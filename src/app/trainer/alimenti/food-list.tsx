@@ -3,7 +3,7 @@
 import { useMemo, useRef, useState, useTransition } from "react";
 import { Plus, Pencil, Trash2, X, Upload, Search } from "lucide-react";
 import type { Tables } from "@/lib/database.types";
-import { FOOD_CATEGORY_LABELS } from "@/lib/diet-calc";
+import { FOOD_CATEGORY_LABELS, foodCategoryDotClass } from "@/lib/diet-calc";
 import { ChipGroup } from "@/components/ui";
 import { createFood, updateFood, deleteFood, bulkImportFoods, type FoodInput } from "./actions";
 
@@ -144,7 +144,15 @@ export function FoodList({ foods }: { foods: Food[] }) {
           onChange={setCategory}
           options={[
             { key: "tutte", label: `Tutte (${foods.length})` },
-            ...presentCategories.map((c) => ({ key: c, label: FOOD_CATEGORY_LABELS[c] ?? c })),
+            ...presentCategories.map((c) => ({
+              key: c,
+              label: (
+                <span className="flex items-center gap-1.5">
+                  <span className={`h-1.5 w-1.5 rounded-full ${foodCategoryDotClass(c)}`} />
+                  {FOOD_CATEGORY_LABELS[c] ?? c}
+                </span>
+              ),
+            })),
           ]}
         />
       </div>
@@ -167,7 +175,12 @@ export function FoodList({ foods }: { foods: Food[] }) {
             {filtered.map((f) => (
               <tr key={f.id} className="border-t border-line">
                 <td className="px-3 py-2 font-medium">{f.name}</td>
-                <td className="px-3 py-2 text-ink-faint">{FOOD_CATEGORY_LABELS[f.category] ?? f.category}</td>
+                <td className="px-3 py-2 text-ink-faint">
+                  <span className="flex items-center gap-1.5">
+                    <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${foodCategoryDotClass(f.category)}`} />
+                    {FOOD_CATEGORY_LABELS[f.category] ?? f.category}
+                  </span>
+                </td>
                 <td className="px-3 py-2 text-right">{f.kcal_100g}</td>
                 <td className="px-3 py-2 text-right">{f.protein_100g}</td>
                 <td className="px-3 py-2 text-right">{f.carbs_100g}</td>

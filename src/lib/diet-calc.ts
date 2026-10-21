@@ -48,6 +48,83 @@ export function classifyEnergyBalance(variationPercent: number): EnergyBalance {
   return "normocalorica";
 }
 
+interface AccentClasses {
+  bg: string;
+  border: string;
+  text: string;
+  dot: string;
+}
+
+/** Colori per fase obiettivo, sui toni del brand: oro per il deficit, verde per il surplus, teal per il resto. */
+export const PHASE_ACCENT: Record<DietPhase, AccentClasses> = {
+  perdita_peso: { bg: "bg-gold-soft", border: "border-gold", text: "text-gold-ink", dot: "bg-gold" },
+  massa_muscolare: { bg: "bg-good/10", border: "border-good/40", text: "text-good", dot: "bg-good" },
+  ricomposizione: { bg: "bg-teal-soft", border: "border-teal-soft-line", text: "text-teal", dot: "bg-teal" },
+  mantenimento: { bg: "bg-cream", border: "border-line", text: "text-ink-soft", dot: "bg-ink-faint" },
+};
+
+export const BALANCE_ACCENT: Record<EnergyBalance, AccentClasses> = {
+  ipocalorica: { bg: "bg-gold-soft", border: "border-gold", text: "text-gold-ink", dot: "bg-gold" },
+  normocalorica: { bg: "bg-teal-soft", border: "border-teal-soft-line", text: "text-teal", dot: "bg-teal" },
+  ipercalorica: { bg: "bg-good/10", border: "border-good/40", text: "text-good", dot: "bg-good" },
+};
+
+/** Un colore fisso per macro, cosi' si riconoscono a colpo d'occhio in tutta la sezione Diete. */
+export const MACRO_ACCENT = {
+  protein: { text: "text-teal", dot: "bg-teal", bg: "bg-teal-soft", border: "border-teal-soft-line" },
+  carbs: { text: "text-gold-ink", dot: "bg-gold", bg: "bg-gold-soft", border: "border-gold" },
+  fat: { text: "text-bad", dot: "bg-bad", bg: "bg-bad/10", border: "border-bad/30" },
+} satisfies Record<string, AccentClasses>;
+
+const MEAL_TYPE_DOT: Record<string, string> = {
+  colazione: "bg-gold",
+  spuntino_mattina: "bg-ink-faint",
+  pranzo: "bg-teal",
+  spuntino_pomeriggio: "bg-ink-faint",
+  cena: "bg-good",
+  spuntino_sera: "bg-ink-faint",
+};
+
+export function mealTypeDotClass(mealType: string): string {
+  return MEAL_TYPE_DOT[mealType] ?? "bg-ink-faint";
+}
+
+const DAY_LABEL_DOT: Record<string, string> = {
+  ricarica: "bg-good",
+  scarico: "bg-gold",
+  allenamento: "bg-bad",
+  gara: "bg-teal",
+};
+
+export function dayLabelDotClass(label: string | null): string {
+  if (!label) return "bg-ink-faint/40";
+  return DAY_LABEL_DOT[label.trim().toLowerCase()] ?? "bg-ink-faint";
+}
+
+const FOOD_CATEGORY_DOT: Record<string, string> = {
+  cereali: "bg-gold",
+  proteine_animali: "bg-bad",
+  proteine_vegetali: "bg-good",
+  latticini: "bg-gold-bright",
+  grassi: "bg-ink-faint",
+  verdura: "bg-good",
+  frutta: "bg-gold",
+  bevande: "bg-teal",
+  dolci_snack: "bg-bad",
+  condimenti: "bg-teal",
+  altro: "bg-ink-faint",
+};
+
+export function foodCategoryDotClass(category: string): string {
+  return FOOD_CATEGORY_DOT[category] ?? "bg-ink-faint";
+}
+
+/** Indice 0=Lunedì..6=Domenica di oggi, coerente con WEEKDAY_LABELS. */
+export function todayWeekdayMon0(): number {
+  const jsDay = new Date().getDay(); // 0=Domenica..6=Sabato
+  return (jsDay + 6) % 7;
+}
+
 export interface MacroSplit {
   proteinG: number;
   fatG: number;
