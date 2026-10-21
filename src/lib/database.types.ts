@@ -445,10 +445,11 @@ export type Database = {
         Row: {
           active: boolean
           bmr: number | null
-          client_id: string
+          client_id: string | null
           created_at: string
           duration_weeks: number
           id: string
+          is_template: boolean
           macro_only: boolean
           name: string
           notes: string | null
@@ -460,14 +461,16 @@ export type Database = {
           target_kcal: number | null
           target_protein_g: number | null
           tdee: number | null
+          trainer_id: string | null
         }
         Insert: {
           active?: boolean
           bmr?: number | null
-          client_id: string
+          client_id?: string | null
           created_at?: string
           duration_weeks?: number
           id?: string
+          is_template?: boolean
           macro_only?: boolean
           name: string
           notes?: string | null
@@ -479,14 +482,16 @@ export type Database = {
           target_kcal?: number | null
           target_protein_g?: number | null
           tdee?: number | null
+          trainer_id?: string | null
         }
         Update: {
           active?: boolean
           bmr?: number | null
-          client_id?: string
+          client_id?: string | null
           created_at?: string
           duration_weeks?: number
           id?: string
+          is_template?: boolean
           macro_only?: boolean
           name?: string
           notes?: string | null
@@ -498,6 +503,7 @@ export type Database = {
           target_kcal?: number | null
           target_protein_g?: number | null
           tdee?: number | null
+          trainer_id?: string | null
         }
         Relationships: [
           {
@@ -505,6 +511,13 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "diet_plans_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]

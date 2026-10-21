@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Plus, Users, User, Search, ChevronDown, ChevronUp, Home, Apple, ClipboardList, Utensils, Dumbbell, Calendar } from "lucide-react";
+import { Plus, Users, User, Search, ChevronDown, ChevronUp, Home, Apple, ClipboardList, Utensils, Dumbbell, Calendar, LayoutTemplate } from "lucide-react";
 import { NewClientForm } from "./new-client-form";
 import { DeleteClientButton } from "./delete-client-button";
 
@@ -67,6 +67,7 @@ export function ClientSidebar({ clients }: { clients: ClientSummary[] }) {
     { href: "/trainer/allenamenti", label: "Allenamenti", icon: Dumbbell, exact: false },
     { href: "/trainer/alimenti", label: "Database Alimenti", icon: Apple, exact: true },
     { href: "/trainer/diete", label: "Diete", icon: Utensils, exact: false },
+    { href: "/trainer/modelli-alimentari", label: "Modelli alimentari", icon: LayoutTemplate, exact: false },
     { href: "/trainer/questionari", label: "Questionari", icon: ClipboardList, exact: false },
   ];
 
