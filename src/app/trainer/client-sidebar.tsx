@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Plus, Users, User, Search, ChevronDown, ChevronUp, Home, Apple, ClipboardList, Utensils, Dumbbell } from "lucide-react";
+import { Plus, Users, User, Search, ChevronDown, ChevronUp, Home, Apple, ClipboardList, Utensils, Dumbbell, Calendar } from "lucide-react";
 import { NewClientForm } from "./new-client-form";
 import { DeleteClientButton } from "./delete-client-button";
 
@@ -63,6 +63,7 @@ export function ClientSidebar({ clients }: { clients: ClientSummary[] }) {
 
   const navItems = [
     { href: "/trainer", label: "Home", icon: Home, exact: true },
+    { href: "/trainer/calendario", label: "Calendario", icon: Calendar, exact: false },
     { href: "/trainer/allenamenti", label: "Allenamenti", icon: Dumbbell, exact: false },
     { href: "/trainer/alimenti", label: "Database Alimenti", icon: Apple, exact: true },
     { href: "/trainer/diete", label: "Diete", icon: Utensils, exact: false },

@@ -1,13 +1,14 @@
 import Link from "next/link";
-import { Bell, Truck, Pill, Users, UserCheck, ClipboardCheck, Apple, Utensils } from "lucide-react";
+import { Bell, Truck, Pill, Users, UserCheck, ClipboardCheck, Apple, Utensils, CalendarClock } from "lucide-react";
 import { getSession } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { formatRelativeIt, formatWeekLabel } from "@/lib/dates";
+import { formatRelativeIt, formatWeekLabel, toISODate } from "@/lib/dates";
 import { formatDateIt } from "@/lib/metrics";
 import { calculateAge, type Gender, type Measurement } from "@/lib/health-score";
 import { computeFullReport, synthesizeReport } from "@/lib/health-report";
 import type { Tables } from "@/lib/database.types";
 import { SectionLabel } from "@/components/ui/SectionLabel";
+import { appointmentTypeAccent, appointmentTypeLabel } from "@/lib/appointments";
 
 const DELIVERY_GOAL_LABELS: Record<string, string> = {
   definizione: "Definizione",
@@ -71,6 +72,11 @@ export default async function TrainerHome() {
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
   const thirtyDaysAgoIso = thirtyDaysAgo.toISOString();
 
+  const todayIso = toISODate(new Date());
+  const inSevenDays = new Date();
+  inSevenDays.setDate(inSevenDays.getDate() + 7);
+  const inSevenDaysIso = toISODate(inSevenDays);
+
   const [
     { data: unseenCheckins },
     { data: unseenDelivery },
@@ -79,6 +85,7 @@ export default async function TrainerHome() {
     { data: recentMeasurements },
     { count: foodsCount },
     { data: activeDietPlans },
+    { data: upcomingAppointments },
   ] = clientIds.length
     ? await Promise.all([
         supabase
@@ -107,6 +114,13 @@ export default async function TrainerHome() {
           .gte("date", thirtyDaysAgoIso.slice(0, 10)),
         supabase.from("foods").select("id", { count: "exact", head: true }),
         supabase.from("diet_plans").select("client_id").in("client_id", clientIds).eq("active", true),
+        supabase
+          .from("client_appointments")
+          .select("*")
+          .in("client_id", clientIds)
+          .eq("completed", false)
+          .lte("date", inSevenDaysIso)
+          .order("date", { ascending: true }),
       ])
     : [
         { data: [] },
@@ -115,6 +129,7 @@ export default async function TrainerHome() {
         { data: [] },
         { data: [] },
         { count: 0 },
+        { data: [] },
         { data: [] },
       ];
 
@@ -199,6 +214,7 @@ export default async function TrainerHome() {
         <StatCard icon={Bell} label="Check-in da rivedere" value={unseenCheckins?.length ?? 0} />
         <StatCard icon={Apple} label="Database alimenti" value={foodsCount ?? 0} />
         <StatCard icon={Utensils} label="Piani diete attivi" value={activeDietClientIds.size} />
+        <StatCard icon={CalendarClock} label="Scadenze (7gg)" value={upcomingAppointments?.length ?? 0} />
       </div>
 
       <div className="mb-3 flex items-center gap-2">
@@ -254,6 +270,49 @@ export default async function TrainerHome() {
               <span className="shrink-0 text-[11px] text-ink-faint">{formatRelativeIt(n.created_at)}</span>
             </Link>
           ))}
+        </div>
+      )}
+
+      <div className="mb-3 flex items-center gap-2">
+        <SectionLabel>Prossime scadenze</SectionLabel>
+        <Link href="/trainer/calendario" className="ml-auto text-[11px] font-medium text-teal hover:underline">
+          Vai al calendario
+        </Link>
+      </div>
+
+      {!upcomingAppointments || upcomingAppointments.length === 0 ? (
+        <div className="mb-6 flex items-center gap-2 rounded-lg border border-dashed border-line bg-surface px-4 py-3 text-[12.5px] text-ink-faint">
+          <CalendarClock size={15} strokeWidth={2.2} className="shrink-0 text-ink-faint" />
+          Nessuna scadenza nei prossimi 7 giorni.
+        </div>
+      ) : (
+        <div className="mb-6 space-y-2">
+          {upcomingAppointments.map((a) => {
+            const accent = appointmentTypeAccent(a.type);
+            const overdue = a.date < todayIso;
+            return (
+              <Link
+                key={a.id}
+                href="/trainer/calendario"
+                className="flex items-center justify-between gap-3 rounded-lg border border-line bg-surface px-4 py-3 hover:border-teal"
+              >
+                <div className="flex items-start gap-2.5">
+                  <span className={`mt-0.5 h-2 w-2 shrink-0 rounded-full ${accent.dot}`} />
+                  <div>
+                    <div className="text-sm font-semibold">{nameById.get(a.client_id) ?? "Cliente"}</div>
+                    <div className="text-xs text-ink-faint">
+                      {appointmentTypeLabel(a.type)}
+                      {a.title && a.title !== appointmentTypeLabel(a.type) && ` · ${a.title}`}
+                    </div>
+                  </div>
+                </div>
+                <span className={`shrink-0 text-[11px] font-medium ${overdue ? "text-bad" : "text-ink-faint"}`}>
+                  {overdue ? "scaduta · " : ""}
+                  {new Date(a.date + "T00:00:00").toLocaleDateString("it-IT", { day: "2-digit", month: "short" })}
+                </span>
+              </Link>
+            );
+          })}
         </div>
       )}
 
