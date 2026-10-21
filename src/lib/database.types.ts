@@ -263,6 +263,57 @@ export type Database = {
           },
         ]
       }
+      intake_forms: {
+        Row: {
+          client_id: string | null
+          completed_at: string | null
+          created_at: string
+          data: Json
+          id: string
+          label: string | null
+          status: string
+          token: string
+          trainer_id: string
+        }
+        Insert: {
+          client_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          data?: Json
+          id?: string
+          label?: string | null
+          status?: string
+          token: string
+          trainer_id: string
+        }
+        Update: {
+          client_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          data?: Json
+          id?: string
+          label?: string | null
+          status?: string
+          token?: string
+          trainer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "intake_forms_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "intake_forms_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       diet_plan_days: {
         Row: {
           id: string

@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Plus, Users, User, Search, ChevronDown, ChevronUp, Apple } from "lucide-react";
+import { Plus, Users, User, Search, ChevronDown, ChevronUp, Apple, ClipboardList } from "lucide-react";
 import { NewClientForm } from "./new-client-form";
 import { DeleteClientButton } from "./delete-client-button";
 
@@ -71,6 +71,16 @@ export function ClientSidebar({ clients }: { clients: ClientSummary[] }) {
       >
         <Apple size={14} strokeWidth={2.2} />
         Database Alimenti
+      </Link>
+
+      <Link
+        href="/trainer/questionari"
+        className={`mb-4 flex items-center gap-2 rounded-lg px-2 py-2 text-[13px] font-medium ${
+          pathname.startsWith("/trainer/questionari") ? "bg-teal-soft text-teal" : "text-ink-soft"
+        }`}
+      >
+        <ClipboardList size={14} strokeWidth={2.2} />
+        Questionari
       </Link>
 
       <div className="mb-2 flex items-center justify-between text-[10.5px] font-semibold tracking-wide text-ink-faint">

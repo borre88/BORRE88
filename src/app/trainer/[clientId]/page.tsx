@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { FileText, FlaskConical, Truck, Pill, Dumbbell, Apple } from "lucide-react";
+import { SendIntakeModal } from "./send-intake-modal";
 import { createClient } from "@/lib/supabase/server";
 import { calculateAge, type Gender } from "@/lib/health-score";
 import { computeLatestByMetric, METRIC_GROUPS } from "@/lib/metrics";
@@ -242,6 +243,7 @@ export default async function ClientDetailPage({
             <Apple size={15} strokeWidth={2.2} />
             Diete
           </Link>
+          <SendIntakeModal clientId={clientId} clientName={client.full_name} />
           <AddMeasurementModal
             clientId={clientId}
             latest={latest}
