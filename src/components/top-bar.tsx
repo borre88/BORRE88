@@ -10,16 +10,25 @@ export function TopBar({
   roleLabel,
   showInstallHint,
   guidaHref,
+  homeHref,
 }: {
   name: string;
   roleLabel: string;
   showInstallHint?: boolean;
   guidaHref?: string;
+  homeHref?: string;
 }) {
+  const logo = <Logo variant="wordmark" size={28} />;
   return (
     <header className="print:hidden mx-3 mt-3 flex items-center justify-between rounded-pill border border-line bg-surface px-5 py-3 sm:mx-5 sm:mt-4 sm:px-7">
       <div>
-        <Logo variant="wordmark" size={28} />
+        {homeHref ? (
+          <Link href={homeHref} aria-label="Torna alla home" className="inline-block transition-opacity hover:opacity-80">
+            {logo}
+          </Link>
+        ) : (
+          logo
+        )}
         <div className="mt-1.5 text-[10px] font-semibold uppercase tracking-wide text-gold">{roleLabel}</div>
       </div>
       <div className="flex items-center gap-3">

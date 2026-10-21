@@ -46,6 +46,7 @@ export default async function ClienteLayout({ children }: { children: React.Reac
           roleLabel="Area Cliente"
           showInstallHint
           guidaHref="/cliente/guida"
+          homeHref="/cliente"
         />
         <main className="mx-auto max-w-3xl px-5 pb-14 pt-6 sm:px-7">{children}</main>
       </div>

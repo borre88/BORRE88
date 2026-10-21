@@ -20,6 +20,7 @@ export default async function TrainerLayout({ children }: { children: React.Reac
         <TopBar
           name={session.profile.full_name ?? session.user.email ?? "Trainer"}
           roleLabel="Area Personal Trainer"
+          homeHref="/trainer"
         />
         <div className="flex flex-col sm:flex-row">
           <ClientSidebar clients={clients ?? []} />
