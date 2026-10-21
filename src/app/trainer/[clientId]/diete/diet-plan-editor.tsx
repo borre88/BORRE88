@@ -17,10 +17,13 @@ type Meal = Tables<"diet_plan_meals"> & { diet_plan_meal_items: MealItem[] };
 type PlanDay = Tables<"diet_plan_days">;
 type Plan = Tables<"diet_plans"> & { diet_plan_days: PlanDay[]; diet_plan_meals: Meal[] };
 
+type Supplement = Tables<"supplements">;
+
 export function DietPlanEditor({
   clientId,
   plans,
   foods,
+  supplements,
   latestMeasurement,
   age,
   gender,
@@ -28,6 +31,7 @@ export function DietPlanEditor({
   clientId: string;
   plans: Plan[];
   foods: Food[];
+  supplements: Supplement[];
   latestMeasurement: { weight_kg: number | null; height_cm: number | null; activity_level: string | null } | null;
   age: number | null;
   gender: Gender | null;
@@ -237,6 +241,7 @@ export function DietPlanEditor({
                 planId={selectedPlan.id}
                 meals={selectedPlan.diet_plan_meals}
                 foods={foods}
+                supplements={supplements}
                 targetKcal={selectedPlan.target_kcal}
                 targetProtein={selectedPlan.target_protein_g}
                 targetCarbs={selectedPlan.target_carbs_g}

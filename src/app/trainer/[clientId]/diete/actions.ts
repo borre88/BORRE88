@@ -205,6 +205,8 @@ export async function copyDayToWeekdays(clientId: string, planId: string, fromWe
             meal_id: newMeal.id,
             food_id: item.food_id,
             recipe_id: item.recipe_id,
+            supplement_id: item.supplement_id,
+            unit: item.unit,
             custom_name: item.custom_name,
             quantity_g: item.quantity_g,
             position: item.position,
@@ -220,7 +222,13 @@ export async function copyDayToWeekdays(clientId: string, planId: string, fromWe
 export async function addMealItem(
   clientId: string,
   mealId: string,
-  data: { food_id: string | null; custom_name: string | null; quantity_g: number }
+  data: {
+    food_id: string | null;
+    supplement_id?: string | null;
+    unit?: string | null;
+    custom_name: string | null;
+    quantity_g: number;
+  }
 ) {
   const supabase = await createClient();
   const { count } = await supabase
@@ -230,6 +238,8 @@ export async function addMealItem(
   await supabase.from("diet_plan_meal_items").insert({
     meal_id: mealId,
     food_id: data.food_id,
+    supplement_id: data.supplement_id ?? null,
+    unit: data.unit ?? null,
     custom_name: data.custom_name,
     quantity_g: data.quantity_g,
     position: count ?? 0,

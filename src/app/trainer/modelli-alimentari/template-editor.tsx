@@ -12,6 +12,7 @@ import { TemplateForm } from "./template-form";
 import { AssignModal } from "./assign-modal";
 
 type Food = Tables<"foods">;
+type Supplement = Tables<"supplements">;
 type MealItem = Tables<"diet_plan_meal_items">;
 type Meal = Tables<"diet_plan_meals"> & { diet_plan_meal_items: MealItem[] };
 type PlanDay = Tables<"diet_plan_days">;
@@ -25,10 +26,12 @@ export function TemplateEditor({
   templates,
   foods,
   clients,
+  supplements,
 }: {
   templates: Template[];
   foods: Food[];
   clients: ClientOption[];
+  supplements: Supplement[];
 }) {
   const [selectedId, setSelectedId] = useState<string | null>(templates[0]?.id ?? null);
   const [mode, setMode] = useState<"view" | "new" | "edit">("view");
@@ -206,6 +209,7 @@ export function TemplateEditor({
                 planId={selected.id}
                 meals={selected.diet_plan_meals}
                 foods={foods}
+                supplements={supplements}
                 targetKcal={selected.target_kcal}
                 targetProtein={selected.target_protein_g}
                 targetCarbs={selected.target_carbs_g}

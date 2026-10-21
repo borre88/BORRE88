@@ -111,28 +111,21 @@ export function IntegrazioniTab({
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: i * 0.03, ease: "easeOut" }}
               >
-                <Card className="flex h-full flex-col overflow-hidden px-0 py-0 transition-shadow hover:shadow-md">
-                  <div className="flex h-28 items-center justify-center bg-cream p-3">
-                    {p.image_url ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={p.image_url} alt={p.name} className="h-full w-full object-contain" loading="lazy" />
-                    ) : (
-                      <Pill size={22} strokeWidth={1.8} className="text-ink-faint" />
-                    )}
+                <Card className="flex h-full flex-col px-4 py-3.5 transition-shadow hover:shadow-md">
+                  <div className="mb-2 flex h-8 w-8 items-center justify-center rounded-full bg-teal-soft text-teal">
+                    <Pill size={15} strokeWidth={2.2} />
                   </div>
-                  <div className="flex flex-1 flex-col px-4 py-3.5">
-                    <span
-                      className={`mb-1.5 inline-flex w-fit items-center gap-1 rounded-full border px-2 py-0.5 text-[9.5px] font-semibold tracking-wide ${accent.border} ${accent.bg} ${accent.text}`}
-                    >
-                      <span className={`h-1.5 w-1.5 rounded-full ${accent.dot}`} />
-                      {firstSupplementCategory(p.category)}
-                    </span>
-                    <div className="text-[13px] font-semibold leading-tight">{p.name}</div>
-                    <div className="mt-0.5 text-[11px] text-ink-faint">
-                      {p.package_size}
-                      {p.package_size && price ? " · " : ""}
-                      {price}
-                    </div>
+                  <span
+                    className={`mb-1.5 inline-flex w-fit items-center gap-1 rounded-full border px-2 py-0.5 text-[9.5px] font-semibold tracking-wide ${accent.border} ${accent.bg} ${accent.text}`}
+                  >
+                    <span className={`h-1.5 w-1.5 rounded-full ${accent.dot}`} />
+                    {firstSupplementCategory(p.category)}
+                  </span>
+                  <div className="text-[13px] font-semibold leading-tight">{p.name}</div>
+                  <div className="mt-0.5 text-[11px] text-ink-faint">
+                    {p.package_size}
+                    {p.package_size && price ? " · " : ""}
+                    {price}
                   </div>
                 </Card>
               </motion.div>

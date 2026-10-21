@@ -23,7 +23,6 @@ export function SupplementForm({
   const [packageSize, setPackageSize] = useState(supplement?.package_size ?? "");
   const [priceMin, setPriceMin] = useState(supplement?.price_min?.toString() ?? "");
   const [priceMax, setPriceMax] = useState(supplement?.price_max?.toString() ?? "");
-  const [imageUrl, setImageUrl] = useState(supplement?.image_url ?? "");
   const [productUrl, setProductUrl] = useState(supplement?.product_url ?? "");
   const [servingSize, setServingSize] = useState(supplement?.serving_size ?? "");
   const [suggestedUse, setSuggestedUse] = useState(supplement?.suggested_use ?? "");
@@ -48,7 +47,7 @@ export function SupplementForm({
       package_size: packageSize || null,
       price_min: priceMin.trim() ? Number(priceMin) : null,
       price_max: priceMax.trim() ? Number(priceMax) : null,
-      image_url: imageUrl || null,
+      image_url: null,
       product_url: productUrl || null,
       serving_size: servingSize || null,
       suggested_use: suggestedUse || null,
@@ -122,13 +121,6 @@ export function SupplementForm({
           </label>
           <input id="sup-price-max" type="number" step="0.01" value={priceMax} onChange={(e) => setPriceMax(e.target.value)} className={inputClass} />
         </div>
-      </div>
-
-      <div className="mb-4">
-        <label className="mb-1 block text-xs font-medium text-ink-soft" htmlFor="sup-image">
-          URL immagine prodotto
-        </label>
-        <input id="sup-image" value={imageUrl ?? ""} onChange={(e) => setImageUrl(e.target.value)} placeholder="https://…" className={inputClass} />
       </div>
 
       <div className="mb-4">

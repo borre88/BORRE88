@@ -357,6 +357,8 @@ export type Database = {
           position: number
           quantity_g: number
           recipe_id: string | null
+          supplement_id: string | null
+          unit: string | null
         }
         Insert: {
           custom_name?: string | null
@@ -366,6 +368,8 @@ export type Database = {
           position?: number
           quantity_g: number
           recipe_id?: string | null
+          supplement_id?: string | null
+          unit?: string | null
         }
         Update: {
           custom_name?: string | null
@@ -375,6 +379,8 @@ export type Database = {
           position?: number
           quantity_g?: number
           recipe_id?: string | null
+          supplement_id?: string | null
+          unit?: string | null
         }
         Relationships: [
           {
@@ -396,6 +402,13 @@ export type Database = {
             columns: ["recipe_id"]
             isOneToOne: false
             referencedRelation: "recipes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "diet_plan_meal_items_supplement_id_fkey"
+            columns: ["supplement_id"]
+            isOneToOne: false
+            referencedRelation: "supplements"
             referencedColumns: ["id"]
           },
         ]

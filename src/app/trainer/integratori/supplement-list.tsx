@@ -55,16 +55,11 @@ export function SupplementList({ supplements }: { supplements: Supplement[] }) {
           const price = formatSupplementPrice(s.price_min, s.price_max);
           return (
             <div key={s.id} className="flex flex-col overflow-hidden rounded-xl border border-line bg-surface">
-              <div className="flex h-40 items-center justify-center bg-cream p-3">
-                {s.image_url ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={s.image_url} alt={s.name} className="h-full w-full object-contain" loading="lazy" />
-                ) : (
-                  <Pill size={28} strokeWidth={1.8} className="text-ink-faint" />
-                )}
-              </div>
               <div className="flex flex-1 flex-col px-4 py-3.5">
                 <div className="mb-1.5 flex flex-wrap items-center gap-1.5">
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-cream text-ink-faint">
+                    <Pill size={14} strokeWidth={1.8} />
+                  </span>
                   <span
                     className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold tracking-wide ${accent.border} ${accent.bg} ${accent.text}`}
                   >

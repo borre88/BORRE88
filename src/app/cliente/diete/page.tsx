@@ -23,7 +23,7 @@ export default async function ClienteDietePage() {
 
   const { data: client } = await supabase
     .from("clients")
-    .select("id")
+    .select("id, trainer_id")
     .eq("profile_id", session!.user.id)
     .single();
 
@@ -54,6 +54,12 @@ export default async function ClienteDietePage() {
 
   const { data: foods } = await supabase.from("foods").select("*");
   const foodsById = new Map((foods ?? []).map((f) => [f.id, f]));
+
+  const { data: supplements } = await supabase
+    .from("supplements")
+    .select("*")
+    .eq("trainer_id", client.trainer_id);
+  const supplementsById = new Map((supplements ?? []).map((s) => [s.id, s]));
 
   const meals = [...plan.diet_plan_meals].sort((a, b) => a.weekday - b.weekday || a.position - b.position);
   const dayOverrides = new Map(plan.diet_plan_days.map((d) => [d.weekday, d]));
@@ -179,13 +185,21 @@ export default async function ClienteDietePage() {
                           <div className="space-y-1">
                             {meal.diet_plan_meal_items.map((item) => {
                               const food: Food | undefined = item.food_id ? foodsById.get(item.food_id) : undefined;
+                              const supplement = item.supplement_id ? supplementsById.get(item.supplement_id) : undefined;
                               const scaled = food ? scaleFoodToQuantity(food, item.quantity_g) : null;
                               return (
                                 <div key={item.id} className="rounded-md bg-cream px-2 py-1.5">
-                                  <div className="text-[11.5px] font-medium">{food?.name ?? item.custom_name ?? "Alimento"}</div>
-                                  <div className="text-[10.5px] text-ink-faint">
-                                    {item.quantity_g}g{scaled ? ` · ${Math.round(scaled.kcal)} kcal` : ""}
+                                  <div className="text-[11.5px] font-medium">
+                                    {food?.name ?? supplement?.name ?? item.custom_name ?? "Alimento"}
                                   </div>
+                                  <div className="text-[10.5px] text-ink-faint">
+                                    {item.quantity_g}
+                                    {item.unit || (supplement ? "" : "g")}
+                                    {scaled ? ` · ${Math.round(scaled.kcal)} kcal` : ""}
+                                  </div>
+                                  {supplement?.suggested_use && (
+                                    <div className="text-[10px] text-ink-faint">{supplement.suggested_use}</div>
+                                  )}
                                 </div>
                               );
                             })}

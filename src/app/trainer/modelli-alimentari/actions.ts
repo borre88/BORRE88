@@ -176,6 +176,8 @@ export async function assignTemplateToClient(
           meal_id: newMeal.id,
           food_id: item.food_id,
           recipe_id: item.recipe_id,
+          supplement_id: item.supplement_id,
+          unit: item.unit,
           custom_name: item.custom_name,
           quantity_g: item.quantity_g,
           position: item.position,

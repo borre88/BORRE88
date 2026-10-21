@@ -57,6 +57,9 @@ export async function POST(request: Request) {
   const { data: foods } = await supabase.from("foods").select("*");
   const foodsById = new Map((foods ?? []).map((f) => [f.id, f]));
 
+  const { data: supplements } = await supabase.from("supplements").select("*").eq("trainer_id", session.user.id);
+  const supplementsById = new Map((supplements ?? []).map((s) => [s.id, s]));
+
   const { data: lastIntake } = await supabase
     .from("intake_forms")
     .select("data, completed_at")
@@ -85,9 +88,13 @@ export async function POST(request: Request) {
       const items = meal.diet_plan_meal_items
         .map((item) => {
           const food = item.food_id ? foodsById.get(item.food_id) : null;
-          if (!food) return item.custom_name ? `${item.custom_name} (${item.quantity_g}g)` : null;
-          const scaled = scaleFoodToQuantity(food, item.quantity_g);
-          return `${food.name} ${item.quantity_g}g (${Math.round(scaled.kcal)} kcal, P${Math.round(scaled.protein)} C${Math.round(scaled.carbs)} G${Math.round(scaled.fat)})`;
+          if (food) {
+            const scaled = scaleFoodToQuantity(food, item.quantity_g);
+            return `${food.name} ${item.quantity_g}g (${Math.round(scaled.kcal)} kcal, P${Math.round(scaled.protein)} C${Math.round(scaled.carbs)} G${Math.round(scaled.fat)})`;
+          }
+          const supplement = item.supplement_id ? supplementsById.get(item.supplement_id) : null;
+          if (supplement) return `${supplement.name} ${item.quantity_g}${item.unit ?? ""}`;
+          return item.custom_name ? `${item.custom_name} (${item.quantity_g}g)` : null;
         })
         .filter(Boolean)
         .join("; ");

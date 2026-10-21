@@ -22,6 +22,7 @@ import {
 } from "./actions";
 
 type Food = Tables<"foods">;
+type Supplement = Tables<"supplements">;
 type MealItem = Tables<"diet_plan_meal_items">;
 type Meal = Tables<"diet_plan_meals"> & { diet_plan_meal_items: MealItem[] };
 
@@ -30,6 +31,7 @@ export function WeeklyMealGrid({
   planId,
   meals,
   foods,
+  supplements = [],
   targetKcal,
   targetProtein,
   targetCarbs,
@@ -40,6 +42,7 @@ export function WeeklyMealGrid({
   planId: string;
   meals: Meal[];
   foods: Food[];
+  supplements?: Supplement[];
   targetKcal: number | null;
   targetProtein: number | null;
   targetCarbs: number | null;
@@ -173,7 +176,7 @@ export function WeeklyMealGrid({
                   return (
                     <td key={weekday} className={`px-2 py-2 ${weekday === today ? "bg-teal-soft/40" : ""}`}>
                       {meal ? (
-                        <MealCell clientId={clientId} meal={meal} foods={foods} foodsById={foodsById} />
+                        <MealCell clientId={clientId} meal={meal} foods={foods} foodsById={foodsById} supplements={supplements} />
                       ) : (
                         <button
                           type="button"
@@ -264,25 +267,56 @@ function MealCell({
   meal,
   foods,
   foodsById,
+  supplements,
 }: {
   clientId: string;
   meal: Meal;
   foods: Food[];
   foodsById: Map<string, Food>;
+  supplements: Supplement[];
 }) {
+  const isSupplementRow = meal.meal_type === "integratori";
+  const supplementsById = useMemo(() => new Map(supplements.map((s) => [s.id, s])), [supplements]);
+
   const [adding, setAdding] = useState(false);
   const [query, setQuery] = useState("");
   const [selectedFoodId, setSelectedFoodId] = useState<string | null>(null);
-  const [quantity, setQuantity] = useState("100");
+  const [selectedSupplementId, setSelectedSupplementId] = useState<string | null>(null);
+  const [quantity, setQuantity] = useState(isSupplementRow ? "1" : "100");
+  const [unit, setUnit] = useState("");
   const [pending, startTransition] = useTransition();
 
-  const matches = useMemo(() => {
+  const foodMatches = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return [];
     return foods.filter((f) => f.name.toLowerCase().includes(q)).slice(0, 8);
   }, [foods, query]);
 
+  const supplementMatches = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return [];
+    return supplements.filter((s) => s.name.toLowerCase().includes(q)).slice(0, 8);
+  }, [supplements, query]);
+
   function submitAdd() {
+    if (isSupplementRow) {
+      if (!selectedSupplementId || !quantity.trim()) return;
+      startTransition(async () => {
+        await addMealItem(clientId, meal.id, {
+          food_id: null,
+          supplement_id: selectedSupplementId,
+          unit: unit.trim() || null,
+          custom_name: null,
+          quantity_g: Number(quantity),
+        });
+        setAdding(false);
+        setQuery("");
+        setSelectedSupplementId(null);
+        setQuantity("1");
+        setUnit("");
+      });
+      return;
+    }
     if (!selectedFoodId || !quantity.trim()) return;
     startTransition(async () => {
       await addMealItem(clientId, meal.id, {
@@ -300,7 +334,9 @@ function MealCell({
   return (
     <div className="rounded-md border border-line bg-cream p-1.5">
       <div className="mb-1 flex items-center justify-between">
-        <span className="text-[10px] text-ink-faint">{meal.diet_plan_meal_items.length} alimenti</span>
+        <span className="text-[10px] text-ink-faint">
+          {meal.diet_plan_meal_items.length} {isSupplementRow ? "integratori" : "alimenti"}
+        </span>
         <button
           type="button"
           onClick={() => startTransition(() => deleteMeal(clientId, meal.id))}
@@ -314,11 +350,14 @@ function MealCell({
       <div className="space-y-1">
         {meal.diet_plan_meal_items.map((item) => {
           const food = item.food_id ? foodsById.get(item.food_id) : null;
+          const supplement = item.supplement_id ? supplementsById.get(item.supplement_id) : null;
           const scaled = food ? scaleFoodToQuantity(food, item.quantity_g) : null;
           return (
             <div key={item.id} className="flex items-center justify-between gap-1 rounded bg-surface px-1.5 py-1">
               <div className="min-w-0 flex-1">
-                <div className="truncate text-[11px] font-medium">{food?.name ?? item.custom_name ?? "Alimento"}</div>
+                <div className="truncate text-[11px] font-medium">
+                  {food?.name ?? supplement?.name ?? item.custom_name ?? (isSupplementRow ? "Integratore" : "Alimento")}
+                </div>
                 <div className="flex items-center gap-1">
                   <input
                     type="number"
@@ -329,8 +368,11 @@ function MealCell({
                     }}
                     className="w-12 rounded border border-line bg-cream px-1 py-0.5 text-[10.5px] outline-none focus:border-teal"
                   />
-                  <span className="text-[10px] text-ink-faint">g</span>
+                  <span className="text-[10px] text-ink-faint">{item.unit || (supplement ? "" : "g")}</span>
                   {scaled && <span className="text-[10px] text-ink-faint">· {Math.round(scaled.kcal)} kcal</span>}
+                  {supplement?.suggested_use && (
+                    <span className="truncate text-[10px] text-ink-faint">· {supplement.suggested_use}</span>
+                  )}
                 </div>
               </div>
               <button
@@ -354,38 +396,69 @@ function MealCell({
             onChange={(e) => {
               setQuery(e.target.value);
               setSelectedFoodId(null);
+              setSelectedSupplementId(null);
             }}
-            placeholder="Cerca alimento…"
+            placeholder={isSupplementRow ? "Cerca integratore…" : "Cerca alimento…"}
             className="mb-1 w-full rounded border border-line bg-cream px-1.5 py-1 text-[11px] outline-none focus:border-teal"
           />
-          {matches.length > 0 && !selectedFoodId && (
-            <div className="mb-1 max-h-28 overflow-y-auto rounded border border-line bg-cream">
-              {matches.map((f) => (
-                <button
-                  key={f.id}
-                  type="button"
-                  onClick={() => {
-                    setSelectedFoodId(f.id);
-                    setQuery(f.name);
-                  }}
-                  className="block w-full px-1.5 py-1 text-left text-[11px] hover:bg-teal-soft"
-                >
-                  {f.name}
-                </button>
-              ))}
-            </div>
-          )}
+          {isSupplementRow
+            ? supplementMatches.length > 0 &&
+              !selectedSupplementId && (
+                <div className="mb-1 max-h-28 overflow-y-auto rounded border border-line bg-cream">
+                  {supplementMatches.map((s) => (
+                    <button
+                      key={s.id}
+                      type="button"
+                      onClick={() => {
+                        setSelectedSupplementId(s.id);
+                        setQuery(s.name);
+                      }}
+                      className="block w-full px-1.5 py-1 text-left text-[11px] hover:bg-teal-soft"
+                    >
+                      {s.name}
+                    </button>
+                  ))}
+                </div>
+              )
+            : foodMatches.length > 0 &&
+              !selectedFoodId && (
+                <div className="mb-1 max-h-28 overflow-y-auto rounded border border-line bg-cream">
+                  {foodMatches.map((f) => (
+                    <button
+                      key={f.id}
+                      type="button"
+                      onClick={() => {
+                        setSelectedFoodId(f.id);
+                        setQuery(f.name);
+                      }}
+                      className="block w-full px-1.5 py-1 text-left text-[11px] hover:bg-teal-soft"
+                    >
+                      {f.name}
+                    </button>
+                  ))}
+                </div>
+              )}
           <div className="flex items-center gap-1">
             <input
               type="number"
               value={quantity}
               onChange={(e) => setQuantity(e.target.value)}
-              className="w-14 rounded border border-line bg-cream px-1 py-0.5 text-[11px] outline-none focus:border-teal"
+              className="w-12 rounded border border-line bg-cream px-1 py-0.5 text-[11px] outline-none focus:border-teal"
             />
-            <span className="text-[10px] text-ink-faint">g</span>
+            {isSupplementRow ? (
+              <input
+                type="text"
+                value={unit}
+                onChange={(e) => setUnit(e.target.value)}
+                placeholder="cps, misurino…"
+                className="w-20 rounded border border-line bg-cream px-1 py-0.5 text-[11px] outline-none focus:border-teal"
+              />
+            ) : (
+              <span className="text-[10px] text-ink-faint">g</span>
+            )}
             <button
               type="button"
-              disabled={!selectedFoodId || pending}
+              disabled={(isSupplementRow ? !selectedSupplementId : !selectedFoodId) || pending}
               onClick={submitAdd}
               className="ml-auto rounded bg-teal px-2 py-0.5 text-[10.5px] font-medium text-white disabled:opacity-50"
             >
@@ -397,6 +470,7 @@ function MealCell({
                 setAdding(false);
                 setQuery("");
                 setSelectedFoodId(null);
+                setSelectedSupplementId(null);
               }}
               className="text-[10.5px] text-ink-faint"
             >
@@ -411,7 +485,7 @@ function MealCell({
           className="mt-1 flex w-full items-center justify-center gap-1 rounded border border-dashed border-line py-1 text-[10.5px] text-ink-faint hover:border-teal hover:text-teal"
         >
           <Plus size={10} strokeWidth={2.2} />
-          Alimento
+          {isSupplementRow ? "Integratore" : "Alimento"}
         </button>
       )}
     </div>

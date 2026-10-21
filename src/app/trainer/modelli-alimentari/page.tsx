@@ -7,7 +7,7 @@ export default async function ModelliAlimentariPage() {
   const session = await getSession();
   const supabase = await createClient();
 
-  const [{ data: templates }, { data: foods }, { data: clients }] = await Promise.all([
+  const [{ data: templates }, { data: foods }, { data: clients }, { data: supplements }] = await Promise.all([
     supabase
       .from("diet_plans")
       .select("*, diet_plan_days(*), diet_plan_meals(*, diet_plan_meal_items(*))")
@@ -16,6 +16,7 @@ export default async function ModelliAlimentariPage() {
       .order("created_at", { ascending: false }),
     supabase.from("foods").select("*").order("category").order("name"),
     supabase.from("clients").select("id, full_name").eq("trainer_id", session!.user.id).order("full_name"),
+    supabase.from("supplements").select("*").eq("trainer_id", session!.user.id).order("position").order("name"),
   ]);
 
   const normalizedTemplates = (templates ?? []).map((t) => ({
@@ -29,7 +30,12 @@ export default async function ModelliAlimentariPage() {
         title="Modelli alimentari"
         subtitle="Diete già pronte da riusare: creale una volta e assegnale con un click ai tuoi clienti."
       />
-      <TemplateEditor templates={normalizedTemplates} foods={foods ?? []} clients={clients ?? []} />
+      <TemplateEditor
+        templates={normalizedTemplates}
+        foods={foods ?? []}
+        clients={clients ?? []}
+        supplements={supplements ?? []}
+      />
     </div>
   );
 }

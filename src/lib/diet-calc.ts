@@ -83,6 +83,7 @@ const MEAL_TYPE_DOT: Record<string, string> = {
   spuntino_pomeriggio: "bg-ink-faint",
   cena: "bg-good",
   spuntino_sera: "bg-ink-faint",
+  integratori: "bg-gold-bright",
 };
 
 export function mealTypeDotClass(mealType: string): string {
@@ -195,6 +196,7 @@ export const MEAL_TYPES = [
   { key: "spuntino_pomeriggio", label: "Spuntino Pomeriggio" },
   { key: "cena", label: "Cena" },
   { key: "spuntino_sera", label: "Spuntino Sera" },
+  { key: "integratori", label: "Integratori" },
 ] as const;
 
 export type MealType = (typeof MEAL_TYPES)[number]["key"];
