@@ -926,6 +926,77 @@ export type Database = {
           },
         ]
       }
+      supplements: {
+        Row: {
+          brand: string | null
+          category: string | null
+          created_at: string
+          flavors: string | null
+          format: string | null
+          id: string
+          image_url: string | null
+          ingredients: string | null
+          name: string
+          notes: string | null
+          package_size: string | null
+          position: number
+          price_max: number | null
+          price_min: number | null
+          product_url: string | null
+          serving_size: string | null
+          suggested_use: string | null
+          trainer_id: string
+        }
+        Insert: {
+          brand?: string | null
+          category?: string | null
+          created_at?: string
+          flavors?: string | null
+          format?: string | null
+          id?: string
+          image_url?: string | null
+          ingredients?: string | null
+          name: string
+          notes?: string | null
+          package_size?: string | null
+          position?: number
+          price_max?: number | null
+          price_min?: number | null
+          product_url?: string | null
+          serving_size?: string | null
+          suggested_use?: string | null
+          trainer_id: string
+        }
+        Update: {
+          brand?: string | null
+          category?: string | null
+          created_at?: string
+          flavors?: string | null
+          format?: string | null
+          id?: string
+          image_url?: string | null
+          ingredients?: string | null
+          name?: string
+          notes?: string | null
+          package_size?: string | null
+          position?: number
+          price_max?: number | null
+          price_min?: number | null
+          product_url?: string | null
+          serving_size?: string | null
+          suggested_use?: string | null
+          trainer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supplements_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       weekly_checkins: {
         Row: {
           braccio_dx_cm: number | null

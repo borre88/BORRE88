@@ -6,22 +6,11 @@ import { Pill, ExternalLink, PackageCheck, Clock, CheckCircle2 } from "lucide-re
 import type { Tables } from "@/lib/database.types";
 import { Card } from "@/components/ui/Card";
 import { SectionLabel } from "@/components/ui/SectionLabel";
+import { firstSupplementCategory, formatSupplementPrice, supplementCategoryAccent } from "@/lib/supplements";
 import { submitSupplementRequest } from "./actions";
 
 type SupplementRequest = Tables<"supplement_requests">;
-
-// Elenco segnaposto: sostituire con i prodotti reali del catalogo Mowe
-// Nutrition (nome + una riga di beneficio) non appena disponibili.
-const MOWE_PRODUCTS: { key: string; name: string; benefit: string }[] = [
-  { key: "whey", name: "Proteine Whey", benefit: "Supportano il recupero muscolare dopo l'allenamento." },
-  { key: "isolate", name: "Isolato proteico", benefit: "Assorbimento rapido, povero di grassi e lattosio." },
-  { key: "creatina", name: "Creatina monoidrato", benefit: "Sostiene la performance negli sforzi brevi e intensi." },
-  { key: "omega3", name: "Omega-3", benefit: "Supporta il benessere cardiovascolare generale." },
-  { key: "multivitaminico", name: "Multivitaminico", benefit: "Copre eventuali carenze nei periodi di dieta più stretta." },
-  { key: "bcaa", name: "BCAA / EAA", benefit: "Supportano la sintesi proteica negli allenamenti prolungati." },
-  { key: "preworkout", name: "Pre-workout", benefit: "Energia e concentrazione per le sessioni più intense." },
-  { key: "collagene", name: "Collagene", benefit: "Supporto al benessere di articolazioni e tessuto connettivo." },
-];
+type Supplement = Tables<"supplements">;
 
 const STATUS_LABELS: Record<string, string> = {
   nuova: "Richiesta inviata",
@@ -56,9 +45,11 @@ function StatusBanner({ request }: { request: SupplementRequest }) {
 export function IntegrazioniTab({
   hasClient,
   latestRequest,
+  supplements,
 }: {
   hasClient: boolean;
   latestRequest: SupplementRequest | null;
+  supplements: Supplement[];
 }) {
   const [state, action, pending] = useActionState(submitSupplementRequest, undefined);
 
@@ -106,24 +97,49 @@ export function IntegrazioniTab({
       </div>
 
       <SectionLabel>Catalogo prodotti</SectionLabel>
-      <div className="mb-6 mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {MOWE_PRODUCTS.map((p, i) => (
-          <motion.div
-            key={p.key}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: i * 0.05, ease: "easeOut" }}
-          >
-            <Card className="h-full px-4 py-3.5 transition-shadow hover:shadow-md">
-              <div className="mb-2 flex h-8 w-8 items-center justify-center rounded-full bg-teal-soft text-teal">
-                <Pill size={15} strokeWidth={2.2} />
-              </div>
-              <div className="mb-1 text-[13px] font-semibold leading-tight">{p.name}</div>
-              <p className="text-[11.5px] leading-relaxed text-ink-faint">{p.benefit}</p>
-            </Card>
-          </motion.div>
-        ))}
-      </div>
+      {supplements.length === 0 ? (
+        <p className="mb-6 mt-3 text-[12.5px] text-ink-faint">Il tuo coach non ha ancora pubblicato il catalogo prodotti.</p>
+      ) : (
+        <div className="mb-6 mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {supplements.map((p, i) => {
+            const accent = supplementCategoryAccent(p.category);
+            const price = formatSupplementPrice(p.price_min, p.price_max);
+            return (
+              <motion.div
+                key={p.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: i * 0.03, ease: "easeOut" }}
+              >
+                <Card className="flex h-full flex-col overflow-hidden px-0 py-0 transition-shadow hover:shadow-md">
+                  <div className="flex h-28 items-center justify-center bg-cream p-3">
+                    {p.image_url ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={p.image_url} alt={p.name} className="h-full w-full object-contain" loading="lazy" />
+                    ) : (
+                      <Pill size={22} strokeWidth={1.8} className="text-ink-faint" />
+                    )}
+                  </div>
+                  <div className="flex flex-1 flex-col px-4 py-3.5">
+                    <span
+                      className={`mb-1.5 inline-flex w-fit items-center gap-1 rounded-full border px-2 py-0.5 text-[9.5px] font-semibold tracking-wide ${accent.border} ${accent.bg} ${accent.text}`}
+                    >
+                      <span className={`h-1.5 w-1.5 rounded-full ${accent.dot}`} />
+                      {firstSupplementCategory(p.category)}
+                    </span>
+                    <div className="text-[13px] font-semibold leading-tight">{p.name}</div>
+                    <div className="mt-0.5 text-[11px] text-ink-faint">
+                      {p.package_size}
+                      {p.package_size && price ? " · " : ""}
+                      {price}
+                    </div>
+                  </div>
+                </Card>
+              </motion.div>
+            );
+          })}
+        </div>
+      )}
 
       <Card className="px-5 py-4">
         <SectionLabel>Richiedi i tuoi integratori</SectionLabel>
@@ -141,12 +157,12 @@ export function IntegrazioniTab({
 
             <form action={action}>
               <div className="mb-3.5 flex flex-wrap gap-1.5">
-                {MOWE_PRODUCTS.map((p) => (
+                {supplements.map((p) => (
                   <label
-                    key={p.key}
+                    key={p.id}
                     className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-line bg-cream px-3 py-1.5 text-[12.5px] has-[:checked]:border-teal has-[:checked]:bg-teal-soft has-[:checked]:text-teal"
                   >
-                    <input type="checkbox" name="items" value={p.key} className="accent-teal" />
+                    <input type="checkbox" name="items" value={p.id} className="accent-teal" />
                     {p.name}
                   </label>
                 ))}

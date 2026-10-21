@@ -9,24 +9,29 @@ export default async function IntegrazioniPage() {
 
   const { data: client } = await supabase
     .from("clients")
-    .select("id")
+    .select("id, trainer_id")
     .eq("profile_id", session!.user.id)
     .single();
 
-  const { data: latestRequest } = client
-    ? await supabase
-        .from("supplement_requests")
-        .select("*")
-        .eq("client_id", client.id)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle()
-    : { data: null };
+  const [{ data: latestRequest }, { data: supplements }] = await Promise.all([
+    client
+      ? supabase
+          .from("supplement_requests")
+          .select("*")
+          .eq("client_id", client.id)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle()
+      : Promise.resolve({ data: null }),
+    client
+      ? supabase.from("supplements").select("*").eq("trainer_id", client.trainer_id).order("position").order("name")
+      : Promise.resolve({ data: null }),
+  ]);
 
   return (
     <div>
       <SectionHeader title="Integrazioni" />
-      <IntegrazioniTab hasClient={!!client} latestRequest={latestRequest ?? null} />
+      <IntegrazioniTab hasClient={!!client} latestRequest={latestRequest ?? null} supplements={supplements ?? []} />
     </div>
   );
 }

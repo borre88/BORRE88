@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Plus, Users, User, Search, ChevronDown, ChevronUp, Home, Apple, ClipboardList, Utensils, Dumbbell, Calendar, LayoutTemplate } from "lucide-react";
+import { Plus, Users, User, Search, ChevronDown, ChevronUp, Home, Apple, ClipboardList, Utensils, Dumbbell, Calendar, LayoutTemplate, Pill } from "lucide-react";
 import { NewClientForm } from "./new-client-form";
 import { DeleteClientButton } from "./delete-client-button";
 
@@ -62,13 +62,14 @@ export function ClientSidebar({ clients }: { clients: ClientSummary[] }) {
   }
 
   const navItems = [
-    { href: "/trainer", label: "Home", icon: Home, exact: true },
-    { href: "/trainer/calendario", label: "Calendario", icon: Calendar, exact: false },
-    { href: "/trainer/allenamenti", label: "Allenamenti", icon: Dumbbell, exact: false },
-    { href: "/trainer/alimenti", label: "Database Alimenti", icon: Apple, exact: true },
-    { href: "/trainer/diete", label: "Diete", icon: Utensils, exact: false },
-    { href: "/trainer/modelli-alimentari", label: "Modelli alimentari", icon: LayoutTemplate, exact: false },
-    { href: "/trainer/questionari", label: "Questionari", icon: ClipboardList, exact: false },
+    { href: "/trainer", label: "Home", icon: Home, exact: true, sub: false },
+    { href: "/trainer/calendario", label: "Calendario", icon: Calendar, exact: false, sub: false },
+    { href: "/trainer/allenamenti", label: "Allenamenti", icon: Dumbbell, exact: false, sub: false },
+    { href: "/trainer/alimenti", label: "Database Alimenti", icon: Apple, exact: true, sub: false },
+    { href: "/trainer/diete", label: "Diete", icon: Utensils, exact: false, sub: false },
+    { href: "/trainer/modelli-alimentari", label: "Modelli alimentari", icon: LayoutTemplate, exact: false, sub: false },
+    { href: "/trainer/integratori", label: "Integratori", icon: Pill, exact: false, sub: true },
+    { href: "/trainer/questionari", label: "Questionari", icon: ClipboardList, exact: false, sub: false },
   ];
 
   return (
@@ -81,11 +82,11 @@ export function ClientSidebar({ clients }: { clients: ClientSummary[] }) {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex items-center gap-2 rounded-lg px-2 py-2 text-[13px] font-medium ${
-                active ? "bg-teal-soft text-teal" : "text-ink-soft"
-              }`}
+              className={`flex items-center gap-2 rounded-lg py-2 text-[13px] font-medium ${
+                item.sub ? "ml-4 pl-2 pr-2 text-[12px]" : "px-2"
+              } ${active ? "bg-teal-soft text-teal" : "text-ink-soft"}`}
             >
-              <Icon size={14} strokeWidth={2.2} />
+              <Icon size={item.sub ? 12 : 14} strokeWidth={2.2} />
               {item.label}
             </Link>
           );
