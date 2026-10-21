@@ -33,14 +33,19 @@ Due aree riservate:
    RESEND_API_KEY=
    EMAIL_FROM=
    CRON_SECRET=
+   ANTHROPIC_API_KEY=
    ```
 
    Le prime due si trovano su Supabase in *Project Settings → API keys*. La
    `SUPABASE_SERVICE_ROLE_KEY` è la chiave segreta "service_role" (stessa pagina):
-   serve solo lato server per creare gli account dei clienti, non va mai esposta al
-   browser. `RESEND_API_KEY`/`EMAIL_FROM`/`CRON_SECRET` servono per il promemoria
-   email settimanale (vedi sezione dedicata più sotto) — senza `RESEND_API_KEY`
-   l'app funziona comunque, semplicemente non invia quell'email.
+   serve solo lato server per creare gli account dei clienti (e per il link del
+   questionario pre-visita), non va mai esposta al browser. `RESEND_API_KEY`/
+   `EMAIL_FROM`/`CRON_SECRET` servono per il promemoria email settimanale (vedi
+   sezione dedicata più sotto) — senza `RESEND_API_KEY` l'app funziona comunque,
+   semplicemente non invia quell'email. `ANTHROPIC_API_KEY` (da
+   [console.anthropic.com](https://console.anthropic.com), sezione *API Keys*)
+   serve per l'assistente AI che controlla le diete lato trainer — senza, l'app
+   funziona comunque ma l'assistente risponde con un errore.
 
 3. Avvia il server di sviluppo:
 
