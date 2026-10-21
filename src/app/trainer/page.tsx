@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Bell, Truck, Pill } from "lucide-react";
+import { Bell, Truck, Pill, Users, UserCheck, ClipboardCheck, Apple, Utensils } from "lucide-react";
 import { getSession } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { formatRelativeIt, formatWeekLabel } from "@/lib/dates";
@@ -32,6 +32,28 @@ function scoreColor(score: number) {
   return "text-bad";
 }
 
+function StatCard({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: React.ComponentType<{ size?: number; strokeWidth?: number; className?: string }>;
+  label: string;
+  value: string | number;
+}) {
+  return (
+    <div className="flex flex-1 items-center justify-between gap-3 rounded-xl border border-line bg-surface px-4 py-3.5">
+      <div className="min-w-0">
+        <div className="text-[10.5px] font-semibold uppercase tracking-wide text-ink-faint">{label}</div>
+        <div className="mt-1 font-display text-2xl font-bold">{value}</div>
+      </div>
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-teal-soft text-teal">
+        <Icon size={16} strokeWidth={2.2} />
+      </span>
+    </div>
+  );
+}
+
 export default async function TrainerHome() {
   const session = await getSession();
   const supabase = await createClient();
@@ -45,7 +67,19 @@ export default async function TrainerHome() {
   const clientIds = (clients ?? []).map((c) => c.id);
   const nameById = new Map((clients ?? []).map((c) => [c.id, c.full_name]));
 
-  const [{ data: unseenCheckins }, { data: unseenDelivery }, { data: unseenSupplement }] = clientIds.length
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  const thirtyDaysAgoIso = thirtyDaysAgo.toISOString();
+
+  const [
+    { data: unseenCheckins },
+    { data: unseenDelivery },
+    { data: unseenSupplement },
+    { data: recentCheckins },
+    { data: recentMeasurements },
+    { count: foodsCount },
+    { data: activeDietPlans },
+  ] = clientIds.length
     ? await Promise.all([
         supabase
           .from("weekly_checkins")
@@ -65,8 +99,30 @@ export default async function TrainerHome() {
           .in("client_id", clientIds)
           .is("viewed_by_trainer_at", null)
           .order("created_at", { ascending: false }),
+        supabase.from("weekly_checkins").select("client_id").in("client_id", clientIds).gte("created_at", thirtyDaysAgoIso),
+        supabase
+          .from("measurements")
+          .select("client_id")
+          .in("client_id", clientIds)
+          .gte("date", thirtyDaysAgoIso.slice(0, 10)),
+        supabase.from("foods").select("id", { count: "exact", head: true }),
+        supabase.from("diet_plans").select("client_id").in("client_id", clientIds).eq("active", true),
       ])
-    : [{ data: [] }, { data: [] }, { data: [] }];
+    : [
+        { data: [] },
+        { data: [] },
+        { data: [] },
+        { data: [] },
+        { data: [] },
+        { count: 0 },
+        { data: [] },
+      ];
+
+  const activeClientIds = new Set<string>([
+    ...(recentCheckins ?? []).map((c) => c.client_id),
+    ...(recentMeasurements ?? []).map((m) => m.client_id),
+  ]);
+  const activeDietClientIds = new Set((activeDietPlans ?? []).map((p) => p.client_id));
 
   const notifications: Notification[] = [
     ...(unseenCheckins ?? []).map((c) => ({
@@ -92,58 +148,10 @@ export default async function TrainerHome() {
     })),
   ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
-  if (notifications.length > 0) {
-    return (
-      <div>
-        <div className="mb-5 flex items-center gap-2 rounded-lg border border-gold bg-gold-soft px-4 py-3">
-          <Bell size={16} strokeWidth={2.2} className="shrink-0 text-gold" />
-          <p className="text-[13px] font-medium text-ink">
-            Hai {notifications.length} {notifications.length === 1 ? "nuova notifica" : "nuove notifiche"} dei tuoi
-            clienti, controlla.
-          </p>
-        </div>
-
-        <div className="space-y-2">
-          {notifications.map((n) => (
-            <Link
-              key={`${n.type}-${n.id}`}
-              href={`/trainer/${n.client_id}`}
-              className="flex items-center justify-between gap-3 rounded-lg border border-line bg-surface px-4 py-3 hover:border-teal"
-            >
-              <div className="flex items-start gap-2.5">
-                {n.type === "delivery" && <Truck size={15} strokeWidth={2.2} className="mt-0.5 shrink-0 text-teal" />}
-                {n.type === "supplement" && <Pill size={15} strokeWidth={2.2} className="mt-0.5 shrink-0 text-teal" />}
-                <div>
-                  <div className="text-sm font-semibold">{nameById.get(n.client_id) ?? "Cliente"}</div>
-                  {n.type === "checkin" && (
-                    <div className="text-xs text-ink-faint">
-                      Check settimana {formatWeekLabel(n.checkin.week_start)}
-                      {n.checkin.weight_kg !== null && ` · peso ${n.checkin.weight_kg}kg`}
-                      {n.checkin.workouts_count !== null && ` · ${n.checkin.workouts_count} allenamenti`}
-                      {n.checkin.energy !== null && ` · energia ${n.checkin.energy}/10`}
-                    </div>
-                  )}
-                  {n.type === "delivery" && (
-                    <div className="text-xs text-ink-faint">
-                      Richiesta servizio delivery a domicilio
-                      {n.delivery.goal && ` · obiettivo ${DELIVERY_GOAL_LABELS[n.delivery.goal] ?? n.delivery.goal}`}
-                    </div>
-                  )}
-                  {n.type === "supplement" && (
-                    <div className="text-xs text-ink-faint">
-                      Richiesta integratori (Mowe Nutrition)
-                      {n.supplement.items && n.supplement.items.length > 0 && ` · ${n.supplement.items.length} prodotti`}
-                    </div>
-                  )}
-                </div>
-              </div>
-              <span className="shrink-0 text-[11px] text-ink-faint">{formatRelativeIt(n.created_at)}</span>
-            </Link>
-          ))}
-        </div>
-      </div>
-    );
-  }
+  const todayLabel = new Date()
+    .toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long" })
+    .toUpperCase();
+  const firstName = (session!.profile.full_name ?? "").split(" ")[0] || "Dottore";
 
   if (!clients || clients.length === 0) {
     return (
@@ -177,6 +185,78 @@ export default async function TrainerHome() {
 
   return (
     <div>
+      <div className="mb-5">
+        <div className="text-[10.5px] font-semibold tracking-wide text-gold">{todayLabel}</div>
+        <h1 className="mt-1 font-display text-[26px] font-bold leading-tight">
+          Bentornato, <span className="text-teal">{firstName}</span>
+        </h1>
+        <p className="mt-0.5 text-[13px] text-ink-faint">La tua giornata in sintesi.</p>
+      </div>
+
+      <div className="mb-6 flex flex-wrap gap-3">
+        <StatCard icon={Users} label="Clienti totali" value={clients.length} />
+        <StatCard icon={UserCheck} label="Clienti attivi (30gg)" value={activeClientIds.size} />
+        <StatCard icon={Bell} label="Check-in da rivedere" value={unseenCheckins?.length ?? 0} />
+        <StatCard icon={Apple} label="Database alimenti" value={foodsCount ?? 0} />
+        <StatCard icon={Utensils} label="Piani diete attivi" value={activeDietClientIds.size} />
+      </div>
+
+      <div className="mb-3 flex items-center gap-2">
+        <SectionLabel>Da fare</SectionLabel>
+        {notifications.length > 0 && (
+          <span className="rounded-full bg-gold-soft px-1.5 py-0.5 text-[10px] font-semibold text-gold-ink">
+            {notifications.length}
+          </span>
+        )}
+      </div>
+
+      {notifications.length === 0 ? (
+        <div className="mb-6 flex items-center gap-2 rounded-lg border border-dashed border-line bg-surface px-4 py-3 text-[12.5px] text-ink-faint">
+          <ClipboardCheck size={15} strokeWidth={2.2} className="shrink-0 text-ink-faint" />
+          Niente in sospeso, tutto sotto controllo.
+        </div>
+      ) : (
+        <div className="mb-6 space-y-2">
+          {notifications.map((n) => (
+            <Link
+              key={`${n.type}-${n.id}`}
+              href={`/trainer/${n.client_id}`}
+              className="flex items-center justify-between gap-3 rounded-lg border border-line bg-surface px-4 py-3 hover:border-teal"
+            >
+              <div className="flex items-start gap-2.5">
+                {n.type === "checkin" && <Bell size={15} strokeWidth={2.2} className="mt-0.5 shrink-0 text-gold" />}
+                {n.type === "delivery" && <Truck size={15} strokeWidth={2.2} className="mt-0.5 shrink-0 text-teal" />}
+                {n.type === "supplement" && <Pill size={15} strokeWidth={2.2} className="mt-0.5 shrink-0 text-teal" />}
+                <div>
+                  <div className="text-sm font-semibold">{nameById.get(n.client_id) ?? "Cliente"}</div>
+                  {n.type === "checkin" && (
+                    <div className="text-xs text-ink-faint">
+                      Check settimana {formatWeekLabel(n.checkin.week_start)}
+                      {n.checkin.weight_kg !== null && ` · peso ${n.checkin.weight_kg}kg`}
+                      {n.checkin.workouts_count !== null && ` · ${n.checkin.workouts_count} allenamenti`}
+                      {n.checkin.energy !== null && ` · energia ${n.checkin.energy}/10`}
+                    </div>
+                  )}
+                  {n.type === "delivery" && (
+                    <div className="text-xs text-ink-faint">
+                      Richiesta servizio delivery a domicilio
+                      {n.delivery.goal && ` · obiettivo ${DELIVERY_GOAL_LABELS[n.delivery.goal] ?? n.delivery.goal}`}
+                    </div>
+                  )}
+                  {n.type === "supplement" && (
+                    <div className="text-xs text-ink-faint">
+                      Richiesta integratori (Mowe Nutrition)
+                      {n.supplement.items && n.supplement.items.length > 0 && ` · ${n.supplement.items.length} prodotti`}
+                    </div>
+                  )}
+                </div>
+              </div>
+              <span className="shrink-0 text-[11px] text-ink-faint">{formatRelativeIt(n.created_at)}</span>
+            </Link>
+          ))}
+        </div>
+      )}
+
       <SectionLabel>I tuoi clienti</SectionLabel>
       <div className="mt-3 space-y-2">
         {roster.map((c) => (

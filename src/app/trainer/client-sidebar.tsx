@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Plus, Users, User, Search, ChevronDown, ChevronUp, Apple, ClipboardList } from "lucide-react";
+import { Plus, Users, User, Search, ChevronDown, ChevronUp, Home, Apple, ClipboardList, Utensils } from "lucide-react";
 import { NewClientForm } from "./new-client-form";
 import { DeleteClientButton } from "./delete-client-button";
 
@@ -61,27 +61,33 @@ export function ClientSidebar({ clients }: { clients: ClientSummary[] }) {
     });
   }
 
+  const navItems = [
+    { href: "/trainer", label: "Home", icon: Home, exact: true },
+    { href: "/trainer/alimenti", label: "Database Alimenti", icon: Apple, exact: true },
+    { href: "/trainer/diete", label: "Diete", icon: Utensils, exact: false },
+    { href: "/trainer/questionari", label: "Questionari", icon: ClipboardList, exact: false },
+  ];
+
   return (
     <aside className="print:hidden w-full shrink-0 border-b border-line bg-surface p-4 sm:w-64 sm:border-b-0 sm:border-r sm:p-5">
-      <Link
-        href="/trainer/alimenti"
-        className={`mb-4 flex items-center gap-2 rounded-lg px-2 py-2 text-[13px] font-medium ${
-          pathname === "/trainer/alimenti" ? "bg-teal-soft text-teal" : "text-ink-soft"
-        }`}
-      >
-        <Apple size={14} strokeWidth={2.2} />
-        Database Alimenti
-      </Link>
-
-      <Link
-        href="/trainer/questionari"
-        className={`mb-4 flex items-center gap-2 rounded-lg px-2 py-2 text-[13px] font-medium ${
-          pathname.startsWith("/trainer/questionari") ? "bg-teal-soft text-teal" : "text-ink-soft"
-        }`}
-      >
-        <ClipboardList size={14} strokeWidth={2.2} />
-        Questionari
-      </Link>
+      <div className="mb-4 flex flex-col gap-0.5">
+        {navItems.map((item) => {
+          const active = item.exact ? pathname === item.href : pathname.startsWith(item.href);
+          const Icon = item.icon;
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={`flex items-center gap-2 rounded-lg px-2 py-2 text-[13px] font-medium ${
+                active ? "bg-teal-soft text-teal" : "text-ink-soft"
+              }`}
+            >
+              <Icon size={14} strokeWidth={2.2} />
+              {item.label}
+            </Link>
+          );
+        })}
+      </div>
 
       <div className="mb-2 flex items-center justify-between text-[10.5px] font-semibold tracking-wide text-ink-faint">
         <span className="flex items-center gap-1.5">
