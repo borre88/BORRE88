@@ -4,29 +4,10 @@ import { useMemo, useState, useTransition } from "react";
 import { Search, Flame, Clock, ChevronDown, ChevronUp, ShoppingCart, Check } from "lucide-react";
 import type { Tables } from "@/lib/database.types";
 import { ChipGroup, EmptyState, MacroPill, SectionIntro, Tag } from "@/components/ui";
+import { GOAL_LABELS, MEAL_LABELS, TAG_LABELS } from "@/lib/recipes";
 import { addItemsToShoppingList } from "../lista-della-spesa/actions";
 
 type Recipe = Tables<"recipes">;
-
-const GOAL_LABELS: Record<string, string> = {
-  definizione: "Definizione",
-  mantenimento: "Mantenimento",
-  massa: "Massa",
-};
-
-const MEAL_LABELS: Record<string, string> = {
-  colazione: "Colazione",
-  pranzo: "Pranzo",
-  cena: "Cena",
-  spuntino: "Spuntino",
-};
-
-const TAG_LABELS: Record<string, string> = {
-  vegano: "Vegano",
-  vegetariano: "Vegetariano",
-  senza_lattosio: "Senza lattosio",
-  senza_glutine: "Senza glutine",
-};
 
 export function RicetteTab({ recipes }: { recipes: Recipe[] }) {
   const [goal, setGoal] = useState("tutti");

@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Plus, Users, User, Search, ChevronDown, ChevronUp, Home, Apple, ClipboardList, Utensils, Dumbbell, Calendar, LayoutTemplate, Pill, Stethoscope, FlaskConical } from "lucide-react";
+import { Plus, Users, User, Search, ChevronDown, ChevronUp, Home, Apple, ClipboardList, Utensils, Dumbbell, Calendar, LayoutTemplate, Pill, Stethoscope, FlaskConical, ChefHat } from "lucide-react";
 import { NewClientForm } from "./new-client-form";
 import { DeleteClientButton } from "./delete-client-button";
 
@@ -71,6 +71,7 @@ export function ClientSidebar({ clients }: { clients: ClientSummary[] }) {
     { href: "/trainer/integratori", label: "Integratori", icon: Pill, exact: false, sub: true },
     { href: "/trainer/raccomandazioni", label: "Raccomandazioni", icon: Stethoscope, exact: false, sub: true },
     { href: "/trainer/protocolli", label: "Protocolli", icon: FlaskConical, exact: false, sub: true },
+    { href: "/trainer/ricette", label: "Ricette", icon: ChefHat, exact: false, sub: true },
     { href: "/trainer/questionari", label: "Questionari", icon: ClipboardList, exact: false, sub: false },
   ];
 
