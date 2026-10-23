@@ -10,13 +10,19 @@ import { ChipGroup } from "@/components/ui";
 import { deletePlan, setPlanActive } from "@/app/trainer/[clientId]/diete/actions";
 import { PlanForm } from "@/app/trainer/[clientId]/diete/plan-form";
 import { EnergyMetabolismCard } from "./energy-metabolism-card";
+import { DietTemplatePicker } from "./diet-template-picker";
 
 type Plan = Tables<"diet_plans">;
 type Recommendation = Tables<"recommendations">;
+type Template = Pick<
+  Tables<"diet_plans">,
+  "id" | "name" | "phase" | "duration_weeks" | "macro_only" | "target_kcal" | "target_protein_g" | "target_carbs_g" | "target_fat_g"
+>;
 
 export function PianificazioneEditor({
   clientId,
   plans,
+  templates,
   recommendations,
   weightKg,
   heightCm,
@@ -28,6 +34,7 @@ export function PianificazioneEditor({
 }: {
   clientId: string;
   plans: Plan[];
+  templates: Template[];
   recommendations: Recommendation[];
   weightKg: number | null;
   heightCm: number | null;
@@ -107,6 +114,11 @@ export function PianificazioneEditor({
   return (
     <div>
       {energyCard}
+      <DietTemplatePicker
+        clientId={clientId}
+        templates={templates}
+        onAssigned={(planId) => setSelectedPlanId(planId)}
+      />
       <div className="mb-4 flex flex-wrap items-center gap-2">
         {plans.length > 0 && (
           <ChipGroup

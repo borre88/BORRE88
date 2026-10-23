@@ -37,6 +37,13 @@ export default async function ClientPianificazionePage({ params }: { params: Pro
     .eq("client_id", clientId)
     .order("created_at", { ascending: false });
 
+  const { data: templates } = await supabase
+    .from("diet_plans")
+    .select("id, name, phase, duration_weeks, macro_only, target_kcal, target_protein_g, target_carbs_g, target_fat_g")
+    .eq("is_template", true)
+    .eq("trainer_id", client.trainer_id)
+    .order("created_at", { ascending: false });
+
   const age = client.date_of_birth ? calculateAge(client.date_of_birth) : null;
   const gender = (client.gender as Gender | null) ?? null;
 
@@ -53,6 +60,7 @@ export default async function ClientPianificazionePage({ params }: { params: Pro
       <PianificazioneEditor
         clientId={clientId}
         plans={plans ?? []}
+        templates={templates ?? []}
         recommendations={recommendations ?? []}
         weightKg={latestMeasurement?.weight_kg ?? null}
         heightCm={latestMeasurement?.height_cm ?? null}
