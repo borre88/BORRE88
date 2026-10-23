@@ -1,13 +1,11 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
-import { Plus, Pencil, Trash2, Star } from "lucide-react";
+import { useMemo, useState } from "react";
+import Link from "next/link";
+import { Settings2, Star } from "lucide-react";
 import type { Tables } from "@/lib/database.types";
-import type { Gender } from "@/lib/health-score";
 import { PHASE_LABELS, PHASE_ACCENT, type DietPhase } from "@/lib/diet-calc";
 import { ChipGroup } from "@/components/ui";
-import { deletePlan, setPlanActive } from "./actions";
-import { PlanForm } from "./plan-form";
 import { DayTargetsTable } from "./day-targets-table";
 import { WeeklyMealGrid } from "./weekly-meal-grid";
 import { PlanNotesButton } from "./plan-notes-modal";
@@ -36,9 +34,6 @@ export function DietPlanEditor({
   recipes,
   recommendations,
   protocols,
-  latestMeasurement,
-  age,
-  gender,
 }: {
   clientId: string;
   plans: Plan[];
@@ -47,15 +42,10 @@ export function DietPlanEditor({
   recipes: Recipe[];
   recommendations: Recommendation[];
   protocols: Protocol[];
-  latestMeasurement: { weight_kg: number | null; height_cm: number | null; activity_level: string | null } | null;
-  age: number | null;
-  gender: Gender | null;
 }) {
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(
     plans.find((p) => p.active)?.id ?? plans[0]?.id ?? null
   );
-  const [mode, setMode] = useState<"view" | "new" | "edit">("view");
-  const [pending, startTransition] = useTransition();
 
   const selectedPlan = useMemo(() => plans.find((p) => p.id === selectedPlanId) ?? null, [plans, selectedPlanId]);
 
@@ -64,47 +54,27 @@ export function DietPlanEditor({
     [selectedPlan]
   );
 
-  if (mode === "new") {
+  if (plans.length === 0) {
     return (
-      <PlanForm
-        clientId={clientId}
-        plan={null}
-        weightKg={latestMeasurement?.weight_kg ?? null}
-        heightCm={latestMeasurement?.height_cm ?? null}
-        defaultActivityLevel={latestMeasurement?.activity_level ?? null}
-        age={age}
-        gender={gender}
-        recommendations={recommendations}
-        onDone={(planId) => {
-          setSelectedPlanId(planId);
-          setMode("view");
-        }}
-        onCancel={() => setMode("view")}
-      />
-    );
-  }
-
-  if (mode === "edit" && selectedPlan) {
-    return (
-      <PlanForm
-        clientId={clientId}
-        plan={selectedPlan}
-        weightKg={latestMeasurement?.weight_kg ?? null}
-        heightCm={latestMeasurement?.height_cm ?? null}
-        defaultActivityLevel={latestMeasurement?.activity_level ?? null}
-        age={age}
-        gender={gender}
-        recommendations={recommendations}
-        onDone={() => setMode("view")}
-        onCancel={() => setMode("view")}
-      />
+      <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-line bg-surface py-10 text-center">
+        <p className="text-[12.5px] text-ink-faint">
+          Nessun piano alimentare ancora per questo cliente: impostalo prima da Pianificazione.
+        </p>
+        <Link
+          href={`/trainer/${clientId}/pianificazione`}
+          className="flex items-center gap-1.5 rounded-lg bg-teal px-3.5 py-2 text-xs font-medium text-white"
+        >
+          <Settings2 size={13} strokeWidth={2.2} />
+          Vai a Pianificazione
+        </Link>
+      </div>
     );
   }
 
   return (
     <div>
-      <div className="mb-4 flex flex-wrap items-center gap-2">
-        {plans.length > 0 && (
+      {plans.length > 1 && (
+        <div className="mb-4">
           <ChipGroup
             value={selectedPlanId ?? ""}
             onChange={setSelectedPlanId}
@@ -118,28 +88,6 @@ export function DietPlanEditor({
               ),
             }))}
           />
-        )}
-        <button
-          type="button"
-          onClick={() => setMode("new")}
-          className="flex items-center gap-1.5 rounded-lg bg-teal px-3.5 py-2 text-xs font-medium text-white"
-        >
-          <Plus size={13} strokeWidth={2.2} />
-          Nuovo piano
-        </button>
-      </div>
-
-      {!selectedPlan && (
-        <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-line bg-surface py-10 text-center">
-          <p className="text-[12.5px] text-ink-faint">Nessun piano alimentare ancora per questo cliente.</p>
-          <button
-            type="button"
-            onClick={() => setMode("new")}
-            className="flex items-center gap-1.5 rounded-lg bg-teal px-3.5 py-2 text-xs font-medium text-white"
-          >
-            <Plus size={13} strokeWidth={2.2} />
-            Crea il primo piano
-          </button>
         </div>
       )}
 
@@ -194,11 +142,7 @@ export function DietPlanEditor({
                 ) : (
                   ""
                 )}
-                {" · "}
-                dal {new Date(selectedPlan.start_date + "T00:00:00").toLocaleDateString("it-IT")} per{" "}
-                {selectedPlan.duration_weeks} settimane
               </div>
-              {selectedPlan.notes && <p className="mt-1.5 text-[12px] text-ink-soft">{selectedPlan.notes}</p>}
             </div>
             <div className="flex flex-wrap gap-1.5">
               <PlanNotesButton
@@ -208,40 +152,13 @@ export function DietPlanEditor({
                 recommendations={recommendations}
                 protocols={protocols}
               />
-              {!selectedPlan.active && (
-                <button
-                  type="button"
-                  disabled={pending}
-                  onClick={() => startTransition(() => setPlanActive(clientId, selectedPlan.id, true))}
-                  className="flex items-center gap-1 rounded-md border border-line px-2.5 py-1.5 text-[11px] font-medium text-ink-soft hover:border-teal hover:text-teal"
-                >
-                  <Star size={12} strokeWidth={2.2} />
-                  Rendi attivo
-                </button>
-              )}
-              <button
-                type="button"
-                onClick={() => setMode("edit")}
+              <Link
+                href={`/trainer/${clientId}/pianificazione`}
                 className="flex items-center gap-1 rounded-md border border-line px-2.5 py-1.5 text-[11px] font-medium text-ink-soft hover:border-teal hover:text-teal"
               >
-                <Pencil size={12} strokeWidth={2.2} />
-                Modifica
-              </button>
-              <button
-                type="button"
-                disabled={pending}
-                onClick={() => {
-                  if (confirm(`Eliminare il piano "${selectedPlan.name}"?`)) {
-                    const remaining = plans.filter((p) => p.id !== selectedPlan.id);
-                    setSelectedPlanId(remaining.find((p) => p.active)?.id ?? remaining[0]?.id ?? null);
-                    startTransition(() => deletePlan(clientId, selectedPlan.id));
-                  }
-                }}
-                className="flex items-center gap-1 rounded-md border border-line px-2.5 py-1.5 text-[11px] font-medium text-ink-soft hover:border-bad hover:text-bad"
-              >
-                <Trash2 size={12} strokeWidth={2.2} />
-                Elimina
-              </button>
+                <Settings2 size={12} strokeWidth={2.2} />
+                Modifica target
+              </Link>
             </div>
           </div>
 

@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { FileText, FlaskConical, Truck, Pill, Dumbbell, Apple } from "lucide-react";
+import { FileText, FlaskConical, Truck, Pill, Dumbbell, Apple, Scale, Target } from "lucide-react";
 import { SendIntakeModal } from "./send-intake-modal";
 import { createClient } from "@/lib/supabase/server";
 import { calculateAge, type Gender } from "@/lib/health-score";
@@ -222,6 +222,24 @@ export default async function ClientDetailPage({
             }}
             existingGroups={existingGroups}
           />
+          <span className="flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full bg-teal px-3 py-1.5 text-xs font-medium text-white">
+            <Scale size={13} strokeWidth={2.2} />
+            Misurazioni
+          </span>
+          <Link
+            href={`/trainer/${clientId}/pianificazione`}
+            className="flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full border border-line bg-surface px-3 py-1.5 text-xs font-medium text-ink-soft hover:border-teal hover:text-teal"
+          >
+            <Target size={13} strokeWidth={2.2} />
+            Pianificazione
+          </Link>
+          <Link
+            href={`/trainer/${clientId}/diete`}
+            className="flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full border border-line bg-surface px-3 py-1.5 text-xs font-medium text-ink-soft hover:border-teal hover:text-teal"
+          >
+            <Apple size={13} strokeWidth={2.2} />
+            Diete
+          </Link>
           <Link
             href={`/trainer/${clientId}/esami-sangue`}
             className="flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full border border-line bg-surface px-3 py-1.5 text-xs font-medium text-ink-soft hover:border-teal hover:text-teal"
@@ -235,13 +253,6 @@ export default async function ClientDetailPage({
           >
             <Dumbbell size={13} strokeWidth={2.2} />
             Allenamenti
-          </Link>
-          <Link
-            href={`/trainer/${clientId}/diete`}
-            className="flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full border border-line bg-surface px-3 py-1.5 text-xs font-medium text-ink-soft hover:border-teal hover:text-teal"
-          >
-            <Apple size={13} strokeWidth={2.2} />
-            Diete
           </Link>
           <SendIntakeModal clientId={clientId} clientName={client.full_name} />
           <AddMeasurementModal

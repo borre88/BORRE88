@@ -2,7 +2,6 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
-import { calculateAge, type Gender } from "@/lib/health-score";
 import { DietPlanEditor } from "./diet-plan-editor";
 
 export default async function ClientDietePage({ params }: { params: Promise<{ clientId: string }> }) {
@@ -11,18 +10,10 @@ export default async function ClientDietePage({ params }: { params: Promise<{ cl
 
   const { data: client } = await supabase
     .from("clients")
-    .select("id, full_name, date_of_birth, gender, trainer_id")
+    .select("id, full_name, trainer_id")
     .eq("id", clientId)
     .single();
   if (!client) notFound();
-
-  const { data: latestMeasurement } = await supabase
-    .from("measurements")
-    .select("weight_kg, height_cm, activity_level")
-    .eq("client_id", clientId)
-    .order("date", { ascending: false })
-    .limit(1)
-    .maybeSingle();
 
   const { data: foods } = await supabase.from("foods").select("*").order("category").order("name");
 
@@ -60,9 +51,6 @@ export default async function ClientDietePage({ params }: { params: Promise<{ cl
     diet_plan_meals: [...p.diet_plan_meals].sort((a, b) => a.weekday - b.weekday || a.position - b.position),
   }));
 
-  const age = client.date_of_birth ? calculateAge(client.date_of_birth) : null;
-  const gender = (client.gender as Gender | null) ?? null;
-
   return (
     <div>
       <Link
@@ -81,9 +69,6 @@ export default async function ClientDietePage({ params }: { params: Promise<{ cl
         recipes={recipes ?? []}
         recommendations={recommendations ?? []}
         protocols={protocols ?? []}
-        latestMeasurement={latestMeasurement ?? null}
-        age={age}
-        gender={gender}
       />
     </div>
   );
