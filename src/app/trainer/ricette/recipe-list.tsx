@@ -70,6 +70,11 @@ export function RecipeList({ recipes }: { recipes: Recipe[] }) {
         </button>
       </div>
 
+      <p className="mb-2 text-[11.5px] text-ink-faint">
+        {filtered.length} {filtered.length === 1 ? "ricetta trovata" : "ricette trovate"}
+        {filtered.length !== recipes.length ? ` su ${recipes.length}` : ""}
+      </p>
+
       <div className="mb-2">
         <ChipGroup
           value={goal}
