@@ -9,6 +9,7 @@ import {
   WEEKDAY_LABELS_SHORT,
   MACRO_ACCENT,
   scaleFoodToQuantity,
+  scaleRecipeToPortions,
   mealTypeDotClass,
   todayWeekdayMon0,
 } from "@/lib/diet-calc";
@@ -23,6 +24,7 @@ import {
 
 type Food = Tables<"foods">;
 type Supplement = Tables<"supplements">;
+type Recipe = Tables<"recipes">;
 type MealItem = Tables<"diet_plan_meal_items">;
 type Meal = Tables<"diet_plan_meals"> & { diet_plan_meal_items: MealItem[] };
 
@@ -32,6 +34,7 @@ export function WeeklyMealGrid({
   meals,
   foods,
   supplements = [],
+  recipes = [],
   targetKcal,
   targetProtein,
   targetCarbs,
@@ -43,6 +46,7 @@ export function WeeklyMealGrid({
   meals: Meal[];
   foods: Food[];
   supplements?: Supplement[];
+  recipes?: Recipe[];
   targetKcal: number | null;
   targetProtein: number | null;
   targetCarbs: number | null;
@@ -55,6 +59,7 @@ export function WeeklyMealGrid({
   const today = useMemo(() => todayWeekdayMon0(), []);
 
   const foodsById = useMemo(() => new Map(foods.map((f) => [f.id, f])), [foods]);
+  const recipesById = useMemo(() => new Map(recipes.map((r) => [r.id, r])), [recipes]);
 
   const mealTypeRows = useMemo(() => {
     const present = new Set(meals.map((m) => m.meal_type));
@@ -75,13 +80,23 @@ export function WeeklyMealGrid({
       fat = 0;
     for (const meal of dayMeals) {
       for (const item of meal.diet_plan_meal_items) {
-        const food = item.food_id ? foodsById.get(item.food_id) : null;
-        if (!food) continue;
-        const scaled = scaleFoodToQuantity(food, item.quantity_g);
-        kcal += scaled.kcal;
-        protein += scaled.protein;
-        carbs += scaled.carbs;
-        fat += scaled.fat;
+        if (item.food_id) {
+          const food = foodsById.get(item.food_id);
+          if (!food) continue;
+          const scaled = scaleFoodToQuantity(food, item.quantity_g);
+          kcal += scaled.kcal;
+          protein += scaled.protein;
+          carbs += scaled.carbs;
+          fat += scaled.fat;
+        } else if (item.recipe_id) {
+          const recipe = recipesById.get(item.recipe_id);
+          if (!recipe) continue;
+          const scaled = scaleRecipeToPortions(recipe, item.quantity_g);
+          kcal += scaled.kcal;
+          protein += scaled.protein;
+          carbs += scaled.carbs;
+          fat += scaled.fat;
+        }
       }
     }
     return { kcal: Math.round(kcal), protein: Math.round(protein), carbs: Math.round(carbs), fat: Math.round(fat) };
@@ -176,7 +191,15 @@ export function WeeklyMealGrid({
                   return (
                     <td key={weekday} className={`px-2 py-2 ${weekday === today ? "bg-teal-soft/40" : ""}`}>
                       {meal ? (
-                        <MealCell clientId={clientId} meal={meal} foods={foods} foodsById={foodsById} supplements={supplements} />
+                        <MealCell
+                          clientId={clientId}
+                          meal={meal}
+                          foods={foods}
+                          foodsById={foodsById}
+                          supplements={supplements}
+                          recipes={recipes}
+                          recipesById={recipesById}
+                        />
                       ) : (
                         <button
                           type="button"
@@ -268,23 +291,32 @@ function MealCell({
   foods,
   foodsById,
   supplements,
+  recipes,
+  recipesById,
 }: {
   clientId: string;
   meal: Meal;
   foods: Food[];
   foodsById: Map<string, Food>;
   supplements: Supplement[];
+  recipes: Recipe[];
+  recipesById: Map<string, Recipe>;
 }) {
   const isSupplementRow = meal.meal_type === "integratori";
   const supplementsById = useMemo(() => new Map(supplements.map((s) => [s.id, s])), [supplements]);
 
   const [adding, setAdding] = useState(false);
+  const [itemKind, setItemKind] = useState<"alimento" | "ricetta">("alimento");
   const [query, setQuery] = useState("");
   const [selectedFoodId, setSelectedFoodId] = useState<string | null>(null);
   const [selectedSupplementId, setSelectedSupplementId] = useState<string | null>(null);
+  const [selectedRecipeId, setSelectedRecipeId] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(isSupplementRow ? "1" : "100");
   const [unit, setUnit] = useState("");
+  const [expandedId, setExpandedId] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+
+  const isRecipeMode = !isSupplementRow && itemKind === "ricetta";
 
   const foodMatches = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -298,6 +330,22 @@ function MealCell({
     return supplements.filter((s) => s.name.toLowerCase().includes(q)).slice(0, 8);
   }, [supplements, query]);
 
+  const recipeMatches = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return [];
+    return recipes.filter((r) => r.name.toLowerCase().includes(q)).slice(0, 8);
+  }, [recipes, query]);
+
+  function resetAddForm() {
+    setAdding(false);
+    setQuery("");
+    setSelectedFoodId(null);
+    setSelectedSupplementId(null);
+    setSelectedRecipeId(null);
+    setQuantity(isSupplementRow ? "1" : "100");
+    setUnit("");
+  }
+
   function submitAdd() {
     if (isSupplementRow) {
       if (!selectedSupplementId || !quantity.trim()) return;
@@ -309,11 +357,21 @@ function MealCell({
           custom_name: null,
           quantity_g: Number(quantity),
         });
-        setAdding(false);
-        setQuery("");
-        setSelectedSupplementId(null);
-        setQuantity("1");
-        setUnit("");
+        resetAddForm();
+      });
+      return;
+    }
+    if (isRecipeMode) {
+      if (!selectedRecipeId || !quantity.trim()) return;
+      startTransition(async () => {
+        await addMealItem(clientId, meal.id, {
+          food_id: null,
+          recipe_id: selectedRecipeId,
+          unit: "porzione",
+          custom_name: null,
+          quantity_g: Number(quantity),
+        });
+        resetAddForm();
       });
       return;
     }
@@ -324,10 +382,7 @@ function MealCell({
         custom_name: null,
         quantity_g: Number(quantity),
       });
-      setAdding(false);
-      setQuery("");
-      setSelectedFoodId(null);
-      setQuantity("100");
+      resetAddForm();
     });
   }
 
@@ -335,7 +390,7 @@ function MealCell({
     <div className="rounded-md border border-line bg-cream p-1.5">
       <div className="mb-1 flex items-center justify-between">
         <span className="text-[10px] text-ink-faint">
-          {meal.diet_plan_meal_items.length} {isSupplementRow ? "integratori" : "alimenti"}
+          {meal.diet_plan_meal_items.length} {isSupplementRow ? "integratori" : "elementi"}
         </span>
         <button
           type="button"
@@ -351,38 +406,62 @@ function MealCell({
         {meal.diet_plan_meal_items.map((item) => {
           const food = item.food_id ? foodsById.get(item.food_id) : null;
           const supplement = item.supplement_id ? supplementsById.get(item.supplement_id) : null;
+          const recipe = item.recipe_id ? recipesById.get(item.recipe_id) : null;
           const scaled = food ? scaleFoodToQuantity(food, item.quantity_g) : null;
+          const recipeScaled = recipe ? scaleRecipeToPortions(recipe, item.quantity_g) : null;
+          const isExpanded = expandedId === item.id;
           return (
-            <div key={item.id} className="flex items-center justify-between gap-1 rounded bg-surface px-1.5 py-1">
-              <div className="min-w-0 flex-1">
-                <div className="truncate text-[11px] font-medium">
-                  {food?.name ?? supplement?.name ?? item.custom_name ?? (isSupplementRow ? "Integratore" : "Alimento")}
-                </div>
-                <div className="flex items-center gap-1">
-                  <input
-                    type="number"
-                    defaultValue={item.quantity_g}
-                    onBlur={(e) => {
-                      const v = Number(e.target.value);
-                      if (v > 0) startTransition(() => updateMealItemQuantity(clientId, item.id, v));
-                    }}
-                    className="w-12 rounded border border-line bg-cream px-1 py-0.5 text-[10.5px] outline-none focus:border-teal"
-                  />
-                  <span className="text-[10px] text-ink-faint">{item.unit || (supplement ? "" : "g")}</span>
-                  {scaled && <span className="text-[10px] text-ink-faint">· {Math.round(scaled.kcal)} kcal</span>}
-                  {supplement?.suggested_use && (
-                    <span className="truncate text-[10px] text-ink-faint">· {supplement.suggested_use}</span>
-                  )}
-                </div>
+            <div key={item.id} className="rounded bg-surface px-1.5 py-1">
+              <div className="flex items-center justify-between gap-1">
+                <button
+                  type="button"
+                  disabled={!recipe}
+                  onClick={() => recipe && setExpandedId(isExpanded ? null : item.id)}
+                  className={`min-w-0 flex-1 text-left ${recipe ? "cursor-pointer" : ""}`}
+                >
+                  <div className="flex items-center gap-1">
+                    <span className="truncate text-[11px] font-medium">
+                      {food?.name ?? recipe?.name ?? supplement?.name ?? item.custom_name ?? (isSupplementRow ? "Integratore" : "Alimento")}
+                    </span>
+                    {recipe && <span className="shrink-0 text-[9px] text-ink-faint">{isExpanded ? "▲" : "▼"}</span>}
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <input
+                      type="number"
+                      defaultValue={item.quantity_g}
+                      onClick={(e) => e.stopPropagation()}
+                      onBlur={(e) => {
+                        const v = Number(e.target.value);
+                        if (v > 0) startTransition(() => updateMealItemQuantity(clientId, item.id, v));
+                      }}
+                      className="w-12 rounded border border-line bg-cream px-1 py-0.5 text-[10.5px] outline-none focus:border-teal"
+                    />
+                    <span className="text-[10px] text-ink-faint">
+                      {item.unit || (supplement || recipe ? "" : "g")}
+                    </span>
+                    {scaled && <span className="text-[10px] text-ink-faint">· {Math.round(scaled.kcal)} kcal</span>}
+                    {recipeScaled && <span className="text-[10px] text-ink-faint">· {Math.round(recipeScaled.kcal)} kcal</span>}
+                    {supplement?.suggested_use && (
+                      <span className="truncate text-[10px] text-ink-faint">· {supplement.suggested_use}</span>
+                    )}
+                  </div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => startTransition(() => deleteMealItem(clientId, item.id))}
+                  aria-label="Rimuovi"
+                  className="shrink-0 text-ink-faint hover:text-bad"
+                >
+                  <Trash2 size={11} strokeWidth={2.2} />
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={() => startTransition(() => deleteMealItem(clientId, item.id))}
-                aria-label="Rimuovi"
-                className="shrink-0 text-ink-faint hover:text-bad"
-              >
-                <Trash2 size={11} strokeWidth={2.2} />
-              </button>
+              {recipe && isExpanded && (
+                <ul className="mt-1 list-disc space-y-0.5 pl-4 text-[10px] leading-relaxed text-ink-soft">
+                  {recipe.ingredients.map((ing, i) => (
+                    <li key={i}>{ing}</li>
+                  ))}
+                </ul>
+              )}
             </div>
           );
         })}
@@ -390,6 +469,27 @@ function MealCell({
 
       {adding ? (
         <div className="mt-1.5 rounded border border-line bg-surface p-1.5">
+          {!isSupplementRow && (
+            <div className="mb-1.5 flex gap-1">
+              {(["alimento", "ricetta"] as const).map((k) => (
+                <button
+                  key={k}
+                  type="button"
+                  onClick={() => {
+                    setItemKind(k);
+                    setQuery("");
+                    setSelectedFoodId(null);
+                    setSelectedRecipeId(null);
+                  }}
+                  className={`rounded-full border px-2 py-0.5 text-[10px] font-medium ${
+                    itemKind === k ? "border-teal bg-teal text-white" : "border-line bg-cream text-ink-soft"
+                  }`}
+                >
+                  {k === "alimento" ? "Alimento" : "Ricetta"}
+                </button>
+              ))}
+            </div>
+          )}
           <input
             autoFocus
             value={query}
@@ -397,8 +497,9 @@ function MealCell({
               setQuery(e.target.value);
               setSelectedFoodId(null);
               setSelectedSupplementId(null);
+              setSelectedRecipeId(null);
             }}
-            placeholder={isSupplementRow ? "Cerca integratore…" : "Cerca alimento…"}
+            placeholder={isSupplementRow ? "Cerca integratore…" : isRecipeMode ? "Cerca ricetta…" : "Cerca alimento…"}
             className="mb-1 w-full rounded border border-line bg-cream px-1.5 py-1 text-[11px] outline-none focus:border-teal"
           />
           {isSupplementRow
@@ -420,27 +521,48 @@ function MealCell({
                   ))}
                 </div>
               )
-            : foodMatches.length > 0 &&
-              !selectedFoodId && (
-                <div className="mb-1 max-h-28 overflow-y-auto rounded border border-line bg-cream">
-                  {foodMatches.map((f) => (
-                    <button
-                      key={f.id}
-                      type="button"
-                      onClick={() => {
-                        setSelectedFoodId(f.id);
-                        setQuery(f.name);
-                      }}
-                      className="block w-full px-1.5 py-1 text-left text-[11px] hover:bg-teal-soft"
-                    >
-                      {f.name}
-                    </button>
-                  ))}
-                </div>
-              )}
+            : isRecipeMode
+              ? recipeMatches.length > 0 &&
+                !selectedRecipeId && (
+                  <div className="mb-1 max-h-28 overflow-y-auto rounded border border-line bg-cream">
+                    {recipeMatches.map((r) => (
+                      <button
+                        key={r.id}
+                        type="button"
+                        onClick={() => {
+                          setSelectedRecipeId(r.id);
+                          setQuery(r.name);
+                        }}
+                        className="block w-full px-1.5 py-1 text-left text-[11px] hover:bg-teal-soft"
+                      >
+                        {r.emoji ? `${r.emoji} ` : ""}
+                        {r.name}
+                      </button>
+                    ))}
+                  </div>
+                )
+              : foodMatches.length > 0 &&
+                !selectedFoodId && (
+                  <div className="mb-1 max-h-28 overflow-y-auto rounded border border-line bg-cream">
+                    {foodMatches.map((f) => (
+                      <button
+                        key={f.id}
+                        type="button"
+                        onClick={() => {
+                          setSelectedFoodId(f.id);
+                          setQuery(f.name);
+                        }}
+                        className="block w-full px-1.5 py-1 text-left text-[11px] hover:bg-teal-soft"
+                      >
+                        {f.name}
+                      </button>
+                    ))}
+                  </div>
+                )}
           <div className="flex items-center gap-1">
             <input
               type="number"
+              step={isRecipeMode ? "0.5" : "1"}
               value={quantity}
               onChange={(e) => setQuantity(e.target.value)}
               className="w-12 rounded border border-line bg-cream px-1 py-0.5 text-[11px] outline-none focus:border-teal"
@@ -454,26 +576,19 @@ function MealCell({
                 className="w-20 rounded border border-line bg-cream px-1 py-0.5 text-[11px] outline-none focus:border-teal"
               />
             ) : (
-              <span className="text-[10px] text-ink-faint">g</span>
+              <span className="text-[10px] text-ink-faint">{isRecipeMode ? "porz." : "g"}</span>
             )}
             <button
               type="button"
-              disabled={(isSupplementRow ? !selectedSupplementId : !selectedFoodId) || pending}
+              disabled={
+                (isSupplementRow ? !selectedSupplementId : isRecipeMode ? !selectedRecipeId : !selectedFoodId) || pending
+              }
               onClick={submitAdd}
               className="ml-auto rounded bg-teal px-2 py-0.5 text-[10.5px] font-medium text-white disabled:opacity-50"
             >
               Aggiungi
             </button>
-            <button
-              type="button"
-              onClick={() => {
-                setAdding(false);
-                setQuery("");
-                setSelectedFoodId(null);
-                setSelectedSupplementId(null);
-              }}
-              className="text-[10.5px] text-ink-faint"
-            >
+            <button type="button" onClick={resetAddForm} className="text-[10.5px] text-ink-faint">
               Annulla
             </button>
           </div>
@@ -485,7 +600,7 @@ function MealCell({
           className="mt-1 flex w-full items-center justify-center gap-1 rounded border border-dashed border-line py-1 text-[10.5px] text-ink-faint hover:border-teal hover:text-teal"
         >
           <Plus size={10} strokeWidth={2.2} />
-          {isSupplementRow ? "Integratore" : "Alimento"}
+          {isSupplementRow ? "Integratore" : "Alimento o ricetta"}
         </button>
       )}
     </div>

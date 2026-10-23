@@ -14,6 +14,7 @@ import { AssignModal } from "./assign-modal";
 type Food = Tables<"foods">;
 type Supplement = Tables<"supplements">;
 type Recommendation = Tables<"recommendations">;
+type Recipe = Tables<"recipes">;
 type MealItem = Tables<"diet_plan_meal_items">;
 type Meal = Tables<"diet_plan_meals"> & { diet_plan_meal_items: MealItem[] };
 type PlanDay = Tables<"diet_plan_days">;
@@ -28,12 +29,14 @@ export function TemplateEditor({
   foods,
   clients,
   supplements,
+  recipes,
   recommendations,
 }: {
   templates: Template[];
   foods: Food[];
   clients: ClientOption[];
   supplements: Supplement[];
+  recipes: Recipe[];
   recommendations: Recommendation[];
 }) {
   const [selectedId, setSelectedId] = useState<string | null>(templates[0]?.id ?? null);
@@ -215,6 +218,7 @@ export function TemplateEditor({
                 meals={selected.diet_plan_meals}
                 foods={foods}
                 supplements={supplements}
+                recipes={recipes}
                 targetKcal={selected.target_kcal}
                 targetProtein={selected.target_protein_g}
                 targetCarbs={selected.target_carbs_g}

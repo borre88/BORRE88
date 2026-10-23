@@ -223,3 +223,20 @@ export function scaleFoodToQuantity(food: FoodMacros, quantityG: number) {
     fiber: food.fiber_100g * factor,
   };
 }
+
+export interface RecipeMacros {
+  kcal: number;
+  protein_g: number;
+  carbs_g: number;
+  fat_g: number;
+}
+
+/** Le ricette hanno kcal/macro già calcolati per 1 porzione: quantityPortions è il moltiplicatore. */
+export function scaleRecipeToPortions(recipe: RecipeMacros, quantityPortions: number) {
+  return {
+    kcal: recipe.kcal * quantityPortions,
+    protein: recipe.protein_g * quantityPortions,
+    carbs: recipe.carbs_g * quantityPortions,
+    fat: recipe.fat_g * quantityPortions,
+  };
+}

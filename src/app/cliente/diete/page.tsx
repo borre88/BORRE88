@@ -9,6 +9,7 @@ import {
   MEAL_TYPE_LABELS,
   WEEKDAY_LABELS,
   scaleFoodToQuantity,
+  scaleRecipeToPortions,
   mealTypeDotClass,
   todayWeekdayMon0,
   type DietPhase,
@@ -61,6 +62,9 @@ export default async function ClienteDietePage() {
     .eq("trainer_id", client.trainer_id);
   const supplementsById = new Map((supplements ?? []).map((s) => [s.id, s]));
 
+  const { data: recipes } = await supabase.from("recipes").select("*");
+  const recipesById = new Map((recipes ?? []).map((r) => [r.id, r]));
+
   const meals = [...plan.diet_plan_meals].sort((a, b) => a.weekday - b.weekday || a.position - b.position);
   const dayOverrides = new Map(plan.diet_plan_days.map((d) => [d.weekday, d]));
 
@@ -78,13 +82,23 @@ export default async function ClienteDietePage() {
       fat = 0;
     for (const meal of meals.filter((m) => m.weekday === weekday)) {
       for (const item of meal.diet_plan_meal_items) {
-        const food: Food | undefined = item.food_id ? foodsById.get(item.food_id) : undefined;
-        if (!food) continue;
-        const scaled = scaleFoodToQuantity(food, item.quantity_g);
-        kcal += scaled.kcal;
-        protein += scaled.protein;
-        carbs += scaled.carbs;
-        fat += scaled.fat;
+        if (item.food_id) {
+          const food: Food | undefined = foodsById.get(item.food_id);
+          if (!food) continue;
+          const scaled = scaleFoodToQuantity(food, item.quantity_g);
+          kcal += scaled.kcal;
+          protein += scaled.protein;
+          carbs += scaled.carbs;
+          fat += scaled.fat;
+        } else if (item.recipe_id) {
+          const recipe = recipesById.get(item.recipe_id);
+          if (!recipe) continue;
+          const scaled = scaleRecipeToPortions(recipe, item.quantity_g);
+          kcal += scaled.kcal;
+          protein += scaled.protein;
+          carbs += scaled.carbs;
+          fat += scaled.fat;
+        }
       }
     }
     return { kcal: Math.round(kcal), protein: Math.round(protein), carbs: Math.round(carbs), fat: Math.round(fat) };
@@ -186,7 +200,31 @@ export default async function ClienteDietePage() {
                             {meal.diet_plan_meal_items.map((item) => {
                               const food: Food | undefined = item.food_id ? foodsById.get(item.food_id) : undefined;
                               const supplement = item.supplement_id ? supplementsById.get(item.supplement_id) : undefined;
+                              const recipe = item.recipe_id ? recipesById.get(item.recipe_id) : undefined;
                               const scaled = food ? scaleFoodToQuantity(food, item.quantity_g) : null;
+                              const recipeScaled = recipe ? scaleRecipeToPortions(recipe, item.quantity_g) : null;
+
+                              if (recipe) {
+                                return (
+                                  <details key={item.id} className="group rounded-md bg-cream px-2 py-1.5">
+                                    <summary className="cursor-pointer list-none text-[11.5px] font-medium marker:content-none">
+                                      {recipe.emoji ? `${recipe.emoji} ` : ""}
+                                      {recipe.name}
+                                      <span className="ml-1 text-[9px] text-ink-faint group-open:hidden">▼</span>
+                                      <span className="ml-1 hidden text-[9px] text-ink-faint group-open:inline">▲</span>
+                                    </summary>
+                                    <div className="text-[10.5px] text-ink-faint">
+                                      {item.quantity_g} porz.{recipeScaled ? ` · ${Math.round(recipeScaled.kcal)} kcal` : ""}
+                                    </div>
+                                    <ul className="mt-1 list-disc space-y-0.5 pl-4 text-[10.5px] leading-relaxed text-ink-soft">
+                                      {recipe.ingredients.map((ing, i) => (
+                                        <li key={i}>{ing}</li>
+                                      ))}
+                                    </ul>
+                                  </details>
+                                );
+                              }
+
                               return (
                                 <div key={item.id} className="rounded-md bg-cream px-2 py-1.5">
                                   <div className="text-[11.5px] font-medium">

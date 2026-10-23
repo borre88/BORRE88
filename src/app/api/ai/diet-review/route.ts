@@ -60,6 +60,9 @@ export async function POST(request: Request) {
   const { data: supplements } = await supabase.from("supplements").select("*").eq("trainer_id", session.user.id);
   const supplementsById = new Map((supplements ?? []).map((s) => [s.id, s]));
 
+  const { data: recipes } = await supabase.from("recipes").select("*");
+  const recipesById = new Map((recipes ?? []).map((r) => [r.id, r]));
+
   const { data: lastIntake } = await supabase
     .from("intake_forms")
     .select("data, completed_at")
@@ -92,6 +95,8 @@ export async function POST(request: Request) {
             const scaled = scaleFoodToQuantity(food, item.quantity_g);
             return `${food.name} ${item.quantity_g}g (${Math.round(scaled.kcal)} kcal, P${Math.round(scaled.protein)} C${Math.round(scaled.carbs)} G${Math.round(scaled.fat)})`;
           }
+          const recipe = item.recipe_id ? recipesById.get(item.recipe_id) : null;
+          if (recipe) return `${recipe.name} (ricetta, ${item.quantity_g} porz., ${Math.round(recipe.kcal * item.quantity_g)} kcal)`;
           const supplement = item.supplement_id ? supplementsById.get(item.supplement_id) : null;
           if (supplement) return `${supplement.name} ${item.quantity_g}${item.unit ?? ""}`;
           return item.custom_name ? `${item.custom_name} (${item.quantity_g}g)` : null;

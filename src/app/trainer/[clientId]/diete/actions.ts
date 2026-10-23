@@ -224,6 +224,7 @@ export async function addMealItem(
   mealId: string,
   data: {
     food_id: string | null;
+    recipe_id?: string | null;
     supplement_id?: string | null;
     unit?: string | null;
     custom_name: string | null;
@@ -238,6 +239,7 @@ export async function addMealItem(
   await supabase.from("diet_plan_meal_items").insert({
     meal_id: mealId,
     food_id: data.food_id,
+    recipe_id: data.recipe_id ?? null,
     supplement_id: data.supplement_id ?? null,
     unit: data.unit ?? null,
     custom_name: data.custom_name,
