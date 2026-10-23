@@ -121,6 +121,49 @@ export function foodCategoryDotClass(category: string): string {
   return FOOD_CATEGORY_DOT[category] ?? "bg-ink-faint";
 }
 
+export type ProteinSource =
+  | "carne_rossa"
+  | "carne_bianca"
+  | "pesce_magro"
+  | "pesce_grasso"
+  | "salumi"
+  | "uova"
+  | "vegetale"
+  | "latticini";
+
+export const PROTEIN_SOURCE_LABELS: Record<ProteinSource, string> = {
+  carne_rossa: "Carne rossa",
+  carne_bianca: "Carne bianca",
+  pesce_magro: "Pesce magro",
+  pesce_grasso: "Pesce grasso",
+  salumi: "Salumi",
+  uova: "Uova",
+  vegetale: "Vegetale",
+  latticini: "Latticini",
+};
+
+/** Colori distinti per fonte proteica: servono a far "saltare all'occhio" come sono distribuite nella settimana. */
+export const PROTEIN_SOURCE_ACCENT: Record<ProteinSource, AccentClasses> = {
+  carne_rossa: { bg: "bg-rose-50", border: "border-rose-300", text: "text-rose-700", dot: "bg-rose-500" },
+  carne_bianca: { bg: "bg-orange-50", border: "border-orange-300", text: "text-orange-700", dot: "bg-orange-500" },
+  pesce_magro: { bg: "bg-sky-50", border: "border-sky-300", text: "text-sky-700", dot: "bg-sky-500" },
+  pesce_grasso: { bg: "bg-blue-50", border: "border-blue-300", text: "text-blue-700", dot: "bg-blue-500" },
+  salumi: { bg: "bg-amber-50", border: "border-amber-300", text: "text-amber-800", dot: "bg-amber-600" },
+  uova: { bg: "bg-yellow-50", border: "border-yellow-300", text: "text-yellow-800", dot: "bg-yellow-500" },
+  vegetale: { bg: "bg-lime-50", border: "border-lime-300", text: "text-lime-700", dot: "bg-lime-500" },
+  latticini: { bg: "bg-violet-50", border: "border-violet-300", text: "text-violet-700", dot: "bg-violet-500" },
+};
+
+export function proteinSourceAccent(source: string | null | undefined): AccentClasses | null {
+  if (!source) return null;
+  return PROTEIN_SOURCE_ACCENT[source as ProteinSource] ?? null;
+}
+
+export function proteinSourceLabel(source: string | null | undefined): string | null {
+  if (!source) return null;
+  return PROTEIN_SOURCE_LABELS[source as ProteinSource] ?? source;
+}
+
 /** Indice 0=Lunedì..6=Domenica di oggi, coerente con WEEKDAY_LABELS. */
 export function todayWeekdayMon0(): number {
   const jsDay = new Date().getDay(); // 0=Domenica..6=Sabato

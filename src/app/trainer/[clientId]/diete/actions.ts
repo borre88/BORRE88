@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import type { Tables } from "@/lib/database.types";
 
 export interface ActionState {
   error?: string;
@@ -255,8 +256,48 @@ export async function updateMealItemQuantity(clientId: string, itemId: string, q
   revalidate(clientId);
 }
 
+export async function updateMealItemUnit(clientId: string, itemId: string, unit: string | null) {
+  const supabase = await createClient();
+  await supabase.from("diet_plan_meal_items").update({ unit }).eq("id", itemId);
+  revalidate(clientId);
+}
+
 export async function deleteMealItem(clientId: string, itemId: string) {
   const supabase = await createClient();
   await supabase.from("diet_plan_meal_items").delete().eq("id", itemId);
+  revalidate(clientId);
+}
+
+/** Sostituisce l'alimento di una riga esistente, mantenendo quantità e posizione. */
+export async function replaceMealItemFood(clientId: string, itemId: string, foodId: string) {
+  const supabase = await createClient();
+  await supabase.from("diet_plan_meal_items").update({ food_id: foodId, custom_name: null }).eq("id", itemId);
+  revalidate(clientId);
+}
+
+/** Duplica una riga alimento/ricetta/integratore nello stesso pasto. */
+export async function duplicateMealItem(clientId: string, mealId: string, item: Tables<"diet_plan_meal_items">) {
+  const supabase = await createClient();
+  const { count } = await supabase
+    .from("diet_plan_meal_items")
+    .select("id", { count: "exact", head: true })
+    .eq("meal_id", mealId);
+  await supabase.from("diet_plan_meal_items").insert({
+    meal_id: mealId,
+    food_id: item.food_id,
+    recipe_id: item.recipe_id,
+    supplement_id: item.supplement_id,
+    unit: item.unit,
+    custom_name: item.custom_name,
+    quantity_g: item.quantity_g,
+    position: count ?? 0,
+  });
+  revalidate(clientId);
+}
+
+/** Sostituisce l'intera lista di alimenti alternativi per una riga. */
+export async function setMealItemAlternatives(clientId: string, itemId: string, alternativeFoodIds: string[]) {
+  const supabase = await createClient();
+  await supabase.from("diet_plan_meal_items").update({ alternative_food_ids: alternativeFoodIds }).eq("id", itemId);
   revalidate(clientId);
 }

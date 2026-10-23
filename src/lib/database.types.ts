@@ -350,6 +350,7 @@ export type Database = {
       }
       diet_plan_meal_items: {
         Row: {
+          alternative_food_ids: string[]
           custom_name: string | null
           food_id: string | null
           id: string
@@ -361,6 +362,7 @@ export type Database = {
           unit: string | null
         }
         Insert: {
+          alternative_food_ids?: string[]
           custom_name?: string | null
           food_id?: string | null
           id?: string
@@ -372,6 +374,7 @@ export type Database = {
           unit?: string | null
         }
         Update: {
+          alternative_food_ids?: string[]
           custom_name?: string | null
           food_id?: string | null
           id?: string
@@ -602,6 +605,7 @@ export type Database = {
           kcal_100g: number
           name: string
           protein_100g: number
+          protein_source: string | null
           source: string
         }
         Insert: {
@@ -614,6 +618,7 @@ export type Database = {
           kcal_100g: number
           name: string
           protein_100g?: number
+          protein_source?: string | null
           source?: string
         }
         Update: {
@@ -626,6 +631,7 @@ export type Database = {
           kcal_100g?: number
           name?: string
           protein_100g?: number
+          protein_source?: string | null
           source?: string
         }
         Relationships: []
