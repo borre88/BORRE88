@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
-import { Flame, Zap, Target, Sparkles, X } from "lucide-react";
+import { Flame, Zap, Target, Sparkles, X, NotebookPen, CalendarDays, Hourglass, FlagTriangleRight } from "lucide-react";
 import { ACTIVITY_LABELS, ACTIVITY_MULTIPLIERS, calculateBMR, type Gender } from "@/lib/health-score";
 import {
   PHASE_LABELS,
@@ -97,6 +97,13 @@ export function PlanForm({
 
   const inputClass = "w-full rounded-md border border-line bg-cream px-2.5 py-1.5 text-[13px] outline-none focus:border-teal";
 
+  const endDateLabel = useMemo(() => {
+    const d = new Date(startDate);
+    if (Number.isNaN(d.getTime())) return null;
+    d.setDate(d.getDate() + durationWeeks * 7);
+    return d.toLocaleDateString("it-IT", { day: "2-digit", month: "2-digit", year: "numeric" });
+  }, [startDate, durationWeeks]);
+
   function save() {
     if (!name.trim()) {
       setError("Il nome del piano è obbligatorio.");
@@ -134,30 +141,57 @@ export function PlanForm({
         </button>
       </div>
 
-      <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-        <div>
-          <label className="mb-1 block text-xs font-medium text-ink-soft" htmlFor="plan-name">
-            Nome piano
-          </label>
-          <input
-            id="plan-name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Es. Definizione autunno"
-            className={inputClass}
-          />
-        </div>
-        <div>
-          <label className="mb-1 block text-xs font-medium text-ink-soft" htmlFor="plan-start">
-            Data inizio
+      <div className="mb-4 rounded-xl border border-teal-soft-line bg-teal-soft px-3.5 py-3">
+        <label className="mb-1 flex items-center gap-1.5 text-[10.5px] font-semibold uppercase tracking-wide text-teal" htmlFor="plan-name">
+          <NotebookPen size={12} strokeWidth={2.4} />
+          Nome piano
+        </label>
+        <input
+          id="plan-name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Es. Definizione autunno"
+          className="w-full rounded-md border border-teal-soft-line bg-surface px-2.5 py-1.5 text-[14px] font-medium outline-none focus:border-teal"
+        />
+      </div>
+
+      <div className="mb-4 grid grid-cols-1 gap-2.5 sm:grid-cols-3">
+        <div className="rounded-xl border border-line bg-cream px-3.5 py-3">
+          <label className="mb-1 flex items-center gap-1.5 text-[10.5px] font-semibold uppercase tracking-wide text-ink-faint" htmlFor="plan-start">
+            <CalendarDays size={12} strokeWidth={2.4} />
+            Inizio
           </label>
           <input
             id="plan-start"
             type="date"
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
-            className={inputClass}
+            className="w-full rounded-md border border-line bg-surface px-2 py-1.5 text-[13px] outline-none focus:border-teal"
           />
+        </div>
+        <div className="rounded-xl border border-line bg-cream px-3.5 py-3">
+          <label className="mb-1 flex items-center gap-1.5 text-[10.5px] font-semibold uppercase tracking-wide text-ink-faint" htmlFor="plan-duration">
+            <Hourglass size={12} strokeWidth={2.4} />
+            Durata
+          </label>
+          <div className="flex items-center gap-1.5">
+            <input
+              id="plan-duration"
+              type="number"
+              min={1}
+              value={durationWeeks}
+              onChange={(e) => setDurationWeeks(Number(e.target.value))}
+              className="w-full rounded-md border border-line bg-surface px-2 py-1.5 text-[13px] outline-none focus:border-teal"
+            />
+            <span className="shrink-0 text-[11px] text-ink-faint">sett.</span>
+          </div>
+        </div>
+        <div className="rounded-xl border border-gold bg-gold-soft px-3.5 py-3">
+          <div className="mb-1 flex items-center gap-1.5 text-[10.5px] font-semibold uppercase tracking-wide text-gold-ink">
+            <FlagTriangleRight size={12} strokeWidth={2.4} />
+            Fine prevista
+          </div>
+          <div className="py-1.5 text-[14px] font-semibold text-gold-ink">{endDateLabel ?? "—"}</div>
         </div>
       </div>
 
@@ -279,18 +313,22 @@ export function PlanForm({
         </div>
       </div>
 
-      <div className="mb-4 flex items-center gap-2">
+      <label
+        htmlFor="plan-macro-only"
+        className="mb-4 flex cursor-pointer items-start gap-2.5 rounded-xl border border-line bg-cream px-3.5 py-3"
+      >
         <input
           id="plan-macro-only"
           type="checkbox"
           checked={macroOnly}
           onChange={(e) => setMacroOnly(e.target.checked)}
-          className="h-4 w-4 accent-teal"
+          className="mt-0.5 h-4 w-4 shrink-0 accent-teal"
         />
-        <label htmlFor="plan-macro-only" className="text-xs text-ink-soft">
-          Solo macro — nessun piano pasti, il cliente logga liberamente i cibi
-        </label>
-      </div>
+        <span className="text-[12.5px] text-ink-soft">
+          <span className="font-semibold text-ink">Solo macro</span> — nessun piano pasti fisso, fissi i target e il
+          cliente logga liberamente i cibi (stile diario alimentare).
+        </span>
+      </label>
 
       <div className="mb-4 grid grid-cols-1 gap-2.5 sm:grid-cols-3">
         <div className={`rounded-lg border px-3.5 py-3 ${MACRO_ACCENT.protein.border} ${MACRO_ACCENT.protein.bg}`}>
@@ -342,20 +380,6 @@ export function PlanForm({
       )}
 
       <div className="mb-4">
-        <label className="mb-1 block text-xs font-medium text-ink-soft" htmlFor="plan-duration">
-          Durata (settimane)
-        </label>
-        <input
-          id="plan-duration"
-          type="number"
-          min={1}
-          value={durationWeeks}
-          onChange={(e) => setDurationWeeks(Number(e.target.value))}
-          className={`${inputClass} max-w-[120px]`}
-        />
-      </div>
-
-      <div className="mb-4">
         <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
           <label className="block text-xs font-medium text-ink-soft" htmlFor="plan-notes">
             Note per il cliente (facoltativo)
@@ -376,20 +400,22 @@ export function PlanForm({
 
       {error && <p className="mb-3 text-xs font-medium text-bad">{error}</p>}
 
-      <div className="flex gap-2">
-        <button
-          type="button"
-          disabled={pending}
-          onClick={save}
-          className="flex items-center gap-1.5 rounded-lg bg-teal px-4 py-2.5 text-sm font-medium text-white disabled:opacity-60"
-        >
-          <Sparkles size={15} strokeWidth={2.2} />
-          {pending ? "Salvataggio…" : plan ? "Salva modifiche" : "Crea piano"}
-        </button>
-        <button type="button" onClick={onCancel} className="rounded-lg border border-line px-4 py-2.5 text-sm font-medium text-ink-soft">
-          Annulla
-        </button>
-      </div>
+      <button
+        type="button"
+        disabled={pending}
+        onClick={save}
+        className="flex w-full items-center justify-center gap-2 rounded-xl bg-teal py-3 text-[14px] font-semibold text-white disabled:opacity-60"
+      >
+        <Sparkles size={16} strokeWidth={2.2} />
+        {pending ? "Salvataggio…" : plan ? "Salva modifiche" : "Crea piano alimentare"}
+      </button>
+      <button
+        type="button"
+        onClick={onCancel}
+        className="mt-2 w-full rounded-xl py-2 text-center text-[13px] font-medium text-ink-faint hover:text-ink-soft"
+      >
+        Annulla
+      </button>
     </div>
   );
 }
