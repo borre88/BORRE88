@@ -18,10 +18,12 @@ import {
   type DietSpeed,
 } from "@/lib/diet-calc";
 import { ChipGroup } from "@/components/ui";
+import { InsertRecommendationButton } from "@/components/insert-recommendation-button";
 import { createPlan, updatePlan, type PlanInput } from "./actions";
 import type { Tables } from "@/lib/database.types";
 
 type Plan = Tables<"diet_plans">;
+type Recommendation = Tables<"recommendations">;
 
 const BALANCE_LABELS = { ipocalorica: "Ipocalorica", normocalorica: "Normocalorica", ipercalorica: "Ipercalorica" };
 
@@ -33,6 +35,7 @@ export function PlanForm({
   defaultActivityLevel,
   age,
   gender,
+  recommendations,
   onDone,
   onCancel,
 }: {
@@ -43,6 +46,7 @@ export function PlanForm({
   defaultActivityLevel: string | null;
   age: number | null;
   gender: Gender | null;
+  recommendations: Recommendation[];
   onDone: (planId: string) => void;
   onCancel: () => void;
 }) {
@@ -352,14 +356,20 @@ export function PlanForm({
       </div>
 
       <div className="mb-4">
-        <label className="mb-1 block text-xs font-medium text-ink-soft" htmlFor="plan-notes">
-          Note per il cliente (facoltativo)
-        </label>
+        <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
+          <label className="block text-xs font-medium text-ink-soft" htmlFor="plan-notes">
+            Note per il cliente (facoltativo)
+          </label>
+          <InsertRecommendationButton
+            recommendations={recommendations}
+            onInsert={(text) => setNotes((prev) => (prev ? `${prev}\n\n${text}` : text))}
+          />
+        </div>
         <textarea
           id="plan-notes"
           value={notes ?? ""}
           onChange={(e) => setNotes(e.target.value)}
-          rows={2}
+          rows={4}
           className={inputClass}
         />
       </div>

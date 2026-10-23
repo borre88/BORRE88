@@ -7,17 +7,19 @@ export default async function ModelliAlimentariPage() {
   const session = await getSession();
   const supabase = await createClient();
 
-  const [{ data: templates }, { data: foods }, { data: clients }, { data: supplements }] = await Promise.all([
-    supabase
-      .from("diet_plans")
-      .select("*, diet_plan_days(*), diet_plan_meals(*, diet_plan_meal_items(*))")
-      .eq("is_template", true)
-      .eq("trainer_id", session!.user.id)
-      .order("created_at", { ascending: false }),
-    supabase.from("foods").select("*").order("category").order("name"),
-    supabase.from("clients").select("id, full_name").eq("trainer_id", session!.user.id).order("full_name"),
-    supabase.from("supplements").select("*").eq("trainer_id", session!.user.id).order("position").order("name"),
-  ]);
+  const [{ data: templates }, { data: foods }, { data: clients }, { data: supplements }, { data: recommendations }] =
+    await Promise.all([
+      supabase
+        .from("diet_plans")
+        .select("*, diet_plan_days(*), diet_plan_meals(*, diet_plan_meal_items(*))")
+        .eq("is_template", true)
+        .eq("trainer_id", session!.user.id)
+        .order("created_at", { ascending: false }),
+      supabase.from("foods").select("*").order("category").order("name"),
+      supabase.from("clients").select("id, full_name").eq("trainer_id", session!.user.id).order("full_name"),
+      supabase.from("supplements").select("*").eq("trainer_id", session!.user.id).order("position").order("name"),
+      supabase.from("recommendations").select("*").eq("trainer_id", session!.user.id).order("position").order("title"),
+    ]);
 
   const normalizedTemplates = (templates ?? []).map((t) => ({
     ...t,
@@ -35,6 +37,7 @@ export default async function ModelliAlimentariPage() {
         foods={foods ?? []}
         clients={clients ?? []}
         supplements={supplements ?? []}
+        recommendations={recommendations ?? []}
       />
     </div>
   );

@@ -18,12 +18,14 @@ type PlanDay = Tables<"diet_plan_days">;
 type Plan = Tables<"diet_plans"> & { diet_plan_days: PlanDay[]; diet_plan_meals: Meal[] };
 
 type Supplement = Tables<"supplements">;
+type Recommendation = Tables<"recommendations">;
 
 export function DietPlanEditor({
   clientId,
   plans,
   foods,
   supplements,
+  recommendations,
   latestMeasurement,
   age,
   gender,
@@ -32,6 +34,7 @@ export function DietPlanEditor({
   plans: Plan[];
   foods: Food[];
   supplements: Supplement[];
+  recommendations: Recommendation[];
   latestMeasurement: { weight_kg: number | null; height_cm: number | null; activity_level: string | null } | null;
   age: number | null;
   gender: Gender | null;
@@ -59,6 +62,7 @@ export function DietPlanEditor({
         defaultActivityLevel={latestMeasurement?.activity_level ?? null}
         age={age}
         gender={gender}
+        recommendations={recommendations}
         onDone={(planId) => {
           setSelectedPlanId(planId);
           setMode("view");
@@ -78,6 +82,7 @@ export function DietPlanEditor({
         defaultActivityLevel={latestMeasurement?.activity_level ?? null}
         age={age}
         gender={gender}
+        recommendations={recommendations}
         onDone={() => setMode("view")}
         onCancel={() => setMode("view")}
       />

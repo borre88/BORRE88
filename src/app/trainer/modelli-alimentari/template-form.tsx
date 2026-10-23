@@ -3,17 +3,21 @@
 import { useState, useTransition } from "react";
 import { Sparkles, X } from "lucide-react";
 import { PHASE_LABELS, PHASE_ACCENT, MACRO_ACCENT, type DietPhase } from "@/lib/diet-calc";
+import { InsertRecommendationButton } from "@/components/insert-recommendation-button";
 import { createTemplate, updateTemplate, type TemplateInput } from "./actions";
 import type { Tables } from "@/lib/database.types";
 
 type Template = Tables<"diet_plans">;
+type Recommendation = Tables<"recommendations">;
 
 export function TemplateForm({
   template,
+  recommendations,
   onDone,
   onCancel,
 }: {
   template: Template | null;
+  recommendations: Recommendation[];
   onDone: (templateId: string) => void;
   onCancel: () => void;
 }) {
@@ -156,10 +160,16 @@ export function TemplateForm({
       </div>
 
       <div className="mb-4">
-        <label className="mb-1 block text-xs font-medium text-ink-soft" htmlFor="tpl-notes">
-          Note (facoltativo)
-        </label>
-        <textarea id="tpl-notes" value={notes ?? ""} onChange={(e) => setNotes(e.target.value)} rows={2} className={inputClass} />
+        <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
+          <label className="block text-xs font-medium text-ink-soft" htmlFor="tpl-notes">
+            Note (facoltativo)
+          </label>
+          <InsertRecommendationButton
+            recommendations={recommendations}
+            onInsert={(text) => setNotes((prev) => (prev ? `${prev}\n\n${text}` : text))}
+          />
+        </div>
+        <textarea id="tpl-notes" value={notes ?? ""} onChange={(e) => setNotes(e.target.value)} rows={4} className={inputClass} />
       </div>
 
       {error && <p className="mb-3 text-xs font-medium text-bad">{error}</p>}

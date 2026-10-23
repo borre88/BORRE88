@@ -818,6 +818,41 @@ export type Database = {
         }
         Relationships: []
       }
+      recommendations: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          position: number
+          title: string
+          trainer_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          position?: number
+          title: string
+          trainer_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          position?: number
+          title?: string
+          trainer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recommendations_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       recipes: {
         Row: {
           carbs_g: number
