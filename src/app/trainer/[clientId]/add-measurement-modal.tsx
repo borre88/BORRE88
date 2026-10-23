@@ -40,9 +40,9 @@ export function AddMeasurementModal({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="flex items-center gap-1.5 rounded-lg bg-teal px-4 py-2.5 text-sm font-medium text-white"
+        className="flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full bg-teal px-3 py-1.5 text-xs font-medium text-white"
       >
-        <Plus size={16} strokeWidth={2.5} />
+        <Plus size={13} strokeWidth={2.5} />
         Nuova rilevazione
       </button>
 

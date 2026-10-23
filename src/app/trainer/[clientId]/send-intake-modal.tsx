@@ -28,9 +28,9 @@ export function SendIntakeModal({ clientId, clientName }: { clientId: string; cl
           setLink(null);
           setError(null);
         }}
-        className="flex items-center gap-1.5 rounded-lg border border-line px-4 py-2.5 text-sm font-medium text-ink-soft"
+        className="flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full border border-line bg-surface px-3 py-1.5 text-xs font-medium text-ink-soft hover:border-teal hover:text-teal"
       >
-        <ClipboardList size={15} strokeWidth={2.2} />
+        <ClipboardList size={13} strokeWidth={2.2} />
         Invia questionario
       </button>
 

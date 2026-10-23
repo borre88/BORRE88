@@ -199,8 +199,8 @@ export default async function ClientDetailPage({
   return (
     <div>
       <MarkCheckinsSeen clientId={clientId} />
-      <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div>
+      <div className="mb-5">
+        <div className="mb-3">
           <div className="mb-0.5 text-[10.5px] font-semibold tracking-wide text-gold">SCHEDA ATLETA</div>
           <h1 className="font-display text-[32px] font-bold leading-none">{client.full_name}</h1>
           <p className="mt-1.5 text-xs text-ink-faint">
@@ -210,7 +210,7 @@ export default async function ClientDetailPage({
             {client.group_name ? ` · ${client.group_name}` : ""}
           </p>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="no-scrollbar flex items-center gap-1.5 overflow-x-auto pb-1">
           <EditProfileModal
             clientId={clientId}
             client={{
@@ -224,23 +224,23 @@ export default async function ClientDetailPage({
           />
           <Link
             href={`/trainer/${clientId}/esami-sangue`}
-            className="flex items-center gap-1.5 rounded-lg border border-line px-4 py-2.5 text-sm font-medium text-ink-soft"
+            className="flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full border border-line bg-surface px-3 py-1.5 text-xs font-medium text-ink-soft hover:border-teal hover:text-teal"
           >
-            <FlaskConical size={15} strokeWidth={2.2} />
+            <FlaskConical size={13} strokeWidth={2.2} />
             Esami del sangue
           </Link>
           <Link
             href={`/trainer/${clientId}/allenamenti`}
-            className="flex items-center gap-1.5 rounded-lg border border-line px-4 py-2.5 text-sm font-medium text-ink-soft"
+            className="flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full border border-line bg-surface px-3 py-1.5 text-xs font-medium text-ink-soft hover:border-teal hover:text-teal"
           >
-            <Dumbbell size={15} strokeWidth={2.2} />
+            <Dumbbell size={13} strokeWidth={2.2} />
             Allenamenti
           </Link>
           <Link
             href={`/trainer/${clientId}/diete`}
-            className="flex items-center gap-1.5 rounded-lg border border-line px-4 py-2.5 text-sm font-medium text-ink-soft"
+            className="flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full border border-line bg-surface px-3 py-1.5 text-xs font-medium text-ink-soft hover:border-teal hover:text-teal"
           >
-            <Apple size={15} strokeWidth={2.2} />
+            <Apple size={13} strokeWidth={2.2} />
             Diete
           </Link>
           <SendIntakeModal clientId={clientId} clientName={client.full_name} />

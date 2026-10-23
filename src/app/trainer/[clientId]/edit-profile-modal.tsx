@@ -47,11 +47,11 @@ export function EditProfileModal({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className={`flex items-center gap-1.5 rounded-lg border px-4 py-2.5 text-sm font-medium ${
-          missing ? "border-gold bg-gold-soft text-gold-ink" : "border-line text-ink-soft"
+        className={`flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full border px-3 py-1.5 text-xs font-medium ${
+          missing ? "border-gold bg-gold-soft text-gold-ink" : "border-line bg-surface text-ink-soft hover:border-teal hover:text-teal"
         }`}
       >
-        <User size={15} strokeWidth={2.2} />
+        <User size={13} strokeWidth={2.2} />
         Profilo
         {missing && <span className="ml-0.5 h-1.5 w-1.5 rounded-full bg-gold" />}
       </button>
