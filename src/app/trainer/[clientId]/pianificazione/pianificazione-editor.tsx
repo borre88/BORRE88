@@ -11,9 +11,11 @@ import { deletePlan, setPlanActive } from "@/app/trainer/[clientId]/diete/action
 import { PlanForm } from "@/app/trainer/[clientId]/diete/plan-form";
 import { EnergyMetabolismCard } from "./energy-metabolism-card";
 import { DietTemplatePicker } from "./diet-template-picker";
+import { GoalPhaseCard } from "./goal-phase-card";
 
 type Plan = Tables<"diet_plans">;
 type Recommendation = Tables<"recommendations">;
+type GoalPhase = Tables<"client_goal_phases">;
 type Template = Pick<
   Tables<"diet_plans">,
   "id" | "name" | "phase" | "duration_weeks" | "macro_only" | "target_kcal" | "target_protein_g" | "target_carbs_g" | "target_fat_g"
@@ -23,6 +25,7 @@ export function PianificazioneEditor({
   clientId,
   plans,
   templates,
+  goalPhases,
   recommendations,
   weightKg,
   heightCm,
@@ -35,6 +38,7 @@ export function PianificazioneEditor({
   clientId: string;
   plans: Plan[];
   templates: Template[];
+  goalPhases: GoalPhase[];
   recommendations: Recommendation[];
   weightKg: number | null;
   heightCm: number | null;
@@ -119,6 +123,7 @@ export function PianificazioneEditor({
         templates={templates}
         onAssigned={(planId) => setSelectedPlanId(planId)}
       />
+      <GoalPhaseCard clientId={clientId} phases={goalPhases} currentWeightKg={weightKg} />
       <div className="mb-4 flex flex-wrap items-center gap-2">
         {plans.length > 0 && (
           <ChipGroup

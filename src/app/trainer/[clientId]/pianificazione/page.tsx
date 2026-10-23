@@ -37,6 +37,12 @@ export default async function ClientPianificazionePage({ params }: { params: Pro
     .eq("client_id", clientId)
     .order("created_at", { ascending: false });
 
+  const { data: goalPhases } = await supabase
+    .from("client_goal_phases")
+    .select("*")
+    .eq("client_id", clientId)
+    .order("position", { ascending: true });
+
   const { data: templates } = await supabase
     .from("diet_plans")
     .select("id, name, phase, duration_weeks, macro_only, target_kcal, target_protein_g, target_carbs_g, target_fat_g")
@@ -61,6 +67,7 @@ export default async function ClientPianificazionePage({ params }: { params: Pro
         clientId={clientId}
         plans={plans ?? []}
         templates={templates ?? []}
+        goalPhases={goalPhases ?? []}
         recommendations={recommendations ?? []}
         weightKg={latestMeasurement?.weight_kg ?? null}
         heightCm={latestMeasurement?.height_cm ?? null}

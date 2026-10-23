@@ -201,6 +201,62 @@ export async function markSupplementRequestFulfilled(clientId: string, requestId
   revalidatePath("/cliente/integrazioni");
 }
 
+export interface GoalPhaseInput {
+  phase: string;
+  speed: string;
+  startWeightKg: number;
+  targetWeightKg: number;
+}
+
+/** Chiude (se presente) la fase attiva e ne apre una nuova per il cliente. */
+export async function startGoalPhase(clientId: string, input: GoalPhaseInput) {
+  const supabase = await createClient();
+  await supabase
+    .from("client_goal_phases")
+    .update({ status: "completata", ended_at: new Date().toISOString().slice(0, 10) })
+    .eq("client_id", clientId)
+    .eq("status", "attiva");
+
+  const { count } = await supabase
+    .from("client_goal_phases")
+    .select("id", { count: "exact", head: true })
+    .eq("client_id", clientId);
+
+  await supabase.from("client_goal_phases").insert({
+    client_id: clientId,
+    phase: input.phase,
+    speed: input.speed,
+    start_weight_kg: input.startWeightKg,
+    target_weight_kg: input.targetWeightKg,
+    position: count ?? 0,
+  });
+
+  revalidatePath(`/trainer/${clientId}/pianificazione`);
+}
+
+export async function updateGoalPhase(clientId: string, phaseId: string, input: GoalPhaseInput) {
+  const supabase = await createClient();
+  await supabase
+    .from("client_goal_phases")
+    .update({
+      phase: input.phase,
+      speed: input.speed,
+      start_weight_kg: input.startWeightKg,
+      target_weight_kg: input.targetWeightKg,
+    })
+    .eq("id", phaseId);
+  revalidatePath(`/trainer/${clientId}/pianificazione`);
+}
+
+export async function setGoalPhaseStatus(clientId: string, phaseId: string, status: "completata" | "abbandonata") {
+  const supabase = await createClient();
+  await supabase
+    .from("client_goal_phases")
+    .update({ status, ended_at: new Date().toISOString().slice(0, 10) })
+    .eq("id", phaseId);
+  revalidatePath(`/trainer/${clientId}/pianificazione`);
+}
+
 export async function markCheckinsSeen(clientId: string) {
   const supabase = await createClient();
   await supabase

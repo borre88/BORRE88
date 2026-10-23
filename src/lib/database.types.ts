@@ -158,6 +158,56 @@ export type Database = {
           },
         ]
       }
+      client_goal_phases: {
+        Row: {
+          client_id: string
+          created_at: string
+          ended_at: string | null
+          id: string
+          phase: string
+          position: number
+          speed: string
+          start_weight_kg: number
+          started_at: string
+          status: string
+          target_weight_kg: number
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          phase: string
+          position?: number
+          speed?: string
+          start_weight_kg: number
+          started_at?: string
+          status?: string
+          target_weight_kg: number
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          phase?: string
+          position?: number
+          speed?: string
+          start_weight_kg?: number
+          started_at?: string
+          status?: string
+          target_weight_kg?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_goal_phases_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clients: {
         Row: {
           created_at: string
