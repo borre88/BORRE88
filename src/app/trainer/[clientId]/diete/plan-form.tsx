@@ -37,6 +37,8 @@ export function PlanForm({
   gender,
   recommendations,
   bmrOverride,
+  activityLevelOverride,
+  initialVariationPercent,
   onDone,
   onCancel,
 }: {
@@ -49,6 +51,8 @@ export function PlanForm({
   gender: Gender | null;
   recommendations: Recommendation[];
   bmrOverride?: { value: number; label: string } | null;
+  activityLevelOverride?: string | null;
+  initialVariationPercent?: number | null;
   onDone: (planId: string) => void;
   onCancel: () => void;
 }) {
@@ -62,9 +66,12 @@ export function PlanForm({
 
   const [weight, setWeight] = useState(weightKg ?? 70);
   const [height, setHeight] = useState(heightCm ?? 170);
-  const [activityLevel, setActivityLevel] = useState(defaultActivityLevel ?? "sedentario");
+  const [activityLevel, setActivityLevel] = useState(activityLevelOverride ?? defaultActivityLevel ?? "sedentario");
   const [variationOverride, setVariationOverride] = useState<number | null>(
-    plan && plan.tdee && plan.target_kcal ? Math.round(((plan.target_kcal - plan.tdee) / plan.tdee) * 1000) / 10 : null
+    initialVariationPercent ??
+      (plan && plan.tdee && plan.target_kcal
+        ? Math.round(((plan.target_kcal - plan.tdee) / plan.tdee) * 1000) / 10
+        : null)
   );
 
   const [proteinG, setProteinG] = useState<number | null>(plan?.target_protein_g ?? null);

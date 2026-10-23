@@ -5,13 +5,14 @@ import Link from "next/link";
 import { Plus, Pencil, Trash2, Star, ChefHat } from "lucide-react";
 import type { Tables } from "@/lib/database.types";
 import type { Gender } from "@/lib/health-score";
-import { PHASE_LABELS, PHASE_ACCENT, type DietPhase } from "@/lib/diet-calc";
+import { PHASE_LABELS, PHASE_ACCENT, type DietPhase, type EnergyBalance } from "@/lib/diet-calc";
 import { ChipGroup } from "@/components/ui";
 import { deletePlan, setPlanActive } from "@/app/trainer/[clientId]/diete/actions";
 import { PlanForm } from "@/app/trainer/[clientId]/diete/plan-form";
 import { EnergyMetabolismCard } from "./energy-metabolism-card";
 import { DietTemplatePicker } from "./diet-template-picker";
 import { GoalPhaseCard } from "./goal-phase-card";
+import { EnergyBalanceCard } from "./energy-balance-card";
 
 type Plan = Tables<"diet_plans">;
 type Recommendation = Tables<"recommendations">;
@@ -54,6 +55,9 @@ export function PianificazioneEditor({
   const [mode, setMode] = useState<"view" | "new" | "edit">("view");
   const [pending, startTransition] = useTransition();
   const [bmrChoice, setBmrChoice] = useState<{ value: number; label: string } | null>(null);
+  const [activityLevel, setActivityLevel] = useState(defaultActivityLevel ?? "sedentario");
+  const [balanceTab, setBalanceTab] = useState<EnergyBalance>("normocalorica");
+  const [variationPercent, setVariationPercent] = useState(0);
 
   const selectedPlan = useMemo(() => plans.find((p) => p.id === selectedPlanId) ?? null, [plans, selectedPlanId]);
 
@@ -70,10 +74,23 @@ export function PianificazioneEditor({
     />
   );
 
+  const balanceCard = (
+    <EnergyBalanceCard
+      bmr={bmrChoice}
+      activityLevel={activityLevel}
+      onActivityLevelChange={setActivityLevel}
+      balanceTab={balanceTab}
+      onBalanceTabChange={setBalanceTab}
+      variationPercent={variationPercent}
+      onVariationPercentChange={setVariationPercent}
+    />
+  );
+
   if (mode === "new") {
     return (
       <div>
         {energyCard}
+        {balanceCard}
         <PlanForm
           clientId={clientId}
           plan={null}
@@ -84,6 +101,8 @@ export function PianificazioneEditor({
           gender={gender}
           recommendations={recommendations}
           bmrOverride={bmrChoice}
+          activityLevelOverride={bmrChoice ? activityLevel : null}
+          initialVariationPercent={bmrChoice ? variationPercent : null}
           onDone={(planId) => {
             setSelectedPlanId(planId);
             setMode("view");
@@ -98,6 +117,7 @@ export function PianificazioneEditor({
     return (
       <div>
         {energyCard}
+        {balanceCard}
         <PlanForm
           clientId={clientId}
           plan={selectedPlan}
@@ -108,6 +128,8 @@ export function PianificazioneEditor({
           gender={gender}
           recommendations={recommendations}
           bmrOverride={bmrChoice}
+          activityLevelOverride={bmrChoice ? activityLevel : null}
+          initialVariationPercent={bmrChoice ? variationPercent : null}
           onDone={() => setMode("view")}
           onCancel={() => setMode("view")}
         />
@@ -118,6 +140,7 @@ export function PianificazioneEditor({
   return (
     <div>
       {energyCard}
+      {balanceCard}
       <DietTemplatePicker
         clientId={clientId}
         templates={templates}
