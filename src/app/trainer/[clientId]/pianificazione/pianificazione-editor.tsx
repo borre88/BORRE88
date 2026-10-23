@@ -5,7 +5,8 @@ import Link from "next/link";
 import { Plus, Pencil, Trash2, Star, ChefHat } from "lucide-react";
 import type { Tables } from "@/lib/database.types";
 import type { Gender } from "@/lib/health-score";
-import { PHASE_LABELS, PHASE_ACCENT, type DietPhase, type EnergyBalance } from "@/lib/diet-calc";
+import { PHASE_LABELS, PHASE_ACCENT, calculateTargetKcal, type DietPhase, type EnergyBalance } from "@/lib/diet-calc";
+import { ACTIVITY_MULTIPLIERS } from "@/lib/health-score";
 import { ChipGroup } from "@/components/ui";
 import { deletePlan, setPlanActive } from "@/app/trainer/[clientId]/diete/actions";
 import { PlanForm } from "@/app/trainer/[clientId]/diete/plan-form";
@@ -13,6 +14,7 @@ import { EnergyMetabolismCard } from "./energy-metabolism-card";
 import { DietTemplatePicker } from "./diet-template-picker";
 import { GoalPhaseCard } from "./goal-phase-card";
 import { EnergyBalanceCard } from "./energy-balance-card";
+import { MacroSplitCard } from "./macro-split-card";
 
 type Plan = Tables<"diet_plans">;
 type Recommendation = Tables<"recommendations">;
@@ -58,8 +60,14 @@ export function PianificazioneEditor({
   const [activityLevel, setActivityLevel] = useState(defaultActivityLevel ?? "sedentario");
   const [balanceTab, setBalanceTab] = useState<EnergyBalance>("normocalorica");
   const [variationPercent, setVariationPercent] = useState(0);
+  const [macroChoice, setMacroChoice] = useState<{ proteinG: number; carbsG: number; fatG: number } | null>(null);
 
   const selectedPlan = useMemo(() => plans.find((p) => p.id === selectedPlanId) ?? null, [plans, selectedPlanId]);
+
+  const targetKcal = bmrChoice
+    ? Math.round(calculateTargetKcal(bmrChoice.value * (ACTIVITY_MULTIPLIERS[activityLevel] ?? 1.2), variationPercent))
+    : null;
+  const leanMassKg = bodyFatPercent !== null && weightKg ? weightKg * (1 - bodyFatPercent / 100) : null;
 
   const energyCard = (
     <EnergyMetabolismCard
@@ -86,11 +94,22 @@ export function PianificazioneEditor({
     />
   );
 
+  const macroCard = (
+    <MacroSplitCard
+      targetKcal={targetKcal}
+      weightKg={weightKg}
+      leanMassKg={leanMassKg}
+      heightCm={heightCm}
+      onChange={setMacroChoice}
+    />
+  );
+
   if (mode === "new") {
     return (
       <div>
         {energyCard}
         {balanceCard}
+        {macroCard}
         <PlanForm
           clientId={clientId}
           plan={null}
@@ -103,6 +122,7 @@ export function PianificazioneEditor({
           bmrOverride={bmrChoice}
           activityLevelOverride={bmrChoice ? activityLevel : null}
           initialVariationPercent={bmrChoice ? variationPercent : null}
+          macroOverride={macroChoice}
           onDone={(planId) => {
             setSelectedPlanId(planId);
             setMode("view");
@@ -118,6 +138,7 @@ export function PianificazioneEditor({
       <div>
         {energyCard}
         {balanceCard}
+        {macroCard}
         <PlanForm
           clientId={clientId}
           plan={selectedPlan}
@@ -130,6 +151,7 @@ export function PianificazioneEditor({
           bmrOverride={bmrChoice}
           activityLevelOverride={bmrChoice ? activityLevel : null}
           initialVariationPercent={bmrChoice ? variationPercent : null}
+          macroOverride={macroChoice}
           onDone={() => setMode("view")}
           onCancel={() => setMode("view")}
         />
@@ -141,6 +163,7 @@ export function PianificazioneEditor({
     <div>
       {energyCard}
       {balanceCard}
+      {macroCard}
       <DietTemplatePicker
         clientId={clientId}
         templates={templates}

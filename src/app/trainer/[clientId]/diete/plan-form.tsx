@@ -39,6 +39,7 @@ export function PlanForm({
   bmrOverride,
   activityLevelOverride,
   initialVariationPercent,
+  macroOverride,
   onDone,
   onCancel,
 }: {
@@ -53,6 +54,7 @@ export function PlanForm({
   bmrOverride?: { value: number; label: string } | null;
   activityLevelOverride?: string | null;
   initialVariationPercent?: number | null;
+  macroOverride?: { proteinG: number; carbsG: number; fatG: number } | null;
   onDone: (planId: string) => void;
   onCancel: () => void;
 }) {
@@ -74,9 +76,9 @@ export function PlanForm({
         : null)
   );
 
-  const [proteinG, setProteinG] = useState<number | null>(plan?.target_protein_g ?? null);
-  const [fatG, setFatG] = useState<number | null>(plan?.target_fat_g ?? null);
-  const [carbsG, setCarbsG] = useState<number | null>(plan?.target_carbs_g ?? null);
+  const [proteinG, setProteinG] = useState<number | null>(macroOverride?.proteinG ?? plan?.target_protein_g ?? null);
+  const [fatG, setFatG] = useState<number | null>(macroOverride?.fatG ?? plan?.target_fat_g ?? null);
+  const [carbsG, setCarbsG] = useState<number | null>(macroOverride?.carbsG ?? plan?.target_carbs_g ?? null);
 
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
