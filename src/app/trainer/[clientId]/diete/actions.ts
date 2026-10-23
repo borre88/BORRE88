@@ -147,6 +147,73 @@ export async function clearPlanDayOverride(clientId: string, planId: string, wee
   revalidate(clientId);
 }
 
+export interface DayPresetRow {
+  weekday: number;
+  label: string | null;
+  target_kcal: number | null;
+  target_protein_g: number | null;
+  target_carbs_g: number | null;
+  target_fat_g: number | null;
+}
+
+/** Applica in blocco una scorciatoia (es. "Allenamento/Riposo") a più giorni in una sola chiamata. */
+export async function applyDayPreset(clientId: string, planId: string, rows: DayPresetRow[]) {
+  if (rows.length === 0) return;
+  const supabase = await createClient();
+  await supabase
+    .from("diet_plan_days")
+    .upsert(
+      rows.map((r) => ({ plan_id: planId, ...r })),
+      { onConflict: "plan_id,weekday" }
+    );
+  revalidate(clientId);
+}
+
+/** Azzera tutti i target giorno-per-giorno del piano (torna al target unico), lasciando intatti i giorni bloccati. */
+export async function clearAllPlanDayOverrides(clientId: string, planId: string) {
+  const supabase = await createClient();
+  await supabase.from("diet_plan_days").delete().eq("plan_id", planId).eq("locked", false);
+  revalidate(clientId);
+}
+
+export async function toggleDayLock(clientId: string, planId: string, weekday: number, locked: boolean) {
+  const supabase = await createClient();
+  await supabase
+    .from("diet_plan_days")
+    .upsert({ plan_id: planId, weekday, locked }, { onConflict: "plan_id,weekday" });
+  revalidate(clientId);
+}
+
+/** Rinomina un'etichetta su tutti i giorni del piano che la usano. */
+export async function renameDayLabel(clientId: string, planId: string, oldLabel: string, newLabel: string) {
+  const supabase = await createClient();
+  await supabase.from("diet_plan_days").update({ label: newLabel }).eq("plan_id", planId).eq("label", oldLabel);
+  revalidate(clientId);
+}
+
+/** Copia il target (etichetta + macro) di un giorno su un altro giorno della settimana. */
+export async function copyDayTargetsTo(clientId: string, planId: string, fromWeekday: number, toWeekday: number) {
+  const supabase = await createClient();
+  const { data: source } = await supabase
+    .from("diet_plan_days")
+    .select("label, target_kcal, target_protein_g, target_carbs_g, target_fat_g")
+    .eq("plan_id", planId)
+    .eq("weekday", fromWeekday)
+    .maybeSingle();
+  if (!source) return;
+  const { data: target } = await supabase
+    .from("diet_plan_days")
+    .select("locked")
+    .eq("plan_id", planId)
+    .eq("weekday", toWeekday)
+    .maybeSingle();
+  if (target?.locked) return;
+  await supabase
+    .from("diet_plan_days")
+    .upsert({ plan_id: planId, weekday: toWeekday, ...source }, { onConflict: "plan_id,weekday" });
+  revalidate(clientId);
+}
+
 export async function addMeal(clientId: string, planId: string, weekday: number, mealType: string, name: string | null) {
   const supabase = await createClient();
   const { count } = await supabase

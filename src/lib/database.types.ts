@@ -311,6 +311,7 @@ export type Database = {
         Row: {
           id: string
           label: string | null
+          locked: boolean
           plan_id: string
           target_carbs_g: number | null
           target_fat_g: number | null
@@ -321,6 +322,7 @@ export type Database = {
         Insert: {
           id?: string
           label?: string | null
+          locked?: boolean
           plan_id: string
           target_carbs_g?: number | null
           target_fat_g?: number | null
@@ -331,6 +333,7 @@ export type Database = {
         Update: {
           id?: string
           label?: string | null
+          locked?: boolean
           plan_id?: string
           target_carbs_g?: number | null
           target_fat_g?: number | null

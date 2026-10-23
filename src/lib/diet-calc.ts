@@ -94,6 +94,7 @@ const DAY_LABEL_DOT: Record<string, string> = {
   ricarica: "bg-good",
   scarico: "bg-gold",
   allenamento: "bg-bad",
+  riposo: "bg-sky-500",
   gara: "bg-teal",
 };
 
