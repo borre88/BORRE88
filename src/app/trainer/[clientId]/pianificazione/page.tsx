@@ -18,7 +18,7 @@ export default async function ClientPianificazionePage({ params }: { params: Pro
 
   const { data: latestMeasurement } = await supabase
     .from("measurements")
-    .select("weight_kg, height_cm, activity_level")
+    .select("weight_kg, height_cm, activity_level, body_fat_percent, date")
     .eq("client_id", clientId)
     .order("date", { ascending: false })
     .limit(1)
@@ -57,6 +57,8 @@ export default async function ClientPianificazionePage({ params }: { params: Pro
         weightKg={latestMeasurement?.weight_kg ?? null}
         heightCm={latestMeasurement?.height_cm ?? null}
         defaultActivityLevel={latestMeasurement?.activity_level ?? null}
+        bodyFatPercent={latestMeasurement?.body_fat_percent ?? null}
+        measurementDate={latestMeasurement?.date ?? null}
         age={age}
         gender={gender}
       />

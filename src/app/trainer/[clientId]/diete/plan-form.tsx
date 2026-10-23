@@ -36,6 +36,7 @@ export function PlanForm({
   age,
   gender,
   recommendations,
+  bmrOverride,
   onDone,
   onCancel,
 }: {
@@ -47,6 +48,7 @@ export function PlanForm({
   age: number | null;
   gender: Gender | null;
   recommendations: Recommendation[];
+  bmrOverride?: { value: number; label: string } | null;
   onDone: (planId: string) => void;
   onCancel: () => void;
 }) {
@@ -73,9 +75,10 @@ export function PlanForm({
   const [pending, startTransition] = useTransition();
 
   const bmr = useMemo(() => {
+    if (bmrOverride) return bmrOverride.value;
     if (!gender || age === null) return null;
     return calculateBMR(weight, height, age, gender);
-  }, [weight, height, age, gender]);
+  }, [bmrOverride, weight, height, age, gender]);
 
   const tdee = useMemo(() => (bmr !== null ? bmr * ACTIVITY_MULTIPLIERS[activityLevel] : null), [bmr, activityLevel]);
 
@@ -285,7 +288,11 @@ export function PlanForm({
             BMR (basale)
           </div>
           <div className="font-display text-xl font-bold">{bmr !== null ? Math.round(bmr) : "—"} kcal</div>
-          {(!gender || age === null) && <div className="mt-1 text-[11px] text-gold-ink">Servono sesso e data di nascita</div>}
+          {bmrOverride ? (
+            <div className="mt-1 text-[10.5px] text-teal">Formula: {bmrOverride.label}</div>
+          ) : (
+            (!gender || age === null) && <div className="mt-1 text-[11px] text-gold-ink">Servono sesso e data di nascita</div>
+          )}
         </div>
         <div className="rounded-lg border border-teal-soft-line bg-teal-soft px-3.5 py-3">
           <div className="mb-1 flex items-center gap-1.5 text-[10.5px] font-semibold uppercase tracking-wide text-teal">

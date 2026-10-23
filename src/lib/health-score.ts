@@ -47,6 +47,122 @@ export function calculateBMR(weightKg: number, heightCm: number, age: number, ge
   return gender === "maschio" ? base + 5 : base - 161;
 }
 
+type AgeBand = "18-30" | "30-60" | "60+";
+
+function ageBand(age: number): AgeBand {
+  if (age < 30) return "18-30";
+  if (age < 60) return "30-60";
+  return "60+";
+}
+
+/** FAO/WHO/UNU 1985 (Tech Rep Series 724), equazioni solo peso per fascia d'età. */
+export function calculateBMRSchofield(weightKg: number, age: number, gender: Gender): number {
+  const table: Record<Gender, Record<AgeBand, [number, number]>> = {
+    maschio: { "18-30": [15.3, 679], "30-60": [11.6, 879], "60+": [13.5, 487] },
+    femmina: { "18-30": [14.7, 496], "30-60": [8.7, 829], "60+": [10.5, 596] },
+  };
+  const [a, b] = table[gender][ageBand(age)];
+  return a * weightKg + b;
+}
+
+/** Henry 2005 (Public Health Nutr 8:1133-1152), versione con peso e altezza per fascia d'età. */
+export function calculateBMRHenryOxford(weightKg: number, heightCm: number, age: number, gender: Gender): number {
+  const table: Record<Gender, Record<AgeBand, [number, number, number]>> = {
+    maschio: { "18-30": [14.4, 3.13, 113], "30-60": [11.4, 5.41, -137], "60+": [11.4, 5.41, -256] },
+    femmina: { "18-30": [10.4, 6.15, -282], "30-60": [8.18, 5.02, -11.6], "60+": [8.52, 4.21, 10.7] },
+  };
+  const [a, b, c] = table[gender][ageBand(age)];
+  return a * weightKg + b * heightCm + c;
+}
+
+/** Black et al. 1996, approccio allometrico (riduce sovrastime agli estremi di peso/età). */
+export function calculateBMRBlackAllometric(weightKg: number, heightCm: number, age: number, gender: Gender): number {
+  const k = gender === "maschio" ? 259 : 230;
+  return k * Math.pow(weightKg, 0.48) * Math.pow(heightCm / 100, 0.5) * Math.pow(age, -0.13);
+}
+
+/** Harris-Benedict rivisitato da Roza & Shizgal 1984 (Am J Clin Nutr 40:168-182). */
+export function calculateBMRHarrisBenedictRevised(weightKg: number, heightCm: number, age: number, gender: Gender): number {
+  return gender === "maschio"
+    ? 88.362 + 13.397 * weightKg + 4.799 * heightCm - 5.677 * age
+    : 447.593 + 9.247 * weightKg + 3.098 * heightCm - 4.33 * age;
+}
+
+/** Katch-McArdle: lavora sulla massa magra (componente metabolicamente attiva). */
+export function calculateBMRKatchMcArdle(leanMassKg: number): number {
+  return 370 + 21.6 * leanMassKg;
+}
+
+export interface BMREstimate {
+  key: string;
+  label: string;
+  citation: string;
+  description: string;
+  recommended?: boolean;
+  measured?: boolean;
+  kcal: number | null;
+  unavailableReason?: string;
+}
+
+/** Tutte le formule BMR disponibili, calcolate sugli stessi dati del cliente. */
+export function computeAllBMRFormulas(params: {
+  weightKg: number;
+  heightCm: number;
+  age: number;
+  gender: Gender;
+  bodyFatPercent: number | null;
+}): BMREstimate[] {
+  const { weightKg, heightCm, age, gender, bodyFatPercent } = params;
+  const leanMassKg = bodyFatPercent !== null ? weightKg * (1 - bodyFatPercent / 100) : null;
+
+  return [
+    {
+      key: "mifflin",
+      label: "Mifflin-St Jeor",
+      recommended: true,
+      citation: "Mifflin et al. 1990, Am J Clin Nutr 51:241-247",
+      description: "Standard clinico per RMR. Raccomandata da Academy of Nutrition and Dietetics.",
+      kcal: calculateBMR(weightKg, heightCm, age, gender),
+    },
+    {
+      key: "schofield",
+      label: "OMS/Schofield",
+      citation: "FAO/WHO/UNU 1985 (Tech Rep Series 724)",
+      description: "Linee guida FAO/WHO/UNU 1985. Bracket 18-30 / 30-60 / >60 anni.",
+      kcal: calculateBMRSchofield(weightKg, age, gender),
+    },
+    {
+      key: "henry",
+      label: "Henry/Oxford",
+      citation: "Henry 2005 (Public Health Nutr 8:1133-1152)",
+      description: "Versione CON altezza (più accurata della simplified).",
+      kcal: calculateBMRHenryOxford(weightKg, heightCm, age, gender),
+    },
+    {
+      key: "black",
+      label: "Black et al. (Allometrica)",
+      citation: "Black et al. 1996",
+      description: "Approccio allometrico. Riduce sovrastime agli estremi.",
+      kcal: calculateBMRBlackAllometric(weightKg, heightCm, age, gender),
+    },
+    {
+      key: "harris_revised",
+      label: "Harris-Benedict (Revised)",
+      citation: "Roza & Shizgal 1984 (Am J Clin Nutr 40:168-182)",
+      description: "Rivisitazione di Harris-Benedict 1919.",
+      kcal: calculateBMRHarrisBenedictRevised(weightKg, heightCm, age, gender),
+    },
+    {
+      key: "katch",
+      label: "Katch-McArdle (LBM)",
+      citation: "Katch & McArdle 1996",
+      description: "Lavora sulla componente metabolicamente attiva (massa magra).",
+      kcal: leanMassKg !== null ? calculateBMRKatchMcArdle(leanMassKg) : null,
+      unavailableReason: leanMassKg === null ? "Serve la % di massa grassa (misurata o stimata)." : undefined,
+    },
+  ];
+}
+
 export const ACTIVITY_MULTIPLIERS: Record<string, number> = {
   sedentario: 1.2,
   leggero: 1.375,

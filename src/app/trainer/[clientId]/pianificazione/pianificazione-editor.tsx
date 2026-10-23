@@ -9,6 +9,7 @@ import { PHASE_LABELS, PHASE_ACCENT, type DietPhase } from "@/lib/diet-calc";
 import { ChipGroup } from "@/components/ui";
 import { deletePlan, setPlanActive } from "@/app/trainer/[clientId]/diete/actions";
 import { PlanForm } from "@/app/trainer/[clientId]/diete/plan-form";
+import { EnergyMetabolismCard } from "./energy-metabolism-card";
 
 type Plan = Tables<"diet_plans">;
 type Recommendation = Tables<"recommendations">;
@@ -20,6 +21,8 @@ export function PianificazioneEditor({
   weightKg,
   heightCm,
   defaultActivityLevel,
+  bodyFatPercent,
+  measurementDate,
   age,
   gender,
 }: {
@@ -29,6 +32,8 @@ export function PianificazioneEditor({
   weightKg: number | null;
   heightCm: number | null;
   defaultActivityLevel: string | null;
+  bodyFatPercent: number | null;
+  measurementDate: string | null;
   age: number | null;
   gender: Gender | null;
 }) {
@@ -37,48 +42,71 @@ export function PianificazioneEditor({
   );
   const [mode, setMode] = useState<"view" | "new" | "edit">("view");
   const [pending, startTransition] = useTransition();
+  const [bmrChoice, setBmrChoice] = useState<{ value: number; label: string } | null>(null);
 
   const selectedPlan = useMemo(() => plans.find((p) => p.id === selectedPlanId) ?? null, [plans, selectedPlanId]);
 
+  const energyCard = (
+    <EnergyMetabolismCard
+      weightKg={weightKg}
+      heightCm={heightCm}
+      age={age}
+      gender={gender}
+      bodyFatPercent={bodyFatPercent}
+      measurementDate={measurementDate}
+      selectedLabel={bmrChoice?.label ?? null}
+      onUseForPlanning={(value, label) => setBmrChoice({ value, label })}
+    />
+  );
+
   if (mode === "new") {
     return (
-      <PlanForm
-        clientId={clientId}
-        plan={null}
-        weightKg={weightKg}
-        heightCm={heightCm}
-        defaultActivityLevel={defaultActivityLevel}
-        age={age}
-        gender={gender}
-        recommendations={recommendations}
-        onDone={(planId) => {
-          setSelectedPlanId(planId);
-          setMode("view");
-        }}
-        onCancel={() => setMode("view")}
-      />
+      <div>
+        {energyCard}
+        <PlanForm
+          clientId={clientId}
+          plan={null}
+          weightKg={weightKg}
+          heightCm={heightCm}
+          defaultActivityLevel={defaultActivityLevel}
+          age={age}
+          gender={gender}
+          recommendations={recommendations}
+          bmrOverride={bmrChoice}
+          onDone={(planId) => {
+            setSelectedPlanId(planId);
+            setMode("view");
+          }}
+          onCancel={() => setMode("view")}
+        />
+      </div>
     );
   }
 
   if (mode === "edit" && selectedPlan) {
     return (
-      <PlanForm
-        clientId={clientId}
-        plan={selectedPlan}
-        weightKg={weightKg}
-        heightCm={heightCm}
-        defaultActivityLevel={defaultActivityLevel}
-        age={age}
-        gender={gender}
-        recommendations={recommendations}
-        onDone={() => setMode("view")}
-        onCancel={() => setMode("view")}
-      />
+      <div>
+        {energyCard}
+        <PlanForm
+          clientId={clientId}
+          plan={selectedPlan}
+          weightKg={weightKg}
+          heightCm={heightCm}
+          defaultActivityLevel={defaultActivityLevel}
+          age={age}
+          gender={gender}
+          recommendations={recommendations}
+          bmrOverride={bmrChoice}
+          onDone={() => setMode("view")}
+          onCancel={() => setMode("view")}
+        />
+      </div>
     );
   }
 
   return (
     <div>
+      {energyCard}
       <div className="mb-4 flex flex-wrap items-center gap-2">
         {plans.length > 0 && (
           <ChipGroup
