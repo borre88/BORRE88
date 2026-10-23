@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Plus, Users, User, Search, ChevronDown, ChevronUp, Home, Apple, ClipboardList, Utensils, Dumbbell, Calendar, LayoutTemplate, Pill, Stethoscope, FlaskConical, ChefHat } from "lucide-react";
+import { Plus, Users, User, Search, ChevronDown, ChevronUp, Home, Apple, ClipboardList, Utensils, Dumbbell, Calendar, LayoutTemplate, Pill, Stethoscope, FlaskConical, ChefHat, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { NewClientForm } from "./new-client-form";
 import { DeleteClientButton } from "./delete-client-button";
 
@@ -19,7 +19,12 @@ export function ClientSidebar({ clients }: { clients: ClientSummary[] }) {
   const [showForm, setShowForm] = useState(false);
   const [query, setQuery] = useState("");
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const pathname = usePathname();
+
+  function toggleSidebar() {
+    setSidebarCollapsed((prev) => !prev);
+  }
 
   const existingGroups = useMemo(
     () =>
@@ -76,7 +81,42 @@ export function ClientSidebar({ clients }: { clients: ClientSummary[] }) {
   ];
 
   return (
-    <aside className="print:hidden w-full shrink-0 border-b border-line bg-surface p-4 sm:w-64 sm:border-b-0 sm:border-r sm:p-5">
+    <aside
+      className={`print:hidden w-full shrink-0 border-b border-line bg-surface p-4 sm:border-b-0 sm:border-r ${
+        sidebarCollapsed ? "sm:w-12 sm:p-2" : "sm:w-64 sm:p-5"
+      }`}
+    >
+      <button
+        type="button"
+        onClick={toggleSidebar}
+        aria-label={sidebarCollapsed ? "Espandi barra laterale" : "Comprimi barra laterale"}
+        title={sidebarCollapsed ? "Espandi barra laterale" : "Comprimi barra laterale"}
+        className="mb-3 hidden items-center justify-center rounded-md p-1.5 text-ink-faint hover:bg-cream hover:text-teal sm:flex"
+      >
+        {sidebarCollapsed ? <PanelLeftOpen size={16} strokeWidth={2.2} /> : <PanelLeftClose size={16} strokeWidth={2.2} />}
+      </button>
+
+      <div className={sidebarCollapsed ? "hidden flex-col items-center gap-3 sm:flex" : "hidden"}>
+          {navItems.map((item) => {
+            const active = item.exact ? pathname === item.href : pathname.startsWith(item.href);
+            const Icon = item.icon;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                aria-label={item.label}
+                title={item.label}
+                className={`flex h-8 w-8 items-center justify-center rounded-lg ${
+                  active ? "bg-teal-soft text-teal" : "text-ink-soft hover:bg-cream"
+                }`}
+              >
+                <Icon size={15} strokeWidth={2.2} />
+              </Link>
+            );
+          })}
+      </div>
+
+      <div className={sidebarCollapsed ? "sm:hidden" : ""}>
       <div className="mb-4 flex flex-col gap-0.5">
         {navItems.map((item) => {
           const active = item.exact ? pathname === item.href : pathname.startsWith(item.href);
@@ -184,6 +224,7 @@ export function ClientSidebar({ clients }: { clients: ClientSummary[] }) {
             </div>
           );
         })}
+      </div>
       </div>
     </aside>
   );

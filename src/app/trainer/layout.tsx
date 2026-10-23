@@ -24,7 +24,7 @@ export default async function TrainerLayout({ children }: { children: React.Reac
         />
         <div className="flex flex-col sm:flex-row">
           <ClientSidebar clients={clients ?? []} />
-          <main className="flex-1 px-5 pb-14 pt-6 sm:px-9">{children}</main>
+          <main className="min-w-0 flex-1 px-5 pb-14 pt-6 sm:px-9">{children}</main>
         </div>
       </div>
     </SplashGate>
