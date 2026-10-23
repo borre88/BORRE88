@@ -14,10 +14,11 @@ export default async function ModelliAlimentariPage() {
     { data: supplements },
     { data: recommendations },
     { data: recipes },
+    { data: protocols },
   ] = await Promise.all([
     supabase
       .from("diet_plans")
-      .select("*, diet_plan_days(*), diet_plan_meals(*, diet_plan_meal_items(*))")
+      .select("*, diet_plan_days(*), diet_plan_meals(*, diet_plan_meal_items(*)), diet_plan_recommended_supplements(*)")
       .eq("is_template", true)
       .eq("trainer_id", session!.user.id)
       .order("created_at", { ascending: false }),
@@ -26,6 +27,7 @@ export default async function ModelliAlimentariPage() {
     supabase.from("supplements").select("*").eq("trainer_id", session!.user.id).order("position").order("name"),
     supabase.from("recommendations").select("*").eq("trainer_id", session!.user.id).order("position").order("title"),
     supabase.from("recipes").select("*").order("name"),
+    supabase.from("protocols").select("*").eq("trainer_id", session!.user.id).order("position").order("title"),
   ]);
 
   const normalizedTemplates = (templates ?? []).map((t) => ({
@@ -46,6 +48,7 @@ export default async function ModelliAlimentariPage() {
         supplements={supplements ?? []}
         recipes={recipes ?? []}
         recommendations={recommendations ?? []}
+        protocols={protocols ?? []}
       />
     </div>
   );

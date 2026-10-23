@@ -460,6 +460,48 @@ export type Database = {
           },
         ]
       }
+      diet_plan_recommended_supplements: {
+        Row: {
+          created_at: string
+          id: string
+          note: string | null
+          plan_id: string
+          position: number
+          supplement_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          note?: string | null
+          plan_id: string
+          position?: number
+          supplement_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          note?: string | null
+          plan_id?: string
+          position?: number
+          supplement_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "diet_plan_recommended_supplements_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "diet_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "diet_plan_recommended_supplements_supplement_id_fkey"
+            columns: ["supplement_id"]
+            isOneToOne: false
+            referencedRelation: "supplements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       diet_plans: {
         Row: {
           active: boolean
@@ -467,6 +509,7 @@ export type Database = {
           client_id: string | null
           created_at: string
           duration_weeks: number
+          hydration_ml: number | null
           id: string
           is_template: boolean
           macro_only: boolean
@@ -488,6 +531,7 @@ export type Database = {
           client_id?: string | null
           created_at?: string
           duration_weeks?: number
+          hydration_ml?: number | null
           id?: string
           is_template?: boolean
           macro_only?: boolean
@@ -509,6 +553,7 @@ export type Database = {
           client_id?: string | null
           created_at?: string
           duration_weeks?: number
+          hydration_ml?: number | null
           id?: string
           is_template?: boolean
           macro_only?: boolean

@@ -10,16 +10,23 @@ import { deletePlan, setPlanActive } from "./actions";
 import { PlanForm } from "./plan-form";
 import { DayTargetsTable } from "./day-targets-table";
 import { WeeklyMealGrid } from "./weekly-meal-grid";
+import { PlanNotesButton } from "./plan-notes-modal";
 
 type Food = Tables<"foods">;
 type MealItem = Tables<"diet_plan_meal_items">;
 type Meal = Tables<"diet_plan_meals"> & { diet_plan_meal_items: MealItem[] };
 type PlanDay = Tables<"diet_plan_days">;
-type Plan = Tables<"diet_plans"> & { diet_plan_days: PlanDay[]; diet_plan_meals: Meal[] };
+type RecommendedSupplement = Tables<"diet_plan_recommended_supplements">;
+type Plan = Tables<"diet_plans"> & {
+  diet_plan_days: PlanDay[];
+  diet_plan_meals: Meal[];
+  diet_plan_recommended_supplements: RecommendedSupplement[];
+};
 
 type Supplement = Tables<"supplements">;
 type Recommendation = Tables<"recommendations">;
 type Recipe = Tables<"recipes">;
+type Protocol = Tables<"protocols">;
 
 export function DietPlanEditor({
   clientId,
@@ -28,6 +35,7 @@ export function DietPlanEditor({
   supplements,
   recipes,
   recommendations,
+  protocols,
   latestMeasurement,
   age,
   gender,
@@ -38,6 +46,7 @@ export function DietPlanEditor({
   supplements: Supplement[];
   recipes: Recipe[];
   recommendations: Recommendation[];
+  protocols: Protocol[];
   latestMeasurement: { weight_kg: number | null; height_cm: number | null; activity_level: string | null } | null;
   age: number | null;
   gender: Gender | null;
@@ -191,7 +200,14 @@ export function DietPlanEditor({
               </div>
               {selectedPlan.notes && <p className="mt-1.5 text-[12px] text-ink-soft">{selectedPlan.notes}</p>}
             </div>
-            <div className="flex gap-1.5">
+            <div className="flex flex-wrap gap-1.5">
+              <PlanNotesButton
+                clientId={clientId}
+                plan={selectedPlan}
+                supplements={supplements}
+                recommendations={recommendations}
+                protocols={protocols}
+              />
               {!selectedPlan.active && (
                 <button
                   type="button"
@@ -231,7 +247,7 @@ export function DietPlanEditor({
 
           {selectedPlan.macro_only ? (
             <div className="rounded-xl border border-dashed border-line bg-surface px-5 py-6 text-center text-[12.5px] text-ink-faint">
-              Piano "Solo macro": il cliente segue liberamente i target sopra, senza un piano pasti fisso.
+              Piano &quot;Solo macro&quot;: il cliente segue liberamente i target sopra, senza un piano pasti fisso.
             </div>
           ) : (
             <>

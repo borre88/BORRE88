@@ -7,6 +7,7 @@ import { PHASE_LABELS, PHASE_ACCENT, type DietPhase } from "@/lib/diet-calc";
 import { ChipGroup } from "@/components/ui";
 import { DayTargetsTable } from "@/app/trainer/[clientId]/diete/day-targets-table";
 import { WeeklyMealGrid } from "@/app/trainer/[clientId]/diete/weekly-meal-grid";
+import { PlanNotesButton } from "@/app/trainer/[clientId]/diete/plan-notes-modal";
 import { deleteTemplate } from "./actions";
 import { TemplateForm } from "./template-form";
 import { AssignModal } from "./assign-modal";
@@ -15,10 +16,16 @@ type Food = Tables<"foods">;
 type Supplement = Tables<"supplements">;
 type Recommendation = Tables<"recommendations">;
 type Recipe = Tables<"recipes">;
+type Protocol = Tables<"protocols">;
 type MealItem = Tables<"diet_plan_meal_items">;
 type Meal = Tables<"diet_plan_meals"> & { diet_plan_meal_items: MealItem[] };
 type PlanDay = Tables<"diet_plan_days">;
-type Template = Tables<"diet_plans"> & { diet_plan_days: PlanDay[]; diet_plan_meals: Meal[] };
+type RecommendedSupplement = Tables<"diet_plan_recommended_supplements">;
+type Template = Tables<"diet_plans"> & {
+  diet_plan_days: PlanDay[];
+  diet_plan_meals: Meal[];
+  diet_plan_recommended_supplements: RecommendedSupplement[];
+};
 interface ClientOption {
   id: string;
   full_name: string;
@@ -31,6 +38,7 @@ export function TemplateEditor({
   supplements,
   recipes,
   recommendations,
+  protocols,
 }: {
   templates: Template[];
   foods: Food[];
@@ -38,6 +46,7 @@ export function TemplateEditor({
   supplements: Supplement[];
   recipes: Recipe[];
   recommendations: Recommendation[];
+  protocols: Protocol[];
 }) {
   const [selectedId, setSelectedId] = useState<string | null>(templates[0]?.id ?? null);
   const [mode, setMode] = useState<"view" | "new" | "edit">("view");
@@ -161,7 +170,14 @@ export function TemplateEditor({
               </div>
               {selected.notes && <p className="mt-1.5 text-[12px] text-ink-soft">{selected.notes}</p>}
             </div>
-            <div className="flex gap-1.5">
+            <div className="flex flex-wrap gap-1.5">
+              <PlanNotesButton
+                clientId={selected.id}
+                plan={selected}
+                supplements={supplements}
+                recommendations={recommendations}
+                protocols={protocols}
+              />
               <button
                 type="button"
                 disabled={clients.length === 0}
@@ -199,7 +215,7 @@ export function TemplateEditor({
 
           {selected.macro_only ? (
             <div className="rounded-xl border border-dashed border-line bg-surface px-5 py-6 text-center text-[12.5px] text-ink-faint">
-              Modello "Solo macro": nessun piano pasti fisso, solo i target sopra.
+              Modello &quot;Solo macro&quot;: nessun piano pasti fisso, solo i target sopra.
             </div>
           ) : (
             <>

@@ -368,3 +368,39 @@ export async function setMealItemAlternatives(clientId: string, itemId: string, 
   await supabase.from("diet_plan_meal_items").update({ alternative_food_ids: alternativeFoodIds }).eq("id", itemId);
   revalidate(clientId);
 }
+
+export async function updatePlanNotesAndHydration(
+  clientId: string,
+  planId: string,
+  data: { notes: string | null; hydration_ml: number | null }
+) {
+  const supabase = await createClient();
+  await supabase.from("diet_plans").update(data).eq("id", planId);
+  revalidate(clientId);
+}
+
+export async function addRecommendedSupplement(clientId: string, planId: string, supplementId: string) {
+  const supabase = await createClient();
+  const { count } = await supabase
+    .from("diet_plan_recommended_supplements")
+    .select("id", { count: "exact", head: true })
+    .eq("plan_id", planId);
+  await supabase.from("diet_plan_recommended_supplements").insert({
+    plan_id: planId,
+    supplement_id: supplementId,
+    position: count ?? 0,
+  });
+  revalidate(clientId);
+}
+
+export async function removeRecommendedSupplement(clientId: string, id: string) {
+  const supabase = await createClient();
+  await supabase.from("diet_plan_recommended_supplements").delete().eq("id", id);
+  revalidate(clientId);
+}
+
+export async function updateRecommendedSupplementNote(clientId: string, id: string, note: string | null) {
+  const supabase = await createClient();
+  await supabase.from("diet_plan_recommended_supplements").update({ note }).eq("id", id);
+  revalidate(clientId);
+}

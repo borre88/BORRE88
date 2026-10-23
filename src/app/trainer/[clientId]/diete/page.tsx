@@ -42,9 +42,16 @@ export default async function ClientDietePage({ params }: { params: Promise<{ cl
 
   const { data: recipes } = await supabase.from("recipes").select("*").order("name");
 
+  const { data: protocols } = await supabase
+    .from("protocols")
+    .select("*")
+    .eq("trainer_id", client.trainer_id)
+    .order("position")
+    .order("title");
+
   const { data: plans } = await supabase
     .from("diet_plans")
-    .select("*, diet_plan_days(*), diet_plan_meals(*, diet_plan_meal_items(*))")
+    .select("*, diet_plan_days(*), diet_plan_meals(*, diet_plan_meal_items(*)), diet_plan_recommended_supplements(*)")
     .eq("client_id", clientId)
     .order("created_at", { ascending: false });
 
@@ -73,6 +80,7 @@ export default async function ClientDietePage({ params }: { params: Promise<{ cl
         supplements={supplements ?? []}
         recipes={recipes ?? []}
         recommendations={recommendations ?? []}
+        protocols={protocols ?? []}
         latestMeasurement={latestMeasurement ?? null}
         age={age}
         gender={gender}
