@@ -818,6 +818,44 @@ export type Database = {
         }
         Relationships: []
       }
+      protocols: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          items: Json
+          position: number
+          title: string
+          trainer_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          items?: Json
+          position?: number
+          title: string
+          trainer_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          items?: Json
+          position?: number
+          title?: string
+          trainer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "protocols_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       recommendations: {
         Row: {
           body: string
