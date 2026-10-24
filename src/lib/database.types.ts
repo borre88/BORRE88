@@ -401,9 +401,53 @@ export type Database = {
           },
         ]
       }
+      diet_plan_meal_item_alternatives: {
+        Row: {
+          created_at: string
+          equivalence_type: string
+          food_id: string
+          id: string
+          meal_item_id: string
+          position: number
+          quantity_g: number
+        }
+        Insert: {
+          created_at?: string
+          equivalence_type?: string
+          food_id: string
+          id?: string
+          meal_item_id: string
+          position?: number
+          quantity_g: number
+        }
+        Update: {
+          created_at?: string
+          equivalence_type?: string
+          food_id?: string
+          id?: string
+          meal_item_id?: string
+          position?: number
+          quantity_g?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "diet_plan_meal_item_alternatives_food_id_fkey"
+            columns: ["food_id"]
+            isOneToOne: false
+            referencedRelation: "foods"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "diet_plan_meal_item_alternatives_meal_item_id_fkey"
+            columns: ["meal_item_id"]
+            isOneToOne: false
+            referencedRelation: "diet_plan_meal_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       diet_plan_meal_items: {
         Row: {
-          alternative_food_ids: string[]
           custom_name: string | null
           food_id: string | null
           id: string
@@ -415,7 +459,6 @@ export type Database = {
           unit: string | null
         }
         Insert: {
-          alternative_food_ids?: string[]
           custom_name?: string | null
           food_id?: string | null
           id?: string
@@ -427,7 +470,6 @@ export type Database = {
           unit?: string | null
         }
         Update: {
-          alternative_food_ids?: string[]
           custom_name?: string | null
           food_id?: string | null
           id?: string

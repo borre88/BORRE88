@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import type { Tables } from "@/lib/database.types";
+import { computeEquivalentQuantity, type EquivalenceType } from "@/lib/diet-calc";
 
 export interface ActionState {
   error?: string;
@@ -362,10 +363,173 @@ export async function duplicateMealItem(clientId: string, mealId: string, item: 
   revalidate(clientId);
 }
 
-/** Sostituisce l'intera lista di alimenti alternativi per una riga. */
-export async function setMealItemAlternatives(clientId: string, itemId: string, alternativeFoodIds: string[]) {
+/** Aggiunge un'alternativa calcolando subito la quantità equivalente (kcal/proteine/carboidrati/grassi) all'alimento originale. */
+export async function addMealItemAlternative(
+  clientId: string,
+  itemId: string,
+  foodId: string,
+  equivalenceType: EquivalenceType
+) {
   const supabase = await createClient();
-  await supabase.from("diet_plan_meal_items").update({ alternative_food_ids: alternativeFoodIds }).eq("id", itemId);
+  const { data: item } = await supabase
+    .from("diet_plan_meal_items")
+    .select("food_id, quantity_g")
+    .eq("id", itemId)
+    .single();
+  if (!item?.food_id) return;
+
+  const { data: foods } = await supabase.from("foods").select("*").in("id", [item.food_id, foodId]);
+  const originalFood = foods?.find((f) => f.id === item.food_id);
+  const altFood = foods?.find((f) => f.id === foodId);
+  if (!originalFood || !altFood) return;
+
+  const quantity = computeEquivalentQuantity(originalFood, item.quantity_g, altFood, equivalenceType);
+  if (quantity === null) return;
+
+  const { count } = await supabase
+    .from("diet_plan_meal_item_alternatives")
+    .select("id", { count: "exact", head: true })
+    .eq("meal_item_id", itemId);
+
+  await supabase.from("diet_plan_meal_item_alternatives").insert({
+    meal_item_id: itemId,
+    food_id: foodId,
+    quantity_g: Math.round(quantity),
+    equivalence_type: equivalenceType,
+    position: count ?? 0,
+  });
+  revalidate(clientId);
+}
+
+export async function updateMealItemAlternativeQuantity(clientId: string, altId: string, quantityG: number) {
+  const supabase = await createClient();
+  await supabase.from("diet_plan_meal_item_alternatives").update({ quantity_g: quantityG }).eq("id", altId);
+  revalidate(clientId);
+}
+
+/** Cambia il tipo di equivalenza di un'alternativa e ne ricalcola la quantità. */
+export async function updateMealItemAlternativeEquivalence(
+  clientId: string,
+  altId: string,
+  itemId: string,
+  equivalenceType: EquivalenceType
+) {
+  const supabase = await createClient();
+  const { data: item } = await supabase
+    .from("diet_plan_meal_items")
+    .select("food_id, quantity_g")
+    .eq("id", itemId)
+    .single();
+  const { data: alt } = await supabase
+    .from("diet_plan_meal_item_alternatives")
+    .select("food_id")
+    .eq("id", altId)
+    .single();
+
+  if (!item?.food_id || !alt) {
+    await supabase.from("diet_plan_meal_item_alternatives").update({ equivalence_type: equivalenceType }).eq("id", altId);
+    revalidate(clientId);
+    return;
+  }
+
+  const { data: foods } = await supabase.from("foods").select("*").in("id", [item.food_id, alt.food_id]);
+  const originalFood = foods?.find((f) => f.id === item.food_id);
+  const altFood = foods?.find((f) => f.id === alt.food_id);
+  const quantity =
+    originalFood && altFood ? computeEquivalentQuantity(originalFood, item.quantity_g, altFood, equivalenceType) : null;
+
+  await supabase
+    .from("diet_plan_meal_item_alternatives")
+    .update({
+      equivalence_type: equivalenceType,
+      ...(quantity !== null ? { quantity_g: Math.round(quantity) } : {}),
+    })
+    .eq("id", altId);
+  revalidate(clientId);
+}
+
+export async function removeMealItemAlternative(clientId: string, altId: string) {
+  const supabase = await createClient();
+  await supabase.from("diet_plan_meal_item_alternatives").delete().eq("id", altId);
+  revalidate(clientId);
+}
+
+/** Ricalcola le quantità di tutte le alternative in base al tipo di equivalenza di ciascuna e alla quantità attuale dell'originale. */
+export async function rebalanceMealItemAlternatives(clientId: string, itemId: string) {
+  const supabase = await createClient();
+  const { data: item } = await supabase
+    .from("diet_plan_meal_items")
+    .select("food_id, quantity_g")
+    .eq("id", itemId)
+    .single();
+  if (!item?.food_id) return;
+
+  const { data: alternatives } = await supabase
+    .from("diet_plan_meal_item_alternatives")
+    .select("id, food_id, equivalence_type")
+    .eq("meal_item_id", itemId);
+  if (!alternatives || alternatives.length === 0) return;
+
+  const foodIds = Array.from(new Set([item.food_id, ...alternatives.map((a) => a.food_id)]));
+  const { data: foods } = await supabase.from("foods").select("*").in("id", foodIds);
+  const foodsById = new Map((foods ?? []).map((f) => [f.id, f]));
+  const originalFood = foodsById.get(item.food_id);
+  if (!originalFood) return;
+
+  for (const alt of alternatives) {
+    const altFood = foodsById.get(alt.food_id);
+    if (!altFood) continue;
+    const quantity = computeEquivalentQuantity(
+      originalFood,
+      item.quantity_g,
+      altFood,
+      alt.equivalence_type as EquivalenceType
+    );
+    if (quantity === null) continue;
+    await supabase.from("diet_plan_meal_item_alternatives").update({ quantity_g: Math.round(quantity) }).eq("id", alt.id);
+  }
+  revalidate(clientId);
+}
+
+/** Arrotonda tutte le quantità delle alternative al multiplo più vicino di `step` grammi. */
+export async function roundMealItemAlternatives(clientId: string, itemId: string, step: number) {
+  const supabase = await createClient();
+  const { data: alternatives } = await supabase
+    .from("diet_plan_meal_item_alternatives")
+    .select("id, quantity_g")
+    .eq("meal_item_id", itemId);
+
+  for (const alt of alternatives ?? []) {
+    const rounded = Math.round(alt.quantity_g / step) * step;
+    if (rounded !== alt.quantity_g) {
+      await supabase.from("diet_plan_meal_item_alternatives").update({ quantity_g: rounded }).eq("id", alt.id);
+    }
+  }
+  revalidate(clientId);
+}
+
+export async function swapMealItemAlternativePosition(
+  clientId: string,
+  itemId: string,
+  altId: string,
+  direction: "up" | "down"
+) {
+  const supabase = await createClient();
+  const { data: alternatives } = await supabase
+    .from("diet_plan_meal_item_alternatives")
+    .select("id, position")
+    .eq("meal_item_id", itemId)
+    .order("position", { ascending: true });
+  if (!alternatives) return;
+
+  const idx = alternatives.findIndex((a) => a.id === altId);
+  const swapIdx = direction === "up" ? idx - 1 : idx + 1;
+  if (idx === -1 || swapIdx < 0 || swapIdx >= alternatives.length) return;
+
+  const a = alternatives[idx];
+  const b = alternatives[swapIdx];
+  await supabase.from("diet_plan_meal_item_alternatives").update({ position: b.position }).eq("id", a.id);
+  await supabase.from("diet_plan_meal_item_alternatives").update({ position: a.position }).eq("id", b.id);
   revalidate(clientId);
 }
 

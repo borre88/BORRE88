@@ -257,6 +257,46 @@ export interface FoodMacros {
   fiber_100g: number;
 }
 
+export type EquivalenceType = "kcal" | "protein" | "carbs" | "fat";
+
+export const EQUIVALENCE_LABELS: Record<EquivalenceType, string> = {
+  kcal: "Kcal",
+  protein: "Proteine",
+  carbs: "Carboidrati",
+  fat: "Grassi",
+};
+
+const EQUIVALENCE_FIELD: Record<EquivalenceType, keyof FoodMacros> = {
+  kcal: "kcal_100g",
+  protein: "protein_100g",
+  carbs: "carbs_100g",
+  fat: "fat_100g",
+};
+
+/**
+ * Grammi dell'alimento alternativo che eguagliano, per il tipo di equivalenza scelto
+ * (kcal/proteine/carboidrati/grassi), il valore dell'alimento originale alla quantità data.
+ * Torna null se l'alternativa non ha quel nutriente (es. 0g/100g).
+ */
+/** Colori per badge "tipo di equivalenza" nelle alternative: kcal neutro, macro sui toni già usati altrove. */
+export function equivalenceAccent(equivalence: EquivalenceType): AccentClasses {
+  if (equivalence === "kcal") return { bg: "bg-cream", border: "border-line", text: "text-ink-soft", dot: "bg-ink-faint" };
+  return MACRO_ACCENT[equivalence];
+}
+
+export function computeEquivalentQuantity(
+  originalFood: FoodMacros,
+  originalQuantityG: number,
+  altFood: FoodMacros,
+  equivalence: EquivalenceType
+): number | null {
+  const scaled = scaleFoodToQuantity(originalFood, originalQuantityG);
+  const targetValue = equivalence === "kcal" ? scaled.kcal : scaled[equivalence];
+  const altPer100 = altFood[EQUIVALENCE_FIELD[equivalence]];
+  if (!altPer100 || altPer100 <= 0) return null;
+  return (targetValue / altPer100) * 100;
+}
+
 export function scaleFoodToQuantity(food: FoodMacros, quantityG: number) {
   const factor = quantityG / 100;
   return {

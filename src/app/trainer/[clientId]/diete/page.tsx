@@ -42,7 +42,9 @@ export default async function ClientDietePage({ params }: { params: Promise<{ cl
 
   const { data: plans } = await supabase
     .from("diet_plans")
-    .select("*, diet_plan_days(*), diet_plan_meals(*, diet_plan_meal_items(*)), diet_plan_recommended_supplements(*)")
+    .select(
+      "*, diet_plan_days(*), diet_plan_meals(*, diet_plan_meal_items(*, diet_plan_meal_item_alternatives(*))), diet_plan_recommended_supplements(*)"
+    )
     .eq("client_id", clientId)
     .order("created_at", { ascending: false });
 

@@ -11,7 +11,8 @@ import { WeeklyMealGrid } from "./weekly-meal-grid";
 import { PlanNotesButton } from "./plan-notes-modal";
 
 type Food = Tables<"foods">;
-type MealItem = Tables<"diet_plan_meal_items">;
+type MealItemAlternative = Tables<"diet_plan_meal_item_alternatives">;
+type MealItem = Tables<"diet_plan_meal_items"> & { diet_plan_meal_item_alternatives: MealItemAlternative[] };
 type Meal = Tables<"diet_plan_meals"> & { diet_plan_meal_items: MealItem[] };
 type PlanDay = Tables<"diet_plan_days">;
 type RecommendedSupplement = Tables<"diet_plan_recommended_supplements">;

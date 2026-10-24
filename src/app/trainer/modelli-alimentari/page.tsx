@@ -18,7 +18,9 @@ export default async function ModelliAlimentariPage() {
   ] = await Promise.all([
     supabase
       .from("diet_plans")
-      .select("*, diet_plan_days(*), diet_plan_meals(*, diet_plan_meal_items(*)), diet_plan_recommended_supplements(*)")
+      .select(
+        "*, diet_plan_days(*), diet_plan_meals(*, diet_plan_meal_items(*, diet_plan_meal_item_alternatives(*))), diet_plan_recommended_supplements(*)"
+      )
       .eq("is_template", true)
       .eq("trainer_id", session!.user.id)
       .order("created_at", { ascending: false }),

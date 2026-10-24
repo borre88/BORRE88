@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
-import { Plus, Trash2, Copy, X, Repeat, Files } from "lucide-react";
+import { Plus, Trash2, Copy, X, Repeat, Files, ListTree } from "lucide-react";
 import type { Tables } from "@/lib/database.types";
 import {
   MEAL_TYPES,
@@ -16,6 +16,9 @@ import {
   scaleRecipeToPortions,
   mealTypeDotClass,
   todayWeekdayMon0,
+  EQUIVALENCE_LABELS,
+  equivalenceAccent,
+  type EquivalenceType,
 } from "@/lib/diet-calc";
 import {
   addMeal,
@@ -26,14 +29,17 @@ import {
   deleteMealItem,
   replaceMealItemFood,
   duplicateMealItem,
-  setMealItemAlternatives,
+  addMealItemAlternative,
+  removeMealItemAlternative,
   copyDayToWeekdays,
 } from "./actions";
+import { ManageAlternativesModal } from "./manage-alternatives-modal";
 
 type Food = Tables<"foods">;
 type Supplement = Tables<"supplements">;
 type Recipe = Tables<"recipes">;
-type MealItem = Tables<"diet_plan_meal_items">;
+type MealItemAlternative = Tables<"diet_plan_meal_item_alternatives">;
+type MealItem = Tables<"diet_plan_meal_items"> & { diet_plan_meal_item_alternatives: MealItemAlternative[] };
 type Meal = Tables<"diet_plan_meals"> & { diet_plan_meal_items: MealItem[] };
 
 export function WeeklyMealGrid({
@@ -821,6 +827,14 @@ function FoodItemPopup({
   const [pending, startTransition] = useTransition();
   const [panel, setPanel] = useState<"none" | "replace" | "alternatives">("none");
   const [query, setQuery] = useState("");
+  const [addEquivalence, setAddEquivalence] = useState<EquivalenceType>("kcal");
+  const [managingAlternatives, setManagingAlternatives] = useState(false);
+
+  const alternatives = useMemo(
+    () => [...item.diet_plan_meal_item_alternatives].sort((a, b) => a.position - b.position),
+    [item.diet_plan_meal_item_alternatives]
+  );
+  const usedAltFoodIds = new Set(alternatives.map((a) => a.food_id));
 
   const matches = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -834,20 +848,10 @@ function FoodItemPopup({
   const accent = proteinSourceAccent(food.protein_source);
   const isPieces = item.unit === "pz";
 
-  const alternatives = (item.alternative_food_ids ?? [])
-    .map((id) => foodsById.get(id))
-    .filter((f): f is Food => Boolean(f));
-
   function addAlternative(foodId: string) {
-    const next = Array.from(new Set([...(item.alternative_food_ids ?? []), foodId]));
-    startTransition(() => setMealItemAlternatives(clientId, item.id, next));
+    startTransition(() => addMealItemAlternative(clientId, item.id, foodId, addEquivalence));
     setQuery("");
     setPanel("none");
-  }
-
-  function removeAlternative(foodId: string) {
-    const next = (item.alternative_food_ids ?? []).filter((id) => id !== foodId);
-    startTransition(() => setMealItemAlternatives(clientId, item.id, next));
   }
 
   return (
@@ -983,34 +987,56 @@ function FoodItemPopup({
         <div className="border-t border-line pt-2.5">
           <div className="mb-1.5 flex items-center justify-between">
             <span className="text-[10.5px] font-semibold uppercase tracking-wide text-ink-faint">Alternative</span>
-            <button
-              type="button"
-              onClick={() => setPanel(panel === "alternatives" ? "none" : "alternatives")}
-              className="flex items-center gap-0.5 text-[11px] font-medium text-teal"
-            >
-              <Plus size={11} strokeWidth={2.2} />
-              Aggiungi
-            </button>
+            <div className="flex items-center gap-2.5">
+              {alternatives.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setManagingAlternatives(true)}
+                  className="flex items-center gap-0.5 text-[11px] font-medium text-teal"
+                >
+                  <ListTree size={11} strokeWidth={2.2} />
+                  Gestisci
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => setPanel(panel === "alternatives" ? "none" : "alternatives")}
+                className="flex items-center gap-0.5 text-[11px] font-medium text-teal"
+              >
+                <Plus size={11} strokeWidth={2.2} />
+                Aggiungi
+              </button>
+            </div>
           </div>
 
           {alternatives.length === 0 ? (
             <p className="text-[11px] text-ink-faint">Nessuna alternativa per questo alimento.</p>
           ) : (
-            <div className="flex flex-wrap gap-1.5">
+            <div className="space-y-1">
               {alternatives.map((alt) => {
-                const altAccent = proteinSourceAccent(alt.protein_source);
+                const altFood = foodsById.get(alt.food_id);
+                const eqAccent = equivalenceAccent(alt.equivalence_type as EquivalenceType);
                 return (
-                  <span
+                  <div
                     key={alt.id}
-                    className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10.5px] font-medium ${
-                      altAccent ? `${altAccent.bg} ${altAccent.border} ${altAccent.text}` : "border-line bg-cream text-ink-soft"
-                    }`}
+                    className="flex items-center justify-between gap-2 rounded-lg border border-line bg-cream px-2 py-1.5"
                   >
-                    {alt.name}
-                    <button type="button" onClick={() => removeAlternative(alt.id)} aria-label="Rimuovi alternativa">
-                      <X size={10} strokeWidth={2.4} />
-                    </button>
-                  </span>
+                    <span className="min-w-0 truncate text-[11.5px] font-medium">{altFood?.name ?? "Alimento"}</span>
+                    <div className="flex shrink-0 items-center gap-1.5">
+                      <span className="text-[10.5px] text-ink-faint">{alt.quantity_g}g</span>
+                      <span className={`rounded-full border px-1.5 py-0.5 text-[9px] font-bold uppercase ${eqAccent.bg} ${eqAccent.border} ${eqAccent.text}`}>
+                        {EQUIVALENCE_LABELS[alt.equivalence_type as EquivalenceType] ?? alt.equivalence_type}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => startTransition(() => removeMealItemAlternative(clientId, alt.id))}
+                        aria-label="Rimuovi alternativa"
+                        className="text-ink-faint hover:text-bad"
+                      >
+                        <X size={11} strokeWidth={2.4} />
+                      </button>
+                    </div>
+                  </div>
                 );
               })}
             </div>
@@ -1018,6 +1044,24 @@ function FoodItemPopup({
 
           {panel === "alternatives" && (
             <div className="mt-1.5 rounded border border-line bg-cream p-1.5">
+              <div className="mb-1.5 flex gap-1">
+                {(["kcal", "protein", "carbs", "fat"] as EquivalenceType[]).map((t) => {
+                  const tAccent = equivalenceAccent(t);
+                  const active = addEquivalence === t;
+                  return (
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() => setAddEquivalence(t)}
+                      className={`rounded-full border px-2 py-0.5 text-[9.5px] font-semibold ${
+                        active ? `${tAccent.bg} ${tAccent.border} ${tAccent.text}` : "border-line bg-surface text-ink-faint"
+                      }`}
+                    >
+                      {EQUIVALENCE_LABELS[t]}
+                    </button>
+                  );
+                })}
+              </div>
               <input
                 autoFocus
                 value={query}
@@ -1028,7 +1072,7 @@ function FoodItemPopup({
               {matches.length > 0 && (
                 <div className="max-h-28 overflow-y-auto rounded border border-line bg-surface">
                   {matches
-                    .filter((f) => !(item.alternative_food_ids ?? []).includes(f.id))
+                    .filter((f) => !usedAltFoodIds.has(f.id))
                     .map((f) => (
                       <button
                         key={f.id}
@@ -1045,6 +1089,17 @@ function FoodItemPopup({
           )}
         </div>
       </div>
+
+      {managingAlternatives && (
+        <ManageAlternativesModal
+          clientId={clientId}
+          item={item}
+          originalFood={food}
+          foods={foods}
+          foodsById={foodsById}
+          onClose={() => setManagingAlternatives(false)}
+        />
+      )}
     </div>
   );
 }
