@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
-import { Plus, Trash2, Copy, X, Repeat, Files, ListTree } from "lucide-react";
+import { Plus, Trash2, Copy, X, Repeat, Files, ListTree, CalendarDays, CalendarRange } from "lucide-react";
 import type { Tables } from "@/lib/database.types";
 import {
   MEAL_TYPES,
@@ -16,6 +16,7 @@ import {
   scaleRecipeToPortions,
   mealTypeDotClass,
   todayWeekdayMon0,
+  dayLabelDotClass,
   EQUIVALENCE_LABELS,
   equivalenceAccent,
   type EquivalenceType,
@@ -116,6 +117,30 @@ export function WeeklyMealGrid({
     return { kcal: Math.round(kcal), protein: Math.round(protein), carbs: Math.round(carbs), fat: Math.round(fat) };
   }
 
+  const perDay = useMemo(() => {
+    const days: {
+      weekday: number;
+      label: string | null;
+      totals: { kcal: number; protein: number; carbs: number; fat: number };
+      target: { kcal: number; protein: number; carbs: number; fat: number } | null;
+    }[] = [];
+    for (let weekday = 0; weekday < 7; weekday++) {
+      const override = dayOverrides.get(weekday);
+      const dKcal = override?.target_kcal ?? targetKcal;
+      const dProtein = override?.target_protein_g ?? targetProtein;
+      const dCarbs = override?.target_carbs_g ?? targetCarbs;
+      const dFat = override?.target_fat_g ?? targetFat;
+      days.push({
+        weekday,
+        label: override?.label ?? null,
+        totals: dayTotals(weekday),
+        target: dKcal ? { kcal: dKcal, protein: dProtein ?? 0, carbs: dCarbs ?? 0, fat: dFat ?? 0 } : null,
+      });
+    }
+    return days;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [meals, foodsById, recipesById, dayOverrides, targetKcal, targetProtein, targetCarbs, targetFat]);
+
   const weeklyTotals = useMemo(() => {
     let kcal = 0,
       protein = 0,
@@ -126,28 +151,32 @@ export function WeeklyMealGrid({
       proteinTarget = 0,
       carbsTarget = 0,
       fatTarget = 0;
-    for (let weekday = 0; weekday < 7; weekday++) {
-      const t = dayTotals(weekday);
-      kcal += t.kcal;
-      protein += t.protein;
-      carbs += t.carbs;
-      fat += t.fat;
-      const override = dayOverrides.get(weekday);
-      const dKcal = override?.target_kcal ?? targetKcal;
-      const dProtein = override?.target_protein_g ?? targetProtein;
-      const dCarbs = override?.target_carbs_g ?? targetCarbs;
-      const dFat = override?.target_fat_g ?? targetFat;
-      if (dKcal) {
+    for (const day of perDay) {
+      kcal += day.totals.kcal;
+      protein += day.totals.protein;
+      carbs += day.totals.carbs;
+      fat += day.totals.fat;
+      if (day.target) {
         daysWithTarget++;
-        kcalTarget += dKcal;
-        proteinTarget += dProtein ?? 0;
-        carbsTarget += dCarbs ?? 0;
-        fatTarget += dFat ?? 0;
+        kcalTarget += day.target.kcal;
+        proteinTarget += day.target.protein;
+        carbsTarget += day.target.carbs;
+        fatTarget += day.target.fat;
       }
     }
-    return { kcal, protein, carbs, fat, kcalTarget, proteinTarget, carbsTarget, fatTarget, daysWithTarget };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [meals, foodsById, recipesById, dayOverrides, targetKcal, targetProtein, targetCarbs, targetFat]);
+    const days = daysWithTarget || 7;
+    return {
+      kcal: Math.round(kcal / 7),
+      protein: Math.round(protein / 7),
+      carbs: Math.round(carbs / 7),
+      fat: Math.round(fat / 7),
+      kcalTarget: Math.round(kcalTarget / days),
+      proteinTarget: Math.round(proteinTarget / days),
+      carbsTarget: Math.round(carbsTarget / days),
+      fatTarget: Math.round(fatTarget / days),
+      daysWithTarget,
+    };
+  }, [perDay]);
 
   const proteinSourceCounts = useMemo(() => {
     const counts = new Map<ProteinSource, number>();
@@ -180,7 +209,7 @@ export function WeeklyMealGrid({
 
   return (
     <div>
-      <WeeklyRecapPanel totals={weeklyTotals} proteinSourceCounts={proteinSourceCounts} />
+      <WeeklyRecapPanel totals={weeklyTotals} perDay={perDay} today={today} proteinSourceCounts={proteinSourceCounts} />
 
       <div className="mb-3 flex flex-wrap items-center gap-2 rounded-lg border border-line bg-cream px-3.5 py-2.5">
         <Copy size={14} strokeWidth={2.2} className="shrink-0 text-ink-faint" />
@@ -349,8 +378,32 @@ export function WeeklyMealGrid({
 }
 
 /** Pannello colorato sopra la griglia: totali settimanali vs target (ring kcal + barre macro) e distribuzione fonti proteiche. */
+interface DayRecap {
+  weekday: number;
+  label: string | null;
+  totals: { kcal: number; protein: number; carbs: number; fat: number };
+  target: { kcal: number; protein: number; carbs: number; fat: number } | null;
+}
+
+/** Testo/colore di stato per uno scarto rispetto al target: entro tolleranza, da raggiungere, o oltre target. */
+function deltaStatus(value: number, target: number, unit: string, isKcal: boolean) {
+  const delta = value - target;
+  const tolerance = isKcal ? Math.max(50, target * 0.08) : Math.max(3, target * 0.05);
+  if (Math.abs(delta) <= tolerance) {
+    return isKcal
+      ? { text: `${delta >= 0 ? "+" : ""}${Math.round(delta)} ${unit} · entro tolleranza`, className: "text-ink-faint" }
+      : { text: "✓ in linea", className: "text-good" };
+  }
+  if (delta < 0) {
+    return { text: `+${Math.round(-delta)}${unit} da raggiungere`, className: "text-gold-ink" };
+  }
+  return { text: `-${Math.round(delta)}${unit} oltre target`, className: "text-bad" };
+}
+
 function WeeklyRecapPanel({
   totals,
+  perDay,
+  today,
   proteinSourceCounts,
 }: {
   totals: {
@@ -364,11 +417,31 @@ function WeeklyRecapPanel({
     fatTarget: number;
     daysWithTarget: number;
   };
+  perDay: DayRecap[];
+  today: number;
   proteinSourceCounts: Map<ProteinSource, number>;
 }) {
-  const proteinKcal = totals.protein * 4;
-  const carbsKcal = totals.carbs * 4;
-  const fatKcal = totals.fat * 9;
+  const [mode, setMode] = useState<"settimana" | "giorno">("settimana");
+  const [selectedDay, setSelectedDay] = useState(today);
+
+  const day = perDay[selectedDay];
+  const values =
+    mode === "giorno"
+      ? {
+          kcal: day.totals.kcal,
+          protein: day.totals.protein,
+          carbs: day.totals.carbs,
+          fat: day.totals.fat,
+          kcalTarget: day.target?.kcal ?? 0,
+          proteinTarget: day.target?.protein ?? 0,
+          carbsTarget: day.target?.carbs ?? 0,
+          fatTarget: day.target?.fat ?? 0,
+        }
+      : totals;
+
+  const proteinKcal = values.protein * 4;
+  const carbsKcal = values.carbs * 4;
+  const fatKcal = values.fat * 9;
   const macroKcalSum = proteinKcal + carbsKcal + fatKcal || 1;
   const proteinPct = (proteinKcal / macroKcalSum) * 100;
   const carbsPct = (carbsKcal / macroKcalSum) * 100;
@@ -378,43 +451,90 @@ function WeeklyRecapPanel({
   };
 
   const bars = [
-    { label: "Energia", unit: "kcal", value: totals.kcal, target: totals.kcalTarget, accent: { text: "text-teal", dot: "bg-teal" } },
-    { label: "Proteine", unit: "g", value: totals.protein, target: totals.proteinTarget, accent: MACRO_ACCENT.protein },
-    { label: "Carboidrati", unit: "g", value: totals.carbs, target: totals.carbsTarget, accent: MACRO_ACCENT.carbs },
-    { label: "Grassi", unit: "g", value: totals.fat, target: totals.fatTarget, accent: MACRO_ACCENT.fat },
+    { label: "Energia", unit: " kcal", isKcal: true, value: values.kcal, target: values.kcalTarget, accent: { text: "text-teal", dot: "bg-teal" } },
+    { label: "Proteine", unit: "g", isKcal: false, value: values.protein, target: values.proteinTarget, accent: MACRO_ACCENT.protein },
+    { label: "Carboidrati", unit: "g", isKcal: false, value: values.carbs, target: values.carbsTarget, accent: MACRO_ACCENT.carbs },
+    { label: "Grassi", unit: "g", isKcal: false, value: values.fat, target: values.fatTarget, accent: MACRO_ACCENT.fat },
   ];
 
   const sourceEntries = Array.from(proteinSourceCounts.entries()).filter(([, count]) => count > 0);
 
   return (
     <div className="mb-4 overflow-hidden rounded-xl border border-line bg-surface">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line px-4 py-2.5">
+        <span className="text-[11px] font-semibold uppercase tracking-wide text-ink-faint">Analisi</span>
+        <div className="flex gap-1">
+          <button
+            type="button"
+            onClick={() => setMode("settimana")}
+            className={`flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-medium ${
+              mode === "settimana" ? "border-teal bg-teal text-white" : "border-line bg-cream text-ink-soft"
+            }`}
+          >
+            <CalendarRange size={11} strokeWidth={2.2} />
+            Settimana (Media)
+          </button>
+          <button
+            type="button"
+            onClick={() => setMode("giorno")}
+            className={`flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-medium ${
+              mode === "giorno" ? "border-teal bg-teal text-white" : "border-line bg-cream text-ink-soft"
+            }`}
+          >
+            <CalendarDays size={11} strokeWidth={2.2} />
+            Giorno
+          </button>
+        </div>
+      </div>
+
+      {mode === "giorno" && (
+        <div className="no-scrollbar flex gap-1 overflow-x-auto border-b border-line bg-cream px-4 py-2">
+          {WEEKDAY_LABELS_SHORT.map((w, weekday) => {
+            const d = perDay[weekday];
+            const active = selectedDay === weekday;
+            return (
+              <button
+                key={weekday}
+                type="button"
+                onClick={() => setSelectedDay(weekday)}
+                className={`flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full border px-2.5 py-1 text-[11px] font-medium ${
+                  active ? "border-teal bg-teal text-white" : "border-line bg-surface text-ink-soft"
+                }`}
+              >
+                <span className={`h-1.5 w-1.5 rounded-full ${active ? "bg-white" : dayLabelDotClass(d.label)}`} />
+                {w}
+                {weekday === today && <span className="text-[9px] opacity-70">· oggi</span>}
+              </button>
+            );
+          })}
+        </div>
+      )}
+
       <div className="flex flex-col gap-5 p-4 sm:flex-row sm:items-center">
         <div className="relative h-24 w-24 shrink-0 rounded-full" style={ringStyle}>
           <div className="absolute inset-[7px] flex flex-col items-center justify-center rounded-full bg-surface text-center">
-            <span className="text-[15px] font-bold leading-none">{totals.kcal}</span>
-            <span className="mt-0.5 text-[8.5px] leading-none text-ink-faint">kcal / sett.</span>
+            <span className="text-[15px] font-bold leading-none">{values.kcal}</span>
+            <span className="mt-0.5 text-[8.5px] leading-none text-ink-faint">
+              {mode === "giorno" ? "kcal" : "kcal / giorno (media)"}
+            </span>
           </div>
         </div>
 
         <div className="flex-1 space-y-2">
           {bars.map((bar) => {
             const pct = bar.target > 0 ? Math.min(100, Math.round((bar.value / bar.target) * 100)) : null;
-            const delta = bar.target > 0 ? bar.value - bar.target : null;
+            const status = bar.target > 0 ? deltaStatus(bar.value, bar.target, bar.unit, bar.isKcal) : null;
             return (
               <div key={bar.label}>
-                <div className="mb-0.5 flex items-center justify-between text-[11px]">
+                <div className="mb-0.5 flex flex-wrap items-center justify-between gap-x-2 text-[11px]">
                   <span className={`flex items-center gap-1.5 font-semibold ${bar.accent.text}`}>
                     <span className={`h-1.5 w-1.5 rounded-full ${bar.accent.dot}`} />
                     {bar.label}
                   </span>
                   <span className="text-ink-soft">
                     <span className="font-semibold">{bar.value}</span>
-                    {bar.target > 0 ? ` / ${bar.target} ${bar.unit}` : ` ${bar.unit}`}
-                    {delta !== null && (
-                      <span className={`ml-1.5 ${delta > 0 ? "text-bad" : "text-good"}`}>
-                        {delta > 0 ? `+${delta}` : delta} {bar.unit}
-                      </span>
-                    )}
+                    {bar.target > 0 ? ` / ${bar.target}${bar.unit}` : bar.unit}
+                    {status && <span className={`ml-1.5 font-medium ${status.className}`}>{status.text}</span>}
                   </span>
                 </div>
                 <div className="h-1.5 w-full overflow-hidden rounded-full bg-cream">
